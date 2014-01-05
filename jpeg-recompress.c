@@ -8,6 +8,7 @@
 */
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "src/commander.h"
 #include "src/iqa/include/iqa.h"
@@ -21,6 +22,10 @@ int attempts = 6;
 // Target quality (SSIM) value
 float target = 0.9999;
 
+// Min/max JPEG quality
+int jpegMin = 40;
+int jpegMax = 95;
+
 // Progressive image output
 int progressive = 0;
 
@@ -33,6 +38,28 @@ static void setAttempts(command_t *self) {
 
 static void setTarget(command_t *self) {
     target = atof(self->arg);
+}
+
+static void setQuality(command_t *self) {
+    if (!strcmp("low", self->arg)) {
+        target = 0.999;
+    } else if (!strcmp("medium", self->arg)) {
+        target = 0.9999;
+    } else if (!strcmp("high", self->arg)) {
+        target = 0.99995;
+    } else if (!strcmp("veryhigh", self->arg)) {
+        target = 0.99999;
+    } else {
+        printf("Unknown quality preset '%s'!\n", self->arg);
+    }
+}
+
+static void setMinimum(command_t *self) {
+    jpegMin = atoi(self->arg);
+}
+
+static void setMaximum(command_t *self) {
+    jpegMax = atoi(self->arg);
 }
 
 static void setProgressive(command_t *self) {
@@ -63,6 +90,9 @@ int main (int argc, char **argv) {
     command_init(&cmd, argv[0], "1.0.0");
     cmd.usage = "[options] input.jpg compressed-output.jpg";
     command_option(&cmd, "-t", "--target [arg]", "Set target SSIM [0.9999]", setTarget);
+    command_option(&cmd, "-q", "--quality [arg]", "Set a quality preset: low, medium, high, veryhigh [medium]", setQuality);
+    command_option(&cmd, "-n", "--min [arg]", "Minimum JPEG quality [40]", setMinimum);
+    command_option(&cmd, "-m", "--max [arg]", "Maximum JPEG quality [95]", setMaximum);
     command_option(&cmd, "-l", "--loops [arg]", "Set the number of runs to attempt [5]", setAttempts);
     command_option(&cmd, "-p", "--progressive", "Set progressive JPEG output", setProgressive);
     command_option(&cmd, "-s", "--strip", "Strip metadata", setStrip);
@@ -100,7 +130,7 @@ int main (int argc, char **argv) {
 
     // Do a binary search to find the optimal encoding quality for the
     // given target SSIM value.
-    int min = 40, max = 95;
+    int min = jpegMin, max = jpegMax;
     for (int attempt = attempts - 1; attempt >= 0; --attempt) {
         int quality = min + (max - min) / 2;
 
