@@ -1,0 +1,7 @@
+src/*.o
+src/iqa/.svn
+src/iqa/build
+jpeg-recompress
+jpeg-compare
+jpeg-hash
+test-output
