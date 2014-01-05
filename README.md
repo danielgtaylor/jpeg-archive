@@ -14,8 +14,14 @@ The following utilities are part of this project. All of them accept a `--help` 
 ### jpeg-recompress
 Compress JPEGs by re-encoding to the smallest JPEG quality while keeping _perceived_ visual quality the same and by making sure huffman tables are optimized. This is a __lossy__ operation, but the images are visually identical and it usually saves 30-70% of the size for JPEGs coming from a digital camera, particularly DSLRs. By default all EXIF/IPTC/XMP and color profile metadata is copied over, but this can be disabled to save more space if desired.
 
+The better the quality of the input image is, the better the output will be.
+
 ```bash
+# Default settings
 jpeg-recompress image.jpg compressed.jpg
+
+# High quality example settings
+jpeg-recompress --quality high --min 60 image.jpg compressed.jpg
 ```
 
 ### jpeg-compare
