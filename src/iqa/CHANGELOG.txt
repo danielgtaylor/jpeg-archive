@@ -1,0 +1,27 @@
+2011-07-06  1.1.2 (rev 40)
+
+ - Fixed MS-SSIM seg-fault issue when height greater than width (#3349231).
+ - Fixed linker warnings on Windows debug builds.
+
+2011-04-15  1.1.1 (rev 36)
+
+ - Added 64-bit build configurations on Windows.
+ - Fixed 64-bit rounding bug in tests (#3286061).
+ - Fixed MS-SSIM buffer overflow bug for images that don't scale to an even 
+   multiple of 2 (#3288043). Added corresponding unit test.
+
+2011-04-09  1.1.0 (rev 30)
+
+ - Added MS-SSIM algorithm.
+ - Added MS-SSIM* algorithm.
+ - Fixed bug (#3269715) that caused SSIM to return inflated results when using
+   custom SSIM arguments.
+ - Fixed bug (#3269702) where the SSIM algorithm was returning NAN instead of
+   INFINITY on error. Since NAN always fails comparisons (even with itself),
+   there was no way for an application to determine if an error occurred.
+ - Improved the performace of the decimate operation.
+
+2011-04-01  1.0.0 (rev 12)
+
+ - First release. Supports MSE, PSNR, and SSIM.
+
