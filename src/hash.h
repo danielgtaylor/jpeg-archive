@@ -1,4 +1,10 @@
 /*
+    Image hashing functions
+*/
+#ifndef HASH_H
+#define HASH_H
+
+/*
     Generate an image hash given a filename. This is a convenience
     function which reads the file, decodes it to grayscale,
     scales the image, and generates the hash.
@@ -22,3 +28,5 @@ void genHash(unsigned char *image, int width, int height, unsigned char **hash);
     http://en.wikipedia.org/wiki/Hamming_distance
 */
 unsigned int hammingDist(const unsigned char *hash1, const unsigned char *hash2, int hashLength);
+
+#endif
