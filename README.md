@@ -69,8 +69,13 @@ Mac users can install it via [Homebrew](http://brew.sh/):
 brew install libjpeg-turbo
 ```
 
+#### Windows
+Windows users can install the official [libjpeg-turbo](http://sourceforge.net/projects/libjpeg-turbo/files/1.3.0/) release. You may also want to grab [IQA](http://sourceforge.net/projects/iqa/files/1.1.2%20Release/), setup Visual Studio, etc. Patches welcome.
+
+The `Makefile` can work with MinGW, but IQA appears to not work when built with GCC on Windows.
+
 ### Compiling
-The `Makefile` should work as-is on Ubuntu and Mac OS X. Other platforms may need to set the location of `libjpeg.a`.
+The `Makefile` should work as-is on Ubuntu and Mac OS X. Other platforms may need to set the location of `libjpeg.a` or make other tweaks.
 
 ```bash
 make
