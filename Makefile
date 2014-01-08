@@ -1,6 +1,7 @@
 CC = gcc
 CFLAGS += -std=c99 -Wall -O3
 LDFLAGS += -lm
+MAKE = make
 
 UNAME_S := $(shell uname -s)
 UNAME_P := $(shell uname -p)
@@ -18,7 +19,9 @@ else
 		LIBJPEG = /usr/local/opt/jpeg-turbo/lib/libjpeg.a
 	else
 		# Windows
-		LIBJPEG = libjpeg.a
+		LIBJPEG = C:\libjpeg-turbo-gcc\lib\libjpeg.a
+		CFLAGS += -IC:\libjpeg-turbo-gcc\include
+		MAKE = mingw32-make
 	endif
 endif
 
@@ -27,7 +30,7 @@ LIBIQA=src/iqa/build/release/libiqa.a
 all: jpeg-recompress jpeg-compare jpeg-hash
 
 $(LIBIQA):
-	cd src/iqa; RELEASE=1 make
+	cd src/iqa; RELEASE=1 $(MAKE)
 
 jpeg-recompress: jpeg-recompress.c src/util.o src/edit.o src/commander.o $(LIBIQA)
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBJPEG) $(LDFLAGS)
