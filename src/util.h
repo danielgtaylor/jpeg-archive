@@ -1,6 +1,9 @@
 /*
     Utility functions
 */
+#ifndef UTIL_H
+#define UTIL_H
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <jpeglib.h>
@@ -34,3 +37,5 @@ unsigned long encodeJpeg(unsigned char **jpeg, unsigned char *buf, int width, in
     modified the file.
 */
 int getMetadata(const unsigned char *buf, unsigned int bufSize, unsigned char **meta, unsigned int *metaSize, const char *comment);
+
+#endif
