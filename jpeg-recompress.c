@@ -11,6 +11,7 @@
 #include <string.h>
 
 #include "src/commander.h"
+#include "src/edit.h"
 #include "src/iqa/include/iqa.h"
 #include "src/util.h"
 
@@ -31,6 +32,10 @@ int progressive = 0;
 
 // Strip metadata from the file?
 int strip = 0;
+
+// Defish the image?
+float defishStrength = 0.0;
+float defishZoom = 1.0;
 
 static void setAttempts(command_t *self) {
     attempts = atoi(self->arg);
@@ -70,6 +75,14 @@ static void setStrip(command_t *self) {
     strip = 1;
 }
 
+static void setDefish(command_t *self) {
+    defishStrength = atof(self->arg);
+}
+
+static void setZoom(command_t *self) {
+    defishZoom = atof(self->arg);
+}
+
 int main (int argc, char **argv) {
     unsigned char *buf;
     long bufSize = 0;
@@ -81,6 +94,7 @@ int main (int argc, char **argv) {
     unsigned long compressedSize = 0;
     unsigned char *compressedGray;
     long compressedGraySize = 0;
+    unsigned char *tmpImage;
     int width, height;
     unsigned char *metaBuf;
     unsigned int metaSize = 0;
@@ -93,9 +107,11 @@ int main (int argc, char **argv) {
     command_option(&cmd, "-q", "--quality [arg]", "Set a quality preset: low, medium, high, veryhigh [medium]", setQuality);
     command_option(&cmd, "-n", "--min [arg]", "Minimum JPEG quality [40]", setMinimum);
     command_option(&cmd, "-m", "--max [arg]", "Maximum JPEG quality [95]", setMaximum);
-    command_option(&cmd, "-l", "--loops [arg]", "Set the number of runs to attempt [5]", setAttempts);
+    command_option(&cmd, "-l", "--loops [arg]", "Set the number of runs to attempt [6]", setAttempts);
     command_option(&cmd, "-p", "--progressive", "Set progressive JPEG output", setProgressive);
     command_option(&cmd, "-s", "--strip", "Strip metadata", setStrip);
+    command_option(&cmd, "-d", "--defish [arg]", "Set defish strength [0.0]", setDefish);
+    command_option(&cmd, "-z", "--zoom [arg]", "Set defish zoom [1.0]", setZoom);
     command_parse(&cmd, argc, argv);
 
     if (cmd.argc < 2) {
@@ -110,7 +126,27 @@ int main (int argc, char **argv) {
 
     // Decode the JPEG
     originalSize = decodeJpeg(buf, bufSize, &original, &width, &height, JCS_RGB);
-    originalGraySize = decodeJpeg(buf, bufSize, &originalGray, &width, &height, JCS_GRAYSCALE);
+
+    if (defishStrength) {
+        printf("Defishing...\n");
+        tmpImage = malloc(width * height * 3);
+        defish(original, tmpImage, width, height, 3, defishStrength, defishZoom);
+        free(original);
+        original = tmpImage;
+    }
+
+    // Convert RGB input into ITU-R luma
+    originalGraySize = width * height;
+    originalGray = malloc(originalGraySize);
+    int stride = width * 3;
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            // Y = 0.2126R + 0.7152G + 0.0722B
+            originalGray[y * width + x] = original[y * stride + x * 3] * 0.2126 +
+                                          original[y * stride + x * 3 + 1] * 0.7152 +
+                                          original[y * stride + x * 3 + 2] * 0.0722;
+        }
+    }
 
     // Read metadata (EXIF / IPTC / XMP tags)
     if (getMetadata(buf, bufSize, &metaBuf, &metaSize, COMMENT)) {

@@ -16,12 +16,17 @@ Compress JPEGs by re-encoding to the smallest JPEG quality while keeping _percei
 
 The better the quality of the input image is, the better the output will be.
 
+Some basic photo-related editing options are available, such as removing fisheye lens distortion.
+
 ```bash
 # Default settings
 jpeg-recompress image.jpg compressed.jpg
 
 # High quality example settings
 jpeg-recompress --quality high --min 60 image.jpg compressed.jpg
+
+# Remove fisheye distortion (Tokina 10-17mm on APS-C @ 10mm)
+jpeg-recompress --defish 2.6 --zoom 1.2 image.jpg defished.jpg
 ```
 
 ### jpeg-compare
@@ -50,6 +55,14 @@ Building
 ### Dependencies
  * libjpeg (or libjpeg-turbo is recommended)
 
+#### Ubuntu
+Ubuntu users can install via `apt-get`:
+
+```bash
+sudo apt-get install build-essential libjpeg-turbo8 libjpeg-turbo8-dev
+```
+
+#### Mac OS X
 Mac users can install it via [Homebrew](http://brew.sh/):
 
 ```bash
@@ -57,7 +70,7 @@ brew install libjpeg-turbo
 ```
 
 ### Compiling
-Modify the `Makefile` to point to your installation of `libjpeg.a`. If you are using turbo then point to it.
+The `Makefile` should work as-is on Ubuntu and Mac OS X. Other platforms may need to set the location of `libjpeg.a`.
 
 ```bash
 make
@@ -67,7 +80,7 @@ make
 Install the binaries into `/usr/local/bin`:
 
 ```bash
-make install
+sudo make install
 ```
 
 Links / Alternatives
