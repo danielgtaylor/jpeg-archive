@@ -1,4 +1,4 @@
-JPEG Archive
+JPEG Archive [![Build Status](https://travis-ci.org/danielgtaylor/jpeg-archive.png?branch=master)](https://travis-ci.org/danielgtaylor/jpeg-archive)
 ============
 Utilities for archiving JPEGs for long term storage. The goals are:
 
@@ -6,6 +6,10 @@ Utilities for archiving JPEGs for long term storage. The goals are:
  * Identify duplicates / similar photos
 
 Contributions to this project are very welcome.
+
+Download
+--------
+You can download the latest source and binary releases from the [JPEG Archive releases page](https://github.com/danielgtaylor/jpeg-archive/releases).
 
 Utilities
 ---------
