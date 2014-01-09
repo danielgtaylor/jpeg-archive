@@ -142,7 +142,7 @@ int main (int argc, char **argv) {
 
     // Parse commandline options
     command_t cmd;
-    command_init(&cmd, argv[0], "1.0.0");
+    command_init(&cmd, argv[0], "1.0.1");
     cmd.usage = "[options] image1.jpg image2.jpg";
     command_option(&cmd, "-s", "--size [arg]", "Set fast comparison image hash size", setSize);
     command_option(&cmd, "-m", "--method [arg]", "Set comparison method to one of 'fast', 'psnr', 'ssim', or 'ms-ssim' [fast]", setMethod);
