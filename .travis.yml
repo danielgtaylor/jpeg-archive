@@ -1,0 +1,9 @@
+language: c
+compiler:
+    - clang
+    - gcc
+before_install:
+    - sudo apt-get update -qq
+    - sudo apt-get install -qq libjpeg-turbo8 libjpeg-turbo8-dev
+script:
+    - make && make test
