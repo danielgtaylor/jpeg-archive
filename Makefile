@@ -1,7 +1,7 @@
-CC = gcc
+CC ?= gcc
 CFLAGS += -std=c99 -Wall -O3
 LDFLAGS += -lm
-MAKE = make
+MAKE ?= make
 
 UNAME_S := $(shell uname -s)
 UNAME_P := $(shell uname -p)
@@ -43,6 +43,10 @@ jpeg-hash: jpeg-hash.c src/util.o src/hash.o src/commander.o
 
 %.o: %.c %.h
 	$(CC) $(CFLAGS) -c -o $@ $<
+
+test: test.c src/util.o src/edit.o src/hash.o
+	$(CC) $(CFLAGS) -o $@ $^ $(LIBJPEG) $(LDFLAGS)
+	./test
 
 install:
 	cp jpeg-recompress /usr/local/bin/
