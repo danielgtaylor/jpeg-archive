@@ -135,16 +135,16 @@ int main (int argc, char **argv) {
         original = tmpImage;
     }
 
-    // Convert RGB input into ITU-R luma
+    // Convert RGB input into Y
     originalGraySize = width * height;
     originalGray = malloc(originalGraySize);
     int stride = width * 3;
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
-            // Y = 0.2126R + 0.7152G + 0.0722B
-            originalGray[y * width + x] = original[y * stride + x * 3] * 0.2126 +
-                                          original[y * stride + x * 3 + 1] * 0.7152 +
-                                          original[y * stride + x * 3 + 2] * 0.0722;
+            // Y = 0.299R + 0.587G + 0.114B
+            originalGray[y * width + x] = original[y * stride + x * 3] * 0.299 +
+                                          original[y * stride + x * 3 + 1] * 0.587 +
+                                          original[y * stride + x * 3 + 2] * 0.114 + 0.5;
         }
     }
 
