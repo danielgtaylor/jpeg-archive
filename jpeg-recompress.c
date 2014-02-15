@@ -55,7 +55,7 @@ static void setQuality(command_t *self) {
     } else if (!strcmp("veryhigh", self->arg)) {
         target = 0.99999;
     } else {
-        printf("Unknown quality preset '%s'!\n", self->arg);
+        fprintf(stderr, "Unknown quality preset '%s'!\n", self->arg);
     }
 }
 
@@ -128,7 +128,7 @@ int main (int argc, char **argv) {
     originalSize = decodeJpeg(buf, bufSize, &original, &width, &height, JCS_RGB);
 
     if (defishStrength) {
-        printf("Defishing...\n");
+        fprintf(stderr, "Defishing...\n");
         tmpImage = malloc(width * height * 3);
         defish(original, tmpImage, width, height, 3, defishStrength, defishZoom);
         free(original);
@@ -150,7 +150,7 @@ int main (int argc, char **argv) {
 
     // Read metadata (EXIF / IPTC / XMP tags)
     if (getMetadata(buf, bufSize, &metaBuf, &metaSize, COMMENT)) {
-        printf("File already processed by jpeg-recompress!\n");
+        fprintf(stderr, "File already processed by jpeg-recompress!\n");
         return 2;
     }
 
@@ -158,7 +158,7 @@ int main (int argc, char **argv) {
         // Pretend we have no metadata
         metaSize = 0;
     } else {
-        printf("Metadata size is %ukb\n", metaSize / 1024);
+        fprintf(stderr, "Metadata size is %ukb\n", metaSize / 1024);
     }
 
     if (!originalSize || !originalGraySize) { return 1; }
@@ -179,11 +179,11 @@ int main (int argc, char **argv) {
 
         // Measure structural similarity (SSIM)
         float ssim = iqa_ssim(originalGray, compressedGray, width, height, width, 0, 0);
-        printf("ssim at q=%i (%i - %i): %f\n", quality, min, max, ssim);
+        fprintf(stderr, "ssim at q=%i (%i - %i): %f\n", quality, min, max, ssim);
 
         if (ssim < target) {
             if (compressedSize >= bufSize) {
-                printf("Output file would be larger than input, aborting!\n");
+                fprintf(stderr, "Output file would be larger than input, aborting!\n");
                 free(compressed);
                 free(compressedGray);
                 return 1;
@@ -206,16 +206,22 @@ int main (int argc, char **argv) {
     // Calculate and show savings, if any
     int percent = (compressedSize + metaSize) * 100 / bufSize;
     unsigned long saved = (bufSize > compressedSize) ? bufSize - compressedSize - metaSize : 0;
-    printf("New size is %i%% of original (saved %lu kb)\n", percent, saved / 1024);
+    fprintf(stderr, "New size is %i%% of original (saved %lu kb)\n", percent, saved / 1024);
 
     if (compressedSize >= bufSize) {
-        printf("Output file is larger than input, aborting!\n");
+        fprintf(stderr, "Output file is larger than input, aborting!\n");
         return 1;
     }
 
     // Write output
     FILE *file;
-    file = fopen(cmd.argv[1], "wb");
+
+    if (strcmp("-", cmd.argv[1]) == 0) {
+        file = stdout;
+    } else {
+        file = fopen(cmd.argv[1], "wb");
+    }
+
     fwrite(compressed, 20, 1, file); /* 0xffd8 and JFIF marker */
 
     // Write comment so we know not to reprocess this file

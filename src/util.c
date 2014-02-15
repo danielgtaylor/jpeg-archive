@@ -10,11 +10,16 @@ long readFile(char *name, void **buffer) {
     size_t result;
 
     // Open file
-    file = fopen(name, "rb");
-    if (!file)
-    {
-        fprintf(stderr, "Unable to open file %s\n", name);
-        return 0;
+    if (strcmp("-", name) == 0) {
+        file = stdin;
+    } else {
+        file = fopen(name, "rb");
+
+        if (!file)
+        {
+            fprintf(stderr, "Unable to open file %s\n", name);
+            return 0;
+        }
     }
     
     // Get file length
