@@ -11,6 +11,16 @@ Download
 --------
 You can download the latest source and binary releases from the [JPEG Archive releases page](https://github.com/danielgtaylor/jpeg-archive/releases).
 
+If you are looking for an easy way to run these utilities in parallel over many files to utilize all CPU cores, please also download [Ladon](https://github.com/danielgtaylor/ladon). Example:
+
+```bash
+# Re-compress JPEGs and replace the originals
+ladon "Photos/**/*.jpg" -- jpeg-recompress FULLPATH FULLPATH
+
+# Re-compress JPEGs into the new directory 'Comp'
+ladon -m Comp/RELDIR "Photos/**/*.jpg" -- jpeg-recompress FULLPATH Comp/RELPATH
+```
+
 Utilities
 ---------
 The following utilities are part of this project. All of them accept a `--help` parameter to see the available options.
