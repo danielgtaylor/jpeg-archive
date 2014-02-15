@@ -31,6 +31,9 @@ jpeg-recompress --quality high --min 60 image.jpg compressed.jpg
 
 # Remove fisheye distortion (Tokina 10-17mm on APS-C @ 10mm)
 jpeg-recompress --defish 2.6 --zoom 1.2 image.jpg defished.jpg
+
+# Read from stdin and write to stdout with '-' as the filename
+jpeg-recompress - - <image.jpg >compressed.jpg
 ```
 
 ### jpeg-compare

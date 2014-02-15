@@ -241,7 +241,7 @@ command_parse_args(command_t *self, int argc, char **argv) {
     }
 
     // unrecognized
-    if ('-' == arg[0] && !literal) {
+    if ('-' == arg[0] && 0 != arg[1] && !literal) {
       fprintf(stderr, "unrecognized flag %s\n", arg);
       command_free(self);
       exit(1);
