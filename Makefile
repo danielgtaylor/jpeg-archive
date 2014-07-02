@@ -2,6 +2,7 @@ CC ?= gcc
 CFLAGS += -std=c99 -Wall -O3
 LDFLAGS += -lm
 MAKE ?= make
+PREFIX ?= /usr/local
 
 UNAME_S := $(shell uname -s)
 UNAME_P := $(shell uname -p)
@@ -49,9 +50,10 @@ test: test.c src/util.o src/edit.o src/hash.o
 	./test
 
 install:
-	cp jpeg-recompress /usr/local/bin/
-	cp jpeg-compare /usr/local/bin/
-	cp jpeg-hash /usr/local/bin/
+	mkdir -p $(PREFIX)/bin
+	cp jpeg-recompress $(PREFIX)/bin/
+	cp jpeg-compare $(PREFIX)/bin/
+	cp jpeg-hash $(PREFIX)/bin/
 
 clean:
 	rm -rf jpeg-recompress jpeg-compare jpeg-hash src/*.o src/iqa/build
