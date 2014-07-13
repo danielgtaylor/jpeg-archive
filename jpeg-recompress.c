@@ -37,6 +37,9 @@ int strip = 0;
 float defishStrength = 0.0;
 float defishZoom = 1.0;
 
+// Input format
+int ppm = 0;
+
 static void setAttempts(command_t *self) {
     attempts = atoi(self->arg);
 }
@@ -83,6 +86,10 @@ static void setZoom(command_t *self) {
     defishZoom = atof(self->arg);
 }
 
+static void setPpm(command_t *self) {
+    ppm = 1;
+}
+
 int main (int argc, char **argv) {
     unsigned char *buf;
     long bufSize = 0;
@@ -112,6 +119,7 @@ int main (int argc, char **argv) {
     command_option(&cmd, "-s", "--strip", "Strip metadata", setStrip);
     command_option(&cmd, "-d", "--defish [arg]", "Set defish strength [0.0]", setDefish);
     command_option(&cmd, "-z", "--zoom [arg]", "Set defish zoom [1.0]", setZoom);
+    command_option(&cmd, "-r", "--ppm", "Parse input as PPM instead of JPEG", setPpm);
     command_parse(&cmd, argc, argv);
 
     if (cmd.argc < 2) {
@@ -124,8 +132,13 @@ int main (int argc, char **argv) {
 
     if (!bufSize) { return 1; }
 
-    // Decode the JPEG
-    originalSize = decodeJpeg(buf, bufSize, &original, &width, &height, JCS_RGB);
+    if (!ppm) {
+        // Decode the JPEG
+        originalSize = decodeJpeg(buf, bufSize, &original, &width, &height, JCS_RGB);
+    } else {
+        // Decode the PPM
+        originalSize = decodePpm(buf, bufSize, &original, &width, &height);
+    }
 
     if (defishStrength) {
         fprintf(stderr, "Defishing...\n");
@@ -148,10 +161,12 @@ int main (int argc, char **argv) {
         }
     }
 
-    // Read metadata (EXIF / IPTC / XMP tags)
-    if (getMetadata(buf, bufSize, &metaBuf, &metaSize, COMMENT)) {
-        fprintf(stderr, "File already processed by jpeg-recompress!\n");
-        return 2;
+    if (!ppm) {
+        // Read metadata (EXIF / IPTC / XMP tags)
+        if (getMetadata(buf, bufSize, &metaBuf, &metaSize, COMMENT)) {
+            fprintf(stderr, "File already processed by jpeg-recompress!\n");
+            return 2;
+        }
     }
 
     if (strip) {
@@ -234,7 +249,7 @@ int main (int argc, char **argv) {
     fwrite(COMMENT, 30, 1, file);
 
     // Write metadata markers
-    if (!strip) {
+    if (!strip && !ppm) {
         fwrite(metaBuf, metaSize, 1, file);
     }
 
@@ -245,7 +260,7 @@ int main (int argc, char **argv) {
     // Cleanup
     command_free(&cmd);
 
-    if (!strip) {
+    if (!strip && !ppm) {
         free(metaBuf);
     }
 
