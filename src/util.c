@@ -145,6 +145,58 @@ unsigned long encodeJpeg(unsigned char **jpeg, unsigned char *buf, int width, in
     return jpegSize;
 }
 
+unsigned long decodePpm(unsigned char *buf, unsigned long bufSize, unsigned char **image, int *width, int *height) {
+    unsigned long pos = 0, imageDataSize;
+    int depth;
+
+    if (bufSize < 2 || buf[0] != 'P' || buf[1] != '6') {
+        fprintf(stderr, "Not a valid PPM format image!\n");
+        return 0;
+    }
+
+    // Read to first newline
+    while (buf[pos++] != '\n') {}
+
+    // Discard for any comment lines
+    while (buf[pos] == '#') {
+        while (buf[pos] != '\n') {
+            pos++;
+        }
+        pos++;
+    }
+
+    // Read width/height
+    sscanf((const char *) buf + pos, "%d %d", width, height);
+
+    // Go to next line
+    while (buf[pos++] != '\n') {}
+
+    // Read bit depth
+    sscanf((const char*) buf + pos, "%d", &depth);
+
+    if (depth != 255) {
+        fprintf(stderr, "Unsupported bit depth %d!\n", depth);
+        return 0;
+    }
+
+    // Go to next line
+    while (buf[pos++] != '\n') {}
+
+    // Width * height * red/green/blue
+    imageDataSize = (*width) * (*height) * 3;
+    if (pos + imageDataSize != bufSize) {
+        fprintf(stderr, "Incorrect image size! %lu vs. %lu\n", bufSize, pos + imageDataSize);
+        return 0;
+    }
+
+    // Allocate image pixel buffer
+    *image = malloc(imageDataSize);
+
+    // Copy pixel data
+    memcpy((void *) *image, (void *) buf + pos, imageDataSize);
+
+    return (*width) * (*height);
+}
 
 int getMetadata(const unsigned char *buf, unsigned int bufSize, unsigned char **meta, unsigned int *metaSize, const char *comment) {
     unsigned int pos = 0;
