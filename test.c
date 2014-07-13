@@ -91,5 +91,21 @@ describe ("Unit Tests", {
     it ("Should calculate hamming distance", {
         int dist = hammingDist((unsigned char *) "101010", (unsigned char *) "111011", 6);
         assert_equal(2, dist);
-    });    
+    });
+
+    it ("Should decode a PPM", {
+        char *image = "P6\n2 2\n255\n\x1\x2\x3\x4\x5\x6\x7\x8\x9\xa\xb\xc";
+        unsigned char *imageData;
+        int width;
+        int height;
+
+        decodePpm((unsigned char *) image, 23, (unsigned char **) &imageData, &width, &height);
+
+        assert_equal(2, width);
+        assert_equal(2, height);
+        assert_equal('\x1', imageData[0]);
+        assert_equal('\xc', imageData[11]);
+
+        free(imageData);
+    })
 });
