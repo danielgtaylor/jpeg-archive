@@ -22,6 +22,11 @@ unsigned long decodeJpegFile(const char *filename, unsigned char **image, int *w
 unsigned long decodeJpeg(unsigned char *buf, unsigned long bufSize, unsigned char **image, int *width, int *height, int pixelFormat);
 
 /*
+    Decode a buffer into a PPM image. Returns the size of the image pixel array.
+*/
+unsigned long decodePpm(unsigned char *buf, unsigned long bufSize, unsigned char **image, int *width, int *height);
+
+/*
     Encode a buffer of image pixels into a JPEG.
 */
 unsigned long encodeJpeg(unsigned char **jpeg, unsigned char *buf, int width, int height, int pixelFormat, int quality, int progressive);
