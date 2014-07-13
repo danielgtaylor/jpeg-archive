@@ -4,10 +4,14 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define INPUT_BUFFER_SIZE 102400
+
 long readFile(char *name, void **buffer) {
     FILE *file;
-    long fileLen;
-    size_t result;
+    size_t fileLen = 0;
+    size_t bytesRead = 0;
+
+    unsigned char chunk[INPUT_BUFFER_SIZE];
 
     // Open file
     if (strcmp("-", name) == 0) {
@@ -21,28 +25,19 @@ long readFile(char *name, void **buffer) {
             return 0;
         }
     }
-    
-    // Get file length
-    fseek(file, 0, SEEK_END);
-    fileLen = ftell(file);
-    rewind(file);
 
-    // Allocate memory
-    *buffer = malloc(fileLen + 1);
-    if (!buffer)
-    {
-        fprintf(stderr, "Memory error!\n");
-        fclose(file);
-        return 0;
-    }
-
-    // Read file contents into buffer
-    result = fread(*buffer, 1, fileLen, file);
-
-    if (result != fileLen) {
-        fprintf(stderr, "Only able to read %zu bytes!\n", result);
-        fclose(file);
-        return 0;
+    while ((bytesRead = fread(chunk, 1, sizeof chunk, file)) > 0) {
+        unsigned char *reallocated = realloc(*buffer, fileLen + bytesRead);
+        if (reallocated) {
+            *buffer = reallocated;
+            memmove((unsigned char *)(*buffer) + fileLen, chunk, bytesRead);
+            fileLen += bytesRead;
+        } else {
+            fprintf(stderr, "Only able to read %zu bytes!\n", fileLen);
+            free(*buffer);
+            fclose(file);
+            return 0;
+        }
     }
 
     fclose(file);
@@ -50,7 +45,7 @@ long readFile(char *name, void **buffer) {
 }
 
 unsigned long decodeJpegFile(const char *filename, unsigned char **image, int *width, int *height, int pixelFormat) {
-    unsigned char *buf;
+    unsigned char *buf = NULL;
     long bufSize = 0;
 
     bufSize = readFile((char *) filename, (void **) &buf);
