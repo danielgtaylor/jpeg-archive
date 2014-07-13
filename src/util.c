@@ -25,8 +25,7 @@ long readFile(char *name, void **buffer) {
             return 0;
         }
     }
-    
-    *buffer = malloc(sizeof chunk);
+
     while ((bytesRead = fread(chunk, 1, sizeof chunk, file)) > 0) {
         unsigned char *reallocated = realloc(*buffer, fileLen + bytesRead);
         if (reallocated) {
@@ -46,7 +45,7 @@ long readFile(char *name, void **buffer) {
 }
 
 unsigned long decodeJpegFile(const char *filename, unsigned char **image, int *width, int *height, int pixelFormat) {
-    unsigned char *buf;
+    unsigned char *buf = NULL;
     long bufSize = 0;
 
     bufSize = readFile((char *) filename, (void **) &buf);
