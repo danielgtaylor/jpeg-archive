@@ -26,6 +26,7 @@ long readFile(char *name, void **buffer) {
         }
     }
 
+    *buffer = malloc(sizeof chunk);
     while ((bytesRead = fread(chunk, 1, sizeof chunk, file)) > 0) {
         unsigned char *reallocated = realloc(*buffer, fileLen + bytesRead);
         if (reallocated) {
