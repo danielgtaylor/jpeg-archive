@@ -97,7 +97,29 @@ brew install libjpeg-turbo
 ```
 
 #### Windows
-Windows users can install the official [libjpeg-turbo](http://sourceforge.net/projects/libjpeg-turbo/files/1.3.0/) release. The `Makefile` should work with MinGW and GCC. Patches welcome.
+The `Makefile` should work with MinGW/Cygwin/etc and standard GCC. Patches welcome.
+
+To get everything you need, install these:
+
+* [libjpeg-turbo](http://sourceforge.net/projects/libjpeg-turbo/files/1.3.0/)
+* [MinGW](http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/installer/mingw-w64-install.exe/download)
+* [Github for Windows](https://windows.github.com/)
+
+Run Github for windows. In the settings, set **Git Bash** as the shell. Open Git Shell from the start menu.
+
+```bash
+$ git clone https://github.com/danielgtaylor/jpeg-archive
+$ cd jpeg-archive
+
+# Update PATH to include MinGW bin folder, location on your system may vary
+$ export PATH=$PATH:/c/Program\ Files\ (x86)\MinGW......../bin
+
+# Build the executables
+$ mingw32-make
+
+# If the `uname` utility is missing, create a blank file named `uname.bat`
+# and then try again and things should work.
+```
 
 ### Compiling
 The `Makefile` should work as-is on Ubuntu and Mac OS X. Other platforms may need to set the location of `libjpeg.a` or make other tweaks.
