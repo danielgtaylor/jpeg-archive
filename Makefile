@@ -9,6 +9,7 @@ UNAME_P := $(shell uname -p)
 
 ifeq ($(UNAME_S),Linux)
 	# Linux (e.g. Ubuntu)
+	CFLAGS += -I/opt/libmozjpeg/include
 	ifeq ($(UNAME_P),x86_64)
 		LIBJPEG = /opt/libmozjpeg/lib64/libjpeg.a
 	else

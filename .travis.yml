@@ -4,6 +4,12 @@ compiler:
     - gcc
 before_install:
     - sudo apt-get update -qq
-    - sudo apt-get install -qq libjpeg-turbo8 libjpeg-turbo8-dev
+    - sudo apt-get install -qq build-essential autoconf nasm
+    - git clone https://github.com/mozilla/mozjpeg.git
+    - cd mozjpeg
+    - autoreconf -fiv
+    - ./configure --with-jpeg8
+    - make && sudo make install
+    - cd ..
 script:
     - make && make test
