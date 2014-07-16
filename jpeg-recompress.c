@@ -27,9 +27,6 @@ float target = 0.9999;
 int jpegMin = 40;
 int jpegMax = 95;
 
-// Progressive image output
-int progressive = 0;
-
 // Strip metadata from the file?
 int strip = 0;
 
@@ -68,10 +65,6 @@ static void setMinimum(command_t *self) {
 
 static void setMaximum(command_t *self) {
     jpegMax = atoi(self->arg);
-}
-
-static void setProgressive(command_t *self) {
-    progressive = 1;
 }
 
 static void setStrip(command_t *self) {
@@ -115,7 +108,6 @@ int main (int argc, char **argv) {
     command_option(&cmd, "-n", "--min [arg]", "Minimum JPEG quality [40]", setMinimum);
     command_option(&cmd, "-m", "--max [arg]", "Maximum JPEG quality [95]", setMaximum);
     command_option(&cmd, "-l", "--loops [arg]", "Set the number of runs to attempt [6]", setAttempts);
-    command_option(&cmd, "-p", "--progressive", "Set progressive JPEG output", setProgressive);
     command_option(&cmd, "-s", "--strip", "Strip metadata", setStrip);
     command_option(&cmd, "-d", "--defish [arg]", "Set defish strength [0.0]", setDefish);
     command_option(&cmd, "-z", "--zoom [arg]", "Set defish zoom [1.0]", setZoom);
@@ -185,9 +177,8 @@ int main (int argc, char **argv) {
     for (int attempt = attempts - 1; attempt >= 0; --attempt) {
         int quality = min + (max - min) / 2;
 
-        // Recompress to a new quality level (progressive only on last run if
-        // it was requested, as this saves time)
-        compressedSize = encodeJpeg(&compressed, original, width, height, JCS_RGB, quality, (attempt == 0) ? progressive : 0);
+        // Recompress to a new quality level, without optimizations (for speed)
+        compressedSize = encodeJpeg(&compressed, original, width, height, JCS_RGB, quality, attempt ? 0 : 1);
 
         // Load compressed luma for quality comparison
         compressedGraySize = decodeJpeg(compressed, compressedSize, &compressedGray, &width, &height, JCS_GRAYSCALE);
@@ -267,7 +258,6 @@ int main (int argc, char **argv) {
     free(compressed);
     free(original);
     free(originalGray);
-    free(compressedGray);
 
     return 0;
 }

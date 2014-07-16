@@ -80,39 +80,52 @@ jpeg-hash image.jpg
 Building
 --------
 ### Dependencies
- * libjpeg (or libjpeg-turbo is recommended)
+ * [mozjpeg](https://github.com/mozilla/mozjpeg)
 
 #### Ubuntu
 Ubuntu users can install via `apt-get`:
 
 ```bash
-sudo apt-get install build-essential libjpeg-turbo8 libjpeg-turbo8-dev
+$ sudo apt-get install build-essential autoconf nasm
+$ git clone https://github.com/mozilla/mozjpeg.git
+$ cd mozjpeg
+$ autoreconf -fiv
+$ ./configure --with-jpeg8
+$ make
+$ sudo make install 
 ```
 
 #### Mac OS X
 Mac users can install it via [Homebrew](http://brew.sh/):
 
 ```bash
-brew install libjpeg-turbo
+$ brew install mozjpeg
 ```
 
 #### Windows
 The `Makefile` should work with MinGW/Cygwin/etc and standard GCC. Patches welcome.
 
-To get everything you need, install these:
+To get everything you need to build, install these:
 
-* [libjpeg-turbo](http://sourceforge.net/projects/libjpeg-turbo/files/1.3.0/)
+* [NASM](http://www.nasm.us/pub/nasm/releasebuilds/2.11.05/win32/)
 * [MinGW](http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/installer/mingw-w64-install.exe/download)
 * [Github for Windows](https://windows.github.com/)
 
 Run Github for windows. In the settings, set **Git Bash** as the shell. Open Git Shell from the start menu.
 
 ```bash
-$ git clone https://github.com/danielgtaylor/jpeg-archive
-$ cd jpeg-archive
-
 # Update PATH to include MinGW bin folder, location on your system may vary
 $ export PATH=$PATH:/c/Program\ Files\ (x86)\MinGW......../bin
+
+$ git clone https://github.com/mozilla/mozjpeg.git
+$ cd mozjpeg
+$ autoreconf -fiv
+$ ./configure --with-jpeg8
+$ make
+$ cd ..
+
+$ git clone https://github.com/danielgtaylor/jpeg-archive
+$ cd jpeg-archive
 
 # Build the executables
 $ mingw32-make
