@@ -10,18 +10,19 @@ UNAME_P := $(shell uname -p)
 ifeq ($(UNAME_S),Linux)
 	# Linux (e.g. Ubuntu)
 	ifeq ($(UNAME_P),x86_64)
-		LIBJPEG = /usr/lib/x86_64-linux-gnu/libjpeg.a
+		LIBJPEG = /opt/libmozjpeg/lib64/libjpeg.a
 	else
-		LIBJPEG = /usr/lib/i386-linux-gnu/libjpeg.a
+		LIBJPEG = /opt/libmozjpeg/lib/libjpeg.a
 	endif
 else
 	ifeq ($(UNAME_S),Darwin)
 		# Mac OS X
-		LIBJPEG = /usr/local/opt/jpeg-turbo/lib/libjpeg.a
+		LIBJPEG = /usr/local/opt/mozjpeg/lib/libjpeg.a
+		CFLAGS += -I/usr/local/opt/mozjpeg/include
 	else
 		# Windows
-		LIBJPEG = C:\libjpeg-turbo-gcc\lib\libjpeg.a
-		CFLAGS += -IC:\libjpeg-turbo-gcc\include
+		LIBJPEG = ../mozjpeg/libjpeg.a
+		CFLAGS += -I../mozjpeg
 		MAKE = mingw32-make
 	endif
 endif

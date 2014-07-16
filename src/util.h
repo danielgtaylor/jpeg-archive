@@ -29,7 +29,7 @@ unsigned long decodePpm(unsigned char *buf, unsigned long bufSize, unsigned char
 /*
     Encode a buffer of image pixels into a JPEG.
 */
-unsigned long encodeJpeg(unsigned char **jpeg, unsigned char *buf, int width, int height, int pixelFormat, int quality, int progressive);
+unsigned long encodeJpeg(unsigned char **jpeg, unsigned char *buf, int width, int height, int pixelFormat, int quality, int optimize);
 
 /*
     Get JPEG metadata (EXIF, IPTC, XMP, etc) and return a buffer

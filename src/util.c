@@ -102,7 +102,7 @@ unsigned long decodeJpeg(unsigned char *buf, unsigned long bufSize, unsigned cha
     return row_stride * (*height);
 }
 
-unsigned long encodeJpeg(unsigned char **jpeg, unsigned char *buf, int width, int height, int pixelFormat, int quality, int progressive) {
+unsigned long encodeJpeg(unsigned char **jpeg, unsigned char *buf, int width, int height, int pixelFormat, int quality, int optimize) {
     long unsigned int jpegSize = 0;
     struct jpeg_compress_struct cinfo;
     struct jpeg_error_mgr jerr;
@@ -122,14 +122,13 @@ unsigned long encodeJpeg(unsigned char **jpeg, unsigned char *buf, int width, in
     cinfo.input_components = pixelFormat == JCS_RGB ? 3 : 1;
     cinfo.in_color_space = pixelFormat;
 
+    if (optimize) {
+        cinfo.use_moz_defaults = TRUE;
+    }
+
     jpeg_set_defaults(&cinfo);
 
     jpeg_set_quality(&cinfo, quality, TRUE);
-    cinfo.optimize_coding = TRUE;
-
-    if (progressive) {
-        jpeg_simple_progression(&cinfo);
-    }
 
     // Start the compression
     jpeg_start_compress(&cinfo, TRUE);
