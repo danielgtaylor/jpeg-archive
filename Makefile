@@ -35,7 +35,7 @@ all: jpeg-recompress jpeg-compare jpeg-hash
 $(LIBIQA):
 	cd src/iqa; RELEASE=1 $(MAKE)
 
-jpeg-recompress: jpeg-recompress.c src/util.o src/edit.o src/commander.o $(LIBIQA)
+jpeg-recompress: jpeg-recompress.c src/util.o src/edit.o src/smallfry.o src/commander.o $(LIBIQA)
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBJPEG) $(LDFLAGS)
 
 jpeg-compare: jpeg-compare.c src/util.o src/hash.o src/edit.o src/commander.o $(LIBIQA)
