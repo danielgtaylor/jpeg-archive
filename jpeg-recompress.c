@@ -3,8 +3,6 @@
     by using structural similarity (SSIM) as a metric. Does a binary search
     between JPEG quality 40 and 95 to find the best match. Also makes sure
     that huffman tables are optimized if they weren't already.
-
-    TODO: Include jpegrescan functionality? It doesn't save much...
 */
 #include <stdio.h>
 #include <stdlib.h>
