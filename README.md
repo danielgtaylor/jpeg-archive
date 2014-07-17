@@ -35,7 +35,7 @@ The better the quality of the input image is, the better the output will be.
 Some basic photo-related editing options are available, such as removing fisheye lens distortion.
 
 #### Demo
-Below are two 100% crops of [Nikon's D3x Sample Image 2](http://imaging.nikon.com/lineup/dslr/d3x/sample.htm). The left shows the original image from the camera, while the right shows the output of `jpeg-recompress` with the `medium` quality setting, which lowers the file size by **85%**. The recompression algorithm chooses a JPEG quality of 80 for a structural similarity (SSIM) of 0.999915. By comparison the `veryhigh` quality setting chooses a JPEG quality of 93 and saves 63% of the file size.
+Below are two 100% crops of [Nikon's D3x Sample Image 2](http://static.nikonusa.com/D3X_gallery/index.html). The left shows the original image from the camera, while the right shows the output of `jpeg-recompress` with the `medium` quality setting, which lowers the file size by **85%**. The recompression algorithm chooses a JPEG quality of 80 for a structural similarity (SSIM) of 0.999915. By comparison the `veryhigh` quality setting chooses a JPEG quality of 93 and saves 63% of the file size.
 
 ![JPEG recompression comparison](https://raw.github.com/danielgtaylor/jpeg-archive/master/comparison.png)
 
