@@ -39,12 +39,24 @@ Below are two 100% crops of [Nikon's D3x Sample Image 2](http://static.nikonusa.
 
 ![JPEG recompression comparison](https://raw.github.com/danielgtaylor/jpeg-archive/master/comparison.png)
 
+#### Image Comparison Metrics
+The following metrics are available when using `jpeg-recompress`. SSIM is the default.
+
+Name     | Option        | Description
+-------- | ------------- | -----------
+SSIM     | `-m ssim`     | [Structural similarity](http://en.wikipedia.org/wiki/Structural_similarity)
+MS-SSIM* | `-m ms-ssim`  | Multi-scale structural similarity ([2008 paper](http://foulard.ece.cornell.edu/publications/dmr_hvei2008_paper.pdf))
+SmallFry | `-m smallfry` | Linear-weighted BBCQ ([original project](https://github.com/dwbuiten/smallfry), [2011 paper](http://spie.org/Publications/Proceedings/Paper/10.1117/12.872231))
+
 ```bash
 # Default settings
 jpeg-recompress image.jpg compressed.jpg
 
 # High quality example settings
 jpeg-recompress --quality high --min 60 image.jpg compressed.jpg
+
+# Use SmallFry instead of SSIM
+jpeg-recompress --method smallfry image.jpg compressed.jpg
 
 # Remove fisheye distortion (Tokina 10-17mm on APS-C @ 10mm)
 jpeg-recompress --defish 2.6 --zoom 1.2 image.jpg defished.jpg
@@ -164,3 +176,4 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 Image Quality Assessment (IQA) is copyright 2011, Tom Distler (http://tdistler.com)
+SmallFry is copyright 2014, Derek Buitenhuis (https://github.com/dwbuiten)
