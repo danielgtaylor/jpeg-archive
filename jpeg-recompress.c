@@ -37,6 +37,9 @@ float defishZoom = 1.0;
 // Input format
 int ppm = 0;
 
+// Whether to copy files that cannot be compressed
+int copyFiles = 1;
+
 static void setAttempts(command_t *self) {
     attempts = atoi(self->arg);
 }
@@ -83,6 +86,19 @@ static void setPpm(command_t *self) {
     ppm = 1;
 }
 
+static void setCopyFiles(command_t *self) {
+    copyFiles = 0;
+}
+
+// Open a file for writing
+FILE *openOutput(char *name) {
+    if (strcmp("-", name) == 0) {
+        return stdout;
+    } else {
+        return fopen(name, "wb");
+    }
+}
+
 int main (int argc, char **argv) {
     unsigned char *buf;
     long bufSize = 0;
@@ -98,6 +114,7 @@ int main (int argc, char **argv) {
     int width, height;
     unsigned char *metaBuf;
     unsigned int metaSize = 0;
+    FILE *file;
 
     // Parse commandline options
     command_t cmd;
@@ -112,6 +129,7 @@ int main (int argc, char **argv) {
     command_option(&cmd, "-d", "--defish [arg]", "Set defish strength [0.0]", setDefish);
     command_option(&cmd, "-z", "--zoom [arg]", "Set defish zoom [1.0]", setZoom);
     command_option(&cmd, "-r", "--ppm", "Parse input as PPM instead of JPEG", setPpm);
+    command_option(&cmd, "-c", "--no-copy", "Disable copying files that will not be compressed", setCopyFiles);
     command_parse(&cmd, argc, argv);
 
     if (cmd.argc < 2) {
@@ -157,7 +175,18 @@ int main (int argc, char **argv) {
         // Read metadata (EXIF / IPTC / XMP tags)
         if (getMetadata(buf, bufSize, &metaBuf, &metaSize, COMMENT)) {
             fprintf(stderr, "File already processed by jpeg-recompress!\n");
-            return 2;
+            if (copyFiles) {
+                file = openOutput(cmd.argv[1]);
+                fwrite(buf, bufSize, 1, file);
+                fclose(file);
+
+                free(buf);
+
+                return 0;
+            } else {
+                free(buf);
+                return 2;
+            }
         }
     }
 
@@ -169,7 +198,6 @@ int main (int argc, char **argv) {
     }
 
     if (!originalSize || !originalGraySize) { return 1; }
-    free(buf);
 
     // Do a binary search to find the optimal encoding quality for the
     // given target SSIM value.
@@ -189,10 +217,22 @@ int main (int argc, char **argv) {
 
         if (ssim < target) {
             if (compressedSize >= bufSize) {
-                fprintf(stderr, "Output file would be larger than input, aborting!\n");
+                fprintf(stderr, "Output file would be larger than input!\n");
                 free(compressed);
                 free(compressedGray);
-                return 1;
+
+                if (copyFiles) {
+                    file = openOutput(cmd.argv[1]);
+                    fwrite(buf, bufSize, 1, file);
+                    fclose(file);
+
+                    free(buf);
+
+                    return 0;
+                } else {
+                    free(buf);
+                    return 1;
+                }
             }
 
             // Too distorted, increase quality
@@ -209,6 +249,8 @@ int main (int argc, char **argv) {
         }
     }
 
+    free(buf);
+
     // Calculate and show savings, if any
     int percent = (compressedSize + metaSize) * 100 / bufSize;
     unsigned long saved = (bufSize > compressedSize) ? bufSize - compressedSize - metaSize : 0;
@@ -219,15 +261,10 @@ int main (int argc, char **argv) {
         return 1;
     }
 
+    // Open output file for writing
+    file = openOutput(cmd.argv[1]);
+
     // Write output
-    FILE *file;
-
-    if (strcmp("-", cmd.argv[1]) == 0) {
-        file = stdout;
-    } else {
-        file = fopen(cmd.argv[1], "wb");
-    }
-
     fwrite(compressed, 20, 1, file); /* 0xffd8 and JFIF marker */
 
     // Write comment so we know not to reprocess this file
