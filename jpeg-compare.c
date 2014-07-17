@@ -19,6 +19,7 @@
 #include <string.h>
 
 #include "src/commander.h"
+#include "src/edit.h"
 #include "src/hash.h"
 #include "src/iqa/include/iqa.h"
 #include "src/util.h"
@@ -37,6 +38,9 @@ int method = FAST;
 // Hash size when method is FAST
 int size = 16;
 
+// Use PPM input?
+int ppm = 0;
+
 static void setSize(command_t *self) {
     size = atoi(self->arg);
 }
@@ -53,6 +57,10 @@ static void setMethod(command_t *self) {
     } else {
         method = UNKNOWN;
     }
+}
+
+static void setPpm(command_t *self) {
+    ppm = 1;
 }
 
 int compareFast(const char *filename1, const char *filename2) {
@@ -80,7 +88,7 @@ int compareFast(const char *filename1, const char *filename2) {
 }
 
 int compare(const char *filename1, const char *filename2) {
-    unsigned char *image1, *image2;
+    unsigned char *image1, *image2, *image1Gray = NULL;
     int width1, width2, height1, height2;
     int format, components;
     float diff;
@@ -98,9 +106,22 @@ int compare(const char *filename1, const char *filename2) {
     }
 
     // Decode files
-    if (!decodeJpegFile(filename1, &image1, &width1, &height1, format)) {
-        printf("Error decoding %s\n", filename1);
-        return 1;
+    if (ppm) {
+        if (!decodePpmFile(filename1, &image1, &width1, &height1)) {
+            printf("Error decoding %s\n", filename1);
+            return 1;
+        }
+
+        if (1 == components) {
+            grayscale(image1, &image1Gray, width1, height1);
+            free(image1);
+            image1 = image1Gray;
+        }
+    } else {
+        if (!decodeJpegFile(filename1, &image1, &width1, &height1, format)) {
+            printf("Error decoding %s\n", filename1);
+            return 1;
+        }
     }
 
     if (!decodeJpegFile(filename2, &image2, &width2, &height2, format)) {
@@ -146,6 +167,7 @@ int main (int argc, char **argv) {
     cmd.usage = "[options] image1.jpg image2.jpg";
     command_option(&cmd, "-s", "--size [arg]", "Set fast comparison image hash size", setSize);
     command_option(&cmd, "-m", "--method [arg]", "Set comparison method to one of 'fast', 'psnr', 'ssim', or 'ms-ssim' [fast]", setMethod);
+    command_option(&cmd, "-r", "--ppm", "Parse first input as PPM instead of JPEG", setPpm);
     command_parse(&cmd, argc, argv);
 
     if (cmd.argc < 2) {

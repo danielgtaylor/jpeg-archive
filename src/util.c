@@ -145,6 +145,17 @@ unsigned long encodeJpeg(unsigned char **jpeg, unsigned char *buf, int width, in
     return jpegSize;
 }
 
+unsigned long decodePpmFile(const char *filename, unsigned char **image, int *width, int *height) {
+    unsigned char *buf = NULL;
+    long bufSize = 0;
+
+    bufSize = readFile((char *) filename, (void **) &buf);
+
+    if (!bufSize) { return 0; }
+
+    return decodePpm(buf, bufSize, image, width, height);
+}
+
 unsigned long decodePpm(unsigned char *buf, unsigned long bufSize, unsigned char **image, int *width, int *height) {
     unsigned long pos = 0, imageDataSize;
     int depth;

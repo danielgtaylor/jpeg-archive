@@ -104,7 +104,7 @@ int main (int argc, char **argv) {
     long bufSize = 0;
     unsigned char *original;
     long originalSize = 0;
-    unsigned char *originalGray;
+    unsigned char *originalGray = NULL;
     long originalGraySize = 0;
     unsigned char *compressed = NULL;
     unsigned long compressedSize = 0;
@@ -159,17 +159,7 @@ int main (int argc, char **argv) {
     }
 
     // Convert RGB input into Y
-    originalGraySize = width * height;
-    originalGray = malloc(originalGraySize);
-    int stride = width * 3;
-    for (int y = 0; y < height; y++) {
-        for (int x = 0; x < width; x++) {
-            // Y = 0.299R + 0.587G + 0.114B
-            originalGray[y * width + x] = original[y * stride + x * 3] * 0.299 +
-                                          original[y * stride + x * 3 + 1] * 0.587 +
-                                          original[y * stride + x * 3 + 2] * 0.114 + 0.5;
-        }
-    }
+    originalGraySize = grayscale(original, &originalGray, width, height);
 
     if (!ppm) {
         // Read metadata (EXIF / IPTC / XMP tags)

@@ -22,4 +22,10 @@ int interpolate(const unsigned char *image, int width, int components, float x, 
 */
 void defish(const unsigned char *input, unsigned char *output, int width, int height, int components, float strength, float zoom);
 
+/*
+    Convert an RGB image to grayscale. Assumes 8-bit color components, 
+    3 color components and a row stride of width * 3.
+*/
+long grayscale(const unsigned char *input, unsigned char **output, int width, int height);
+
 #endif
