@@ -1,4 +1,5 @@
 #include <math.h>
+#include <stdlib.h>
 
 float clamp(float low, float value, float high) {
     return (value < low) ? low : ((value > high) ? high : value);
@@ -45,4 +46,21 @@ void defish(const unsigned char *input, unsigned char *output, int width, int he
             }
         }
     }
+}
+
+long grayscale(const unsigned char *input, unsigned char **output, int width, int height) {
+    int stride = width * 3;
+
+    *output = malloc(width * height);
+
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            // Y = 0.299R + 0.587G + 0.114B
+            (*output)[y * width + x] = input[y * stride + x * 3] * 0.299 +
+                                       input[y * stride + x * 3 + 1] * 0.587 +
+                                       input[y * stride + x * 3 + 2] * 0.114 + 0.5;
+        }
+    }
+
+    return width * height;
 }
