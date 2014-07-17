@@ -13,15 +13,34 @@
 #include "src/commander.h"
 #include "src/edit.h"
 #include "src/iqa/include/iqa.h"
+#include "src/smallfry.h"
 #include "src/util.h"
 
 const char *COMMENT = "Compressed by jpeg-recompress";
+
+// Comparison method
+enum METHOD {
+    UNKNOWN,
+    SSIM,
+    MS_SSIM,
+    SMALLFRY
+};
+
+int method = SSIM;
 
 // Number of binary search steps
 int attempts = 6;
 
 // Target quality (SSIM) value
-float target = 0.9999;
+enum QUALITY_PRESET {
+    LOW,
+    MEDIUM,
+    HIGH,
+    VERYHIGH
+};
+
+float target = 0;
+int preset = MEDIUM;
 
 // Min/max JPEG quality
 int jpegMin = 40;
@@ -50,15 +69,27 @@ static void setTarget(command_t *self) {
 
 static void setQuality(command_t *self) {
     if (!strcmp("low", self->arg)) {
-        target = 0.999;
+        preset = LOW;
     } else if (!strcmp("medium", self->arg)) {
-        target = 0.9999;
+        preset = MEDIUM;
     } else if (!strcmp("high", self->arg)) {
-        target = 0.99995;
+        preset = HIGH;
     } else if (!strcmp("veryhigh", self->arg)) {
-        target = 0.99999;
+        preset = VERYHIGH;
     } else {
         fprintf(stderr, "Unknown quality preset '%s'!\n", self->arg);
+    }
+}
+
+static void setMethod(command_t *self) {
+    if (!strcmp("ssim", self->arg)) {
+        method = SSIM;
+    } else if (!strcmp("ms-ssim", self->arg)) {
+        method = MS_SSIM;
+    } else if (!strcmp("smallfry", self->arg)) {
+        method = SMALLFRY;
+    } else {
+        method = UNKNOWN;
     }
 }
 
@@ -88,6 +119,43 @@ static void setPpm(command_t *self) {
 
 static void setCopyFiles(command_t *self) {
     copyFiles = 0;
+}
+
+static void setTargetFromPreset() {
+    switch (method) {
+        case SSIM: case MS_SSIM:
+            switch (preset) {
+                case LOW:
+                    target = 0.999;
+                    break;
+                case MEDIUM:
+                    target = 0.9999;
+                    break;
+                case HIGH:
+                    target = 0.99995;
+                    break;
+                case VERYHIGH:
+                    target = 0.99999;
+                    break;
+            }
+            break;
+        case SMALLFRY:
+            switch (preset) {
+                case LOW:
+                    target = 100.75;
+                    break;
+                case MEDIUM:
+                    target = 102.25;
+                    break;
+                case HIGH:
+                    target = 103.8;
+                    break;
+                case VERYHIGH:
+                    target = 105.5;
+                    break;
+            }
+            break;
+    }
 }
 
 // Open a file for writing
@@ -123,8 +191,9 @@ int main (int argc, char **argv) {
     command_option(&cmd, "-t", "--target [arg]", "Set target SSIM [0.9999]", setTarget);
     command_option(&cmd, "-q", "--quality [arg]", "Set a quality preset: low, medium, high, veryhigh [medium]", setQuality);
     command_option(&cmd, "-n", "--min [arg]", "Minimum JPEG quality [40]", setMinimum);
-    command_option(&cmd, "-m", "--max [arg]", "Maximum JPEG quality [95]", setMaximum);
+    command_option(&cmd, "-x", "--max [arg]", "Maximum JPEG quality [95]", setMaximum);
     command_option(&cmd, "-l", "--loops [arg]", "Set the number of runs to attempt [6]", setAttempts);
+    command_option(&cmd, "-m", "--method [arg]", "Set comparison method to one of 'ssim', 'ms-ssim', 'smallfry' [ssim]", setMethod);
     command_option(&cmd, "-s", "--strip", "Strip metadata", setStrip);
     command_option(&cmd, "-d", "--defish [arg]", "Set defish strength [0.0]", setDefish);
     command_option(&cmd, "-z", "--zoom [arg]", "Set defish zoom [1.0]", setZoom);
@@ -135,6 +204,11 @@ int main (int argc, char **argv) {
     if (cmd.argc < 2) {
         command_help(&cmd);
         return 255;
+    }
+
+    // No target passed, use preset!
+    if (!target) {
+        setTargetFromPreset();
     }
 
     // Read original
@@ -193,6 +267,7 @@ int main (int argc, char **argv) {
     // given target SSIM value.
     int min = jpegMin, max = jpegMax;
     for (int attempt = attempts - 1; attempt >= 0; --attempt) {
+        float metric;
         int quality = min + (max - min) / 2;
 
         // Recompress to a new quality level, without optimizations (for speed)
@@ -201,11 +276,33 @@ int main (int argc, char **argv) {
         // Load compressed luma for quality comparison
         compressedGraySize = decodeJpeg(compressed, compressedSize, &compressedGray, &width, &height, JCS_GRAYSCALE);
 
-        // Measure structural similarity (SSIM)
-        float ssim = iqa_ssim(originalGray, compressedGray, width, height, width, 0, 0);
-        fprintf(stderr, "ssim at q=%i (%i - %i): %f\n", quality, min, max, ssim);
+        if (!attempt) {
+            fprintf(stderr, "Final optimized ");
+        }
 
-        if (ssim < target) {
+        // Measure quality difference
+        switch (method) {
+            case SSIM:
+                metric = iqa_ssim(originalGray, compressedGray, width, height, width, 0, 0);
+                fprintf(stderr, "ssim");
+                break;
+            case MS_SSIM:
+                metric = iqa_ms_ssim(originalGray, compressedGray, width, height, width, 0);
+                fprintf(stderr, "ms-ssim");
+                break;
+            case SMALLFRY:
+                metric = smallfry_metric(originalGray, compressedGray, width, height);
+                fprintf(stderr, "smallfry");
+                break;
+        }
+
+        if (attempt) {
+            fprintf(stderr, " at q=%i (%i - %i): %f\n", quality, min, max, metric);
+        } else {
+            fprintf(stderr, " at q=%i: %f\n", quality, metric);
+        }
+
+        if (metric < target) {
             if (compressedSize >= bufSize) {
                 fprintf(stderr, "Output file would be larger than input!\n");
                 free(compressed);
@@ -228,7 +325,7 @@ int main (int argc, char **argv) {
             // Too distorted, increase quality
             min = quality + 1;
         } else {
-            // Higher SSIM than required, decrease quality
+            // Higher than required, decrease quality
             max = quality - 1;
         }
 
