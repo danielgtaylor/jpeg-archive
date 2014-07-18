@@ -4,4 +4,8 @@ src/iqa/build
 jpeg-recompress
 jpeg-compare
 jpeg-hash
+test-files
 test-output
+comparison
+comparison.png
+test.jpg
