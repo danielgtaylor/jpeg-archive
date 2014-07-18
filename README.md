@@ -44,8 +44,9 @@ The following metrics are available when using `jpeg-recompress`. SSIM is the de
 
 Name     | Option        | Description
 -------- | ------------- | -----------
-SSIM     | `-m ssim`     | [Structural similarity](http://en.wikipedia.org/wiki/Structural_similarity)
-MS-SSIM* | `-m ms-ssim`  | Multi-scale structural similarity ([2008 paper](http://foulard.ece.cornell.edu/publications/dmr_hvei2008_paper.pdf))
+MPE      | `-m mpe`      | Mean pixel error (as used by [imgmin](https://github.com/rflynn/imgmin))
+SSIM     | `-m ssim`     | [Structural similarity](http://en.wikipedia.org/wiki/Structural_similarity) **DEFAULT**
+MS-SSIM* | `-m ms-ssim`  | Multi-scale structural similarity (slow!) ([2008 paper](http://foulard.ece.cornell.edu/publications/dmr_hvei2008_paper.pdf))
 SmallFry | `-m smallfry` | Linear-weighted BBCQ-like ([original project](https://github.com/dwbuiten/smallfry), [2011 BBCQ paper](http://spie.org/Publications/Proceedings/Paper/10.1117/12.872231))
 
 **Note**: The SmallFry algorithm may be [patented](http://www.jpegmini.com/main/technology) so use with caution.

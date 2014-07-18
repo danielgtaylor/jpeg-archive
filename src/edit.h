@@ -15,6 +15,11 @@ float clamp(float low, float value, float high);
 int interpolate(const unsigned char *image, int width, int components, float x, float y, int offset);
 
 /*
+    Get mean error per pixel rate.
+*/
+float meanPixelError(const unsigned char *original, const unsigned char *compressed, int width, int height, int components);
+
+/*
     Remove fisheye distortion from an image. The amount of distortion is
     controlled by strength, while zoom controls where the image gets
     cropped. For example, the Tokina 10-17mm ATX fisheye on a Canon APS-C

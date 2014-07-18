@@ -22,6 +22,21 @@ int interpolate(const unsigned char *image, int width, int components, float x, 
     return (top * (1.0 - py)) + (bot * py);
 }
 
+float meanPixelError(const unsigned char *original, const unsigned char *compressed, int width, int height, int components) {
+    float pme = 0.0;
+
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            for (int z = 0; z < components; z++) {
+                int offset = y * width * components + x * components + z;
+                pme += abs(original[offset] - compressed[offset]);
+            }
+        }
+    }
+
+    return pme / (width * height * components);
+}
+
 void defish(const unsigned char *input, unsigned char *output, int width, int height, int components, float strength, float zoom) {
     const int cx = width / 2;
     const int cy = height / 2;
@@ -42,7 +57,7 @@ void defish(const unsigned char *input, unsigned char *output, int width, int he
             dy = clamp(0.0, (float) height / 2.0 - theta * dy, height);
 
             for (int z = 0; z < components; z++) {
-                output[y * width * 3 + x * 3 + z] = interpolate(input, width, components, dx, dy, z);
+                output[y * width * components + x * components + z] = interpolate(input, width, components, dx, dy, z);
             }
         }
     }
