@@ -122,7 +122,7 @@ static void setCopyFiles(command_t *self) {
 
 static void setTargetFromPreset() {
     switch (method) {
-        case SSIM: case MS_SSIM:
+        case SSIM:
             switch (preset) {
                 case LOW:
                     target = 0.999;
@@ -135,6 +135,22 @@ static void setTargetFromPreset() {
                     break;
                 case VERYHIGH:
                     target = 0.99999;
+                    break;
+            }
+            break;
+        case MS_SSIM:
+            switch (preset) {
+                case LOW:
+                    target = 0.85;
+                    break;
+                case MEDIUM:
+                    target = 0.94;
+                    break;
+                case HIGH:
+                    target = 0.96;
+                    break;
+                case VERYHIGH:
+                    target = 0.98;
                     break;
             }
             break;
