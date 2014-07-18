@@ -37,7 +37,7 @@ Some basic photo-related editing options are available, such as removing fisheye
 #### Demo
 Below are two 100% crops of [Nikon's D3x Sample Image 2](http://static.nikonusa.com/D3X_gallery/index.html). The left shows the original image from the camera, while the right shows the output of `jpeg-recompress` with the `medium` quality setting, which lowers the file size by **85%**. The recompression algorithm chooses a JPEG quality of 80 for a structural similarity (SSIM) of 0.999915. By comparison the `veryhigh` quality setting chooses a JPEG quality of 93 and saves 63% of the file size.
 
-![JPEG recompression comparison](https://raw.github.com/danielgtaylor/jpeg-archive/master/comparison.png)
+![JPEG recompression comparison](https://cloud.githubusercontent.com/assets/106826/3622098/c4f2cf62-0e27-11e4-8755-857a8e6e8eeb.png)
 
 #### Image Comparison Metrics
 The following metrics are available when using `jpeg-recompress`. SSIM is the default.
