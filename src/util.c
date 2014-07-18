@@ -107,7 +107,7 @@ unsigned long encodeJpeg(unsigned char **jpeg, unsigned char *buf, int width, in
     struct jpeg_compress_struct cinfo;
     struct jpeg_error_mgr jerr;
     JSAMPROW row_pointer[1];
-    int row_stride = width * 3;
+    int row_stride = width * (pixelFormat == JCS_RGB ? 3 : 1);
 
     cinfo.err = jpeg_std_error(&jerr);
 
