@@ -240,6 +240,12 @@ int main (int argc, char **argv) {
         return 255;
     }
 
+    if (method == UNKNOWN) {
+        fprintf(stderr, "Invalid method!");
+        command_help(&cmd);
+        return 255;
+    }
+
     // No target passed, use preset!
     if (!target) {
         setTargetFromPreset();
