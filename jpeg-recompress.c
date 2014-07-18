@@ -22,7 +22,8 @@ enum METHOD {
     UNKNOWN,
     SSIM,
     MS_SSIM,
-    SMALLFRY
+    SMALLFRY,
+    MPE
 };
 
 int method = SSIM;
@@ -87,6 +88,8 @@ static void setMethod(command_t *self) {
         method = MS_SSIM;
     } else if (!strcmp("smallfry", self->arg)) {
         method = SMALLFRY;
+    } else if (!strcmp("mpe", self->arg)) {
+        method = MPE;
     } else {
         method = UNKNOWN;
     }
@@ -170,6 +173,22 @@ static void setTargetFromPreset() {
                     break;
             }
             break;
+        case MPE:
+            switch (preset) {
+                case LOW:
+                    target = 1.5;
+                    break;
+                case MEDIUM:
+                    target = 1.0;
+                    break;
+                case HIGH:
+                    target = 0.8;
+                    break;
+                case VERYHIGH:
+                    target = 0.6;
+                    break;
+            }
+            break;
     }
 }
 
@@ -208,7 +227,7 @@ int main (int argc, char **argv) {
     command_option(&cmd, "-n", "--min [arg]", "Minimum JPEG quality [40]", setMinimum);
     command_option(&cmd, "-x", "--max [arg]", "Maximum JPEG quality [95]", setMaximum);
     command_option(&cmd, "-l", "--loops [arg]", "Set the number of runs to attempt [6]", setAttempts);
-    command_option(&cmd, "-m", "--method [arg]", "Set comparison method to one of 'ssim', 'ms-ssim', 'smallfry' [ssim]", setMethod);
+    command_option(&cmd, "-m", "--method [arg]", "Set comparison method to one of 'mpe', 'ssim', 'ms-ssim', 'smallfry' [ssim]", setMethod);
     command_option(&cmd, "-s", "--strip", "Strip metadata", setStrip);
     command_option(&cmd, "-d", "--defish [arg]", "Set defish strength [0.0]", setDefish);
     command_option(&cmd, "-z", "--zoom [arg]", "Set defish zoom [1.0]", setZoom);
@@ -309,6 +328,10 @@ int main (int argc, char **argv) {
                 metric = smallfry_metric(originalGray, compressedGray, width, height);
                 fprintf(stderr, "smallfry");
                 break;
+            case MPE:
+                metric = meanPixelError(originalGray, compressedGray, width, height, 1);
+                fprintf(stderr, "mpe");
+                break;
         }
 
         if (attempt) {
@@ -337,11 +360,27 @@ int main (int argc, char **argv) {
                 }
             }
 
-            // Too distorted, increase quality
-            min = quality + 1;
+            switch (method) {
+                case SSIM: case MS_SSIM: case SMALLFRY:
+                    // Too distorted, increase quality
+                    min = quality + 1;
+                    break;
+                case MPE:
+                    // Higher than required, decrease quality
+                    max = quality - 1;
+                    break;
+            }
         } else {
-            // Higher than required, decrease quality
-            max = quality - 1;
+            switch (method) {
+                case SSIM: case MS_SSIM: case SMALLFRY:
+                    // Higher than required, decrease quality
+                    max = quality - 1;
+                    break;
+                case MPE:
+                    // Too distorted, increase quality
+                    min = quality + 1;
+                    break;
+            }
         }
 
         // If we aren't done yet, then free the image data
