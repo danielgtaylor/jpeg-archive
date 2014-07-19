@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# This script requires ladon, dcraw, exiftool, and jpeg-recompress
+# Usage:
+#   $ cd path/to/photos
+#   $ jpeg-archive
+# Compressed JPEGs are now in ./Comp/*
+
+if [ $1 == '--help' ]; then
+    echo 'JPEG-Archive - Compress RAW and JPEG images in the current folder'
+    echo 'Usage: jpeg-archive [options]'
+    echo ''
+    echo 'Possible compression options:'
+    echo "`jpeg-recompress --help | tail -n+6`"
+    exit 255
+fi
+
+set -e
+
+# Cleanup old files
+rm -rf Comp
+rm -rf /tmp/comp
+
+echo 'Converting RAW files...'
+ladon -m /tmp/comp/RELDIR '**/*.+(cr2|nef|dng)' -- "dcraw -w -q 3 -c RELPATH | jpeg-recompress ${@:--q high} --ppm - /tmp/comp/RELDIR/BASENAME.jpg"
+
+echo 'Copying EXIF data...'
+ladon '**/*.+(cr2|nef|dng)' -- exiftool -overwrite_original -TagsFromFile RELPATH -all:all /tmp/comp/RELDIR/BASENAME.jpg
+
+echo 'Recompressing JPEG files'
+ladon -m /tmp/comp/RELDIR '**/*.jpg' -- jpeg-recompress ${@:--q high} RELPATH /tmp/comp/RELPATH
+
+mv /tmp/comp Comp
+
+echo 'Done! Compressed files are in the Comp folder.'

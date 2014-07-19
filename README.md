@@ -11,7 +11,7 @@ Download
 --------
 You can download the latest source and binary releases from the [JPEG Archive releases page](https://github.com/danielgtaylor/jpeg-archive/releases).
 
-If you are looking for an easy way to run these utilities in parallel over many files to utilize all CPU cores, please also download [Ladon](https://github.com/danielgtaylor/ladon). Example:
+If you are looking for an easy way to run these utilities in parallel over many files to utilize all CPU cores, please also download [Ladon](https://github.com/danielgtaylor/ladon). You can then use the `jpeg-archive` command below or use `ladon` directly. Example:
 
 ```bash
 # Re-compress JPEGs and replace the originals
@@ -24,6 +24,24 @@ ladon -m Comp/RELDIR "Photos/**/*.jpg" -- jpeg-recompress FULLPATH Comp/RELPATH
 Utilities
 ---------
 The following utilities are part of this project. All of them accept a `--help` parameter to see the available options.
+
+### jpeg-archive
+Compress RAW and JPEG files in a folder utilizing all CPU cores. This is a simple bash script that uses the utilities below. It requires:
+
+* Bash
+* [Ladon](https://github.com/danielgtaylor/ladon)
+* [dcraw](http://www.cybercom.net/~dcoffin/dcraw/)
+* [exiftool](http://www.sno.phy.queensu.ca/~phil/exiftool/)
+* jpeg-recompress (part of this project)
+
+```bash
+# Compress a folder of images
+cd path/to/photos
+jpeg-archive
+
+# Custom quality and metric
+jpeg-archive --quality medium --method smallfry
+```
 
 ### jpeg-recompress
 Compress JPEGs by re-encoding to the smallest JPEG quality while keeping _perceived_ visual quality the same and by making sure huffman tables are optimized. This is a __lossy__ operation, but the images are visually identical and it usually saves 30-70% of the size for JPEGs coming from a digital camera, particularly DSLRs. By default all EXIF/IPTC/XMP and color profile metadata is copied over, but this can be disabled to save more space if desired.
