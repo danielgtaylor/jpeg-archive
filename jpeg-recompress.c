@@ -229,7 +229,7 @@ int main (int argc, char **argv) {
     command_t cmd;
     command_init(&cmd, argv[0], "1.1.0");
     cmd.usage = "[options] input.jpg compressed-output.jpg";
-    command_option(&cmd, "-t", "--target [arg]", "Set target SSIM [0.9999]", setTarget);
+    command_option(&cmd, "-t", "--target [arg]", "Set target quality [0.9999]", setTarget);
     command_option(&cmd, "-q", "--quality [arg]", "Set a quality preset: low, medium, high, veryhigh [medium]", setQuality);
     command_option(&cmd, "-n", "--min [arg]", "Minimum JPEG quality [40]", setMinimum);
     command_option(&cmd, "-x", "--max [arg]", "Maximum JPEG quality [95]", setMaximum);
