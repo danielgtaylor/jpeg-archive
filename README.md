@@ -37,7 +37,7 @@ Some basic photo-related editing options are available, such as removing fisheye
 #### Demo
 Below are two 100% crops of [Nikon's D3x Sample Image 2](http://static.nikonusa.com/D3X_gallery/index.html). The left shows the original image from the camera, while the others show the output of `jpeg-recompress` with the `medium` quality setting and various comparison methods. By default SSIM is used, which lowers the file size by **88%**. The recompression algorithm chooses a JPEG quality of 80. By comparison the `veryhigh` quality setting chooses a JPEG quality of 93 and saves 70% of the file size.
 
-![JPEG recompression comparison](https://cloud.githubusercontent.com/assets/106826/3622098/c4f2cf62-0e27-11e4-8755-857a8e6e8eeb.png)
+![JPEG recompression comparison](https://cloud.githubusercontent.com/assets/106826/3633843/5fde26b6-0eff-11e4-8c98-f18dbbf7b510.png)
 
 #### Image Comparison Metrics
 The following metrics are available when using `jpeg-recompress`. SSIM is the default.
@@ -57,6 +57,9 @@ jpeg-recompress image.jpg compressed.jpg
 
 # High quality example settings
 jpeg-recompress --quality high --min 60 image.jpg compressed.jpg
+
+# Slow high quality settings (3-4x slower than above, slightly more accurate)
+jpeg-recompress --accurate --quality high --min 60 image.jpg compressed.jpg
 
 # Use SmallFry instead of SSIM
 jpeg-recompress --method smallfry image.jpg compressed.jpg
