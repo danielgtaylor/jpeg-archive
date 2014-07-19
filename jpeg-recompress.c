@@ -59,6 +59,9 @@ int ppm = 0;
 // Whether to copy files that cannot be compressed
 int copyFiles = 1;
 
+// Whether to favor accuracy over speed
+int accurate = 0;
+
 static void setAttempts(command_t *self) {
     attempts = atoi(self->arg);
 }
@@ -121,6 +124,10 @@ static void setPpm(command_t *self) {
 
 static void setCopyFiles(command_t *self) {
     copyFiles = 0;
+}
+
+static void setAccurate(command_t *self) {
+    accurate = 1;
 }
 
 static void setTargetFromPreset() {
@@ -227,6 +234,7 @@ int main (int argc, char **argv) {
     command_option(&cmd, "-n", "--min [arg]", "Minimum JPEG quality [40]", setMinimum);
     command_option(&cmd, "-x", "--max [arg]", "Maximum JPEG quality [95]", setMaximum);
     command_option(&cmd, "-l", "--loops [arg]", "Set the number of runs to attempt [6]", setAttempts);
+    command_option(&cmd, "-a", "--accurate", "Favor accuracy over speed", setAccurate);
     command_option(&cmd, "-m", "--method [arg]", "Set comparison method to one of 'mpe', 'ssim', 'ms-ssim', 'smallfry' [ssim]", setMethod);
     command_option(&cmd, "-s", "--strip", "Strip metadata", setStrip);
     command_option(&cmd, "-d", "--defish [arg]", "Set defish strength [0.0]", setDefish);
@@ -311,7 +319,7 @@ int main (int argc, char **argv) {
         int quality = min + (max - min) / 2;
 
         // Recompress to a new quality level, without optimizations (for speed)
-        compressedSize = encodeJpeg(&compressed, original, width, height, JCS_RGB, quality, attempt ? 0 : 1);
+        compressedSize = encodeJpeg(&compressed, original, width, height, JCS_RGB, quality, accurate ? 1 : (attempt ? 0 : 1));
 
         // Load compressed luma for quality comparison
         compressedGraySize = decodeJpeg(compressed, compressedSize, &compressedGray, &width, &height, JCS_GRAYSCALE);
