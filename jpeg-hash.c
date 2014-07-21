@@ -22,7 +22,7 @@ int main (int argc, char **argv) {
 
     // Parse commandline options
     command_t cmd;
-    command_init(&cmd, argv[0], "1.1.0");
+    command_init(&cmd, argv[0], "2.0.0");
     cmd.usage = "[options] image.jpg";
     command_option(&cmd, "-s", "--size [arg]", "Set image hash size", setSize);
     command_parse(&cmd, argc, argv);
