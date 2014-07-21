@@ -5,12 +5,12 @@ MAKE ?= make
 PREFIX ?= /usr/local
 
 UNAME_S := $(shell uname -s)
-UNAME_P := $(shell uname -p)
+UNAME_M := $(shell uname -m)
 
 ifeq ($(UNAME_S),Linux)
 	# Linux (e.g. Ubuntu)
 	CFLAGS += -I/opt/libmozjpeg/include
-	ifeq ($(UNAME_P),x86_64)
+	ifeq ($(UNAME_M),x86_64)
 		LIBJPEG = /opt/libmozjpeg/lib64/libjpeg.a
 	else
 		LIBJPEG = /opt/libmozjpeg/lib/libjpeg.a
