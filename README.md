@@ -64,6 +64,8 @@ Below are two 100% crops of [Nikon's D3x Sample Image 2](http://static.nikonusa.
 
 ![JPEG recompression comparison](https://cloud.githubusercontent.com/assets/106826/3633843/5fde26b6-0eff-11e4-8c98-f18dbbf7b510.png)
 
+Why are they different sizes? The default quality settings are set to average out to similar visual quality over large data sets. They may differ on individual photos (like above) because each metric considers different parts of the image to be more or less important for compression.
+
 #### Image Comparison Metrics
 The following metrics are available when using `jpeg-recompress`. SSIM is the default.
 
