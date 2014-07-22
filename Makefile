@@ -51,7 +51,7 @@ test: test.c src/util.o src/edit.o src/hash.o
 	$(CC) $(CFLAGS) -o $@ $^ $(LIBJPEG) $(LDFLAGS)
 	./test
 
-install:
+install: all
 	mkdir -p $(PREFIX)/bin
 	cp jpeg-archive $(PREFIX)/bin/
 	cp jpeg-recompress $(PREFIX)/bin/
