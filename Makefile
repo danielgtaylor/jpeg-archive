@@ -53,6 +53,7 @@ test: test.c src/util.o src/edit.o src/hash.o
 
 install:
 	mkdir -p $(PREFIX)/bin
+	cp jpeg-archive $(PREFIX)/bin/
 	cp jpeg-recompress $(PREFIX)/bin/
 	cp jpeg-compare $(PREFIX)/bin/
 	cp jpeg-hash $(PREFIX)/bin/
