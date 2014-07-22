@@ -1,9 +1,16 @@
 JPEG Archive [![Build Status](https://travis-ci.org/danielgtaylor/jpeg-archive.png?branch=master)](https://travis-ci.org/danielgtaylor/jpeg-archive)
 ============
-Utilities for archiving JPEGs for long term storage. The goals are:
+Utilities for archiving photos for saving to long term storage or serving over the web. The goals are:
 
- * Minimize storage space
+ * Use a common, well supported format (JPEG)
+ * Minimize storage space & cost
  * Identify duplicates / similar photos
+
+Approach:
+
+ * Commandline utilities & scripts
+ * Simple options & useful help
+ * Good quality output via sane defaults
 
 Contributions to this project are very welcome.
 
