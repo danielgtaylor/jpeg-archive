@@ -15,6 +15,11 @@ if [ $1 == '--help' ]; then
     exit 255
 fi
 
+if [ $1 == '--version' ]; then
+    echo '2.0.0'
+    exit 255
+fi
+
 set -e
 
 # Cleanup old files
