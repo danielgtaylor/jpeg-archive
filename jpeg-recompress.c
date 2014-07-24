@@ -319,7 +319,7 @@ int main (int argc, char **argv) {
         int quality = min + (max - min) / 2;
 
         // Recompress to a new quality level, without optimizations (for speed)
-        compressedSize = encodeJpeg(&compressed, original, width, height, JCS_RGB, quality, accurate ? 1 : (attempt ? 0 : 1));
+        compressedSize = encodeJpeg(&compressed, original, width, height, JCS_RGB, quality, attempt ? 0 : 1, accurate ? 1 : (attempt ? 0 : 1));
 
         // Load compressed luma for quality comparison
         compressedGraySize = decodeJpeg(compressed, compressedSize, &compressedGray, &width, &height, JCS_GRAYSCALE);
