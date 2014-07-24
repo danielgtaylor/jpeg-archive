@@ -102,7 +102,7 @@ unsigned long decodeJpeg(unsigned char *buf, unsigned long bufSize, unsigned cha
     return row_stride * (*height);
 }
 
-unsigned long encodeJpeg(unsigned char **jpeg, unsigned char *buf, int width, int height, int pixelFormat, int quality, int optimize) {
+unsigned long encodeJpeg(unsigned char **jpeg, unsigned char *buf, int width, int height, int pixelFormat, int quality, int progressive, int optimize) {
     long unsigned int jpegSize = 0;
     struct jpeg_compress_struct cinfo;
     struct jpeg_error_mgr jerr;
@@ -127,6 +127,18 @@ unsigned long encodeJpeg(unsigned char **jpeg, unsigned char *buf, int width, in
     }
 
     jpeg_set_defaults(&cinfo);
+
+    if (optimize && !progressive) {
+        // Moz defaults, disable progressive
+        cinfo.scan_info = NULL;
+        cinfo.num_scans = 0;
+        cinfo.optimize_scans = FALSE;
+    }
+
+    if (!optimize && progressive) {
+        // No moz defaults, set scan progression
+        jpeg_simple_progression(&cinfo);
+    }
 
     jpeg_set_quality(&cinfo, quality, TRUE);
 
