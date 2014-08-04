@@ -1,4 +1,4 @@
-JPEG Archive [![Build Status](https://travis-ci.org/danielgtaylor/jpeg-archive.png?branch=master)](https://travis-ci.org/danielgtaylor/jpeg-archive)
+JPEG Archive [![Build Status](http://img.shields.io/travis/danielgtaylor/jpeg-archive.svg?style=flat](https://travis-ci.org/danielgtaylor/jpeg-archive) [![Version](http://img.shields.io/github/release/danielgtaylor/jpeg-archive.svg?style=flat)](https://github.com/danielgtaylor/jpeg-archive/releases) [![License](http://img.shields.io/badge/license-MIT-red.svg?style=flat)](http://dgt.mit-license.org/)
 ============
 Utilities for archiving photos for saving to long term storage or serving over the web. The goals are:
 
