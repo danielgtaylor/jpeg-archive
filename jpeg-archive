@@ -16,7 +16,7 @@ if [ $1 == '--help' ]; then
 fi
 
 if [ $1 == '--version' ]; then
-    echo '2.0.0'
+    jpeg-recompress --version
     exit 255
 fi
 
