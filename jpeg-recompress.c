@@ -324,16 +324,17 @@ int main (int argc, char **argv) {
         // Load compressed luma for quality comparison
         compressedGraySize = decodeJpeg(compressed, compressedSize, &compressedGray, &width, &height, JCS_GRAYSCALE);
 
+        if (!compressedGraySize) {
+          fprintf(stderr, "Unable to decode file that was just encoded!\n");
+          return 1;
+        }
+
         if (!attempt) {
             fprintf(stderr, "Final optimized ");
         }
 
         // Measure quality difference
         switch (method) {
-            case SSIM:
-                metric = iqa_ssim(originalGray, compressedGray, width, height, width, 0, 0);
-                fprintf(stderr, "ssim");
-                break;
             case MS_SSIM:
                 metric = iqa_ms_ssim(originalGray, compressedGray, width, height, width, 0);
                 fprintf(stderr, "ms-ssim");
@@ -345,6 +346,10 @@ int main (int argc, char **argv) {
             case MPE:
                 metric = meanPixelError(originalGray, compressedGray, width, height, 1);
                 fprintf(stderr, "mpe");
+                break;
+            case SSIM: default:
+                metric = iqa_ssim(originalGray, compressedGray, width, height, width, 0, 0);
+                fprintf(stderr, "ssim");
                 break;
         }
 

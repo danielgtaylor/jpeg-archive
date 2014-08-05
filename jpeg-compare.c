@@ -99,7 +99,7 @@ int compare(const char *filename1, const char *filename2) {
             format = JCS_RGB;
             components = 3;
             break;
-        case SSIM: case MS_SSIM:
+        case SSIM: case MS_SSIM: default:
             format = JCS_GRAYSCALE;
             components = 1;
             break;
@@ -141,13 +141,13 @@ int compare(const char *filename1, const char *filename2) {
             diff = iqa_psnr(image1, image2, width1, height1, width1 * components);
             printf("PSNR: %f\n", diff);
             break;
-        case SSIM:
-            diff = iqa_ssim(image1, image2, width1, height1, width1 * components, 0, 0);
-            printf("SSIM: %f\n", diff);
-            break;
         case MS_SSIM:
             diff = iqa_ms_ssim(image1, image2, width1, height1, width1 * components, 0);
             printf("MS-SSIM: %f\n", diff);
+            break;
+        case SSIM: default:
+            diff = iqa_ssim(image1, image2, width1, height1, width1 * components, 0, 0);
+            printf("SSIM: %f\n", diff);
             break;
     }
 
