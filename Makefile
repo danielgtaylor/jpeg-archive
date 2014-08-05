@@ -59,4 +59,4 @@ install: all
 	cp jpeg-hash $(PREFIX)/bin/
 
 clean:
-	rm -rf jpeg-recompress jpeg-compare jpeg-hash src/*.o src/iqa/build
+	rm -rf jpeg-recompress jpeg-compare jpeg-hash test src/*.o src/iqa/build
