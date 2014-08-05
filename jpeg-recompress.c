@@ -227,7 +227,7 @@ int main (int argc, char **argv) {
 
     // Parse commandline options
     command_t cmd;
-    command_init(&cmd, argv[0], "2.0.0");
+    command_init(&cmd, argv[0], VERSION);
     cmd.usage = "[options] input.jpg compressed-output.jpg";
     command_option(&cmd, "-t", "--target [arg]", "Set target quality [0.9999]", setTarget);
     command_option(&cmd, "-q", "--quality [arg]", "Set a quality preset: low, medium, high, veryhigh [medium]", setQuality);

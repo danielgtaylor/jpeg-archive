@@ -8,6 +8,8 @@
 #include <sys/types.h>
 #include <jpeglib.h>
 
+const char *VERSION;
+
 /*
     Read a file into a buffer and return the length.
 */
