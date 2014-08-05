@@ -137,7 +137,7 @@ $ cd mozjpeg
 $ autoreconf -fiv
 $ ./configure --with-jpeg8
 $ make
-$ sudo make install 
+$ sudo make install
 ```
 
 #### Mac OS X
