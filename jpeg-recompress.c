@@ -49,6 +49,9 @@ int jpegMax = 95;
 // Strip metadata from the file?
 int strip = 0;
 
+// Disable progressive mode?
+int noProgressive = 0;
+
 // Defish the image?
 float defishStrength = 0.0;
 float defishZoom = 1.0;
@@ -96,6 +99,10 @@ static void setMethod(command_t *self) {
     } else {
         method = UNKNOWN;
     }
+}
+
+static void setNoProgressive(command_t *self) {
+    noProgressive = 1;
 }
 
 static void setMinimum(command_t *self) {
@@ -241,6 +248,7 @@ int main (int argc, char **argv) {
     command_option(&cmd, "-z", "--zoom [arg]", "Set defish zoom [1.0]", setZoom);
     command_option(&cmd, "-r", "--ppm", "Parse input as PPM instead of JPEG", setPpm);
     command_option(&cmd, "-c", "--no-copy", "Disable copying files that will not be compressed", setCopyFiles);
+    command_option(&cmd, "-p", "--no-progressive", "Disable progressive encoding", setNoProgressive);
     command_parse(&cmd, argc, argv);
 
     if (cmd.argc < 2) {
@@ -317,9 +325,11 @@ int main (int argc, char **argv) {
     for (int attempt = attempts - 1; attempt >= 0; --attempt) {
         float metric;
         int quality = min + (max - min) / 2;
+        int progressive = attempt ? 0 : !noProgressive;
+        int optimize = accurate ? 1 : (attempt ? 0 : 1);
 
         // Recompress to a new quality level, without optimizations (for speed)
-        compressedSize = encodeJpeg(&compressed, original, width, height, JCS_RGB, quality, attempt ? 0 : 1, accurate ? 1 : (attempt ? 0 : 1));
+        compressedSize = encodeJpeg(&compressed, original, width, height, JCS_RGB, quality, progressive, optimize);
 
         // Load compressed luma for quality comparison
         compressedGraySize = decodeJpeg(compressed, compressedSize, &compressedGray, &width, &height, JCS_GRAYSCALE);
