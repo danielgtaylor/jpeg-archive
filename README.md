@@ -99,6 +99,9 @@ jpeg-recompress - - <image.jpg >compressed.jpg
 
 # Convert RAW to JPEG via PPM from stdin
 dcraw -w -q 3 -c IMG_1234.CR2 | jpeg-recompress --ppm - compressed.jpg
+
+# Disable progressive mode (not recommended)
+jpeg-recompress --no-progressive image.jpg compressed.jpg
 ```
 
 ### jpeg-compare
