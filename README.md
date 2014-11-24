@@ -134,7 +134,7 @@ Building
 Ubuntu users can install via `apt-get`:
 
 ```bash
-$ sudo apt-get install build-essential autoconf nasm
+$ sudo apt-get install build-essential autoconf nasm libtool
 $ git clone https://github.com/mozilla/mozjpeg.git
 $ cd mozjpeg
 $ autoreconf -fiv
