@@ -3,23 +3,24 @@ CFLAGS += -std=c99 -Wall -O3
 LDFLAGS += -lm
 MAKE ?= make
 PREFIX ?= /usr/local
+MOZJPEG_PREFIX ?= /opt/mozjpeg
 
 UNAME_S := $(shell uname -s)
 UNAME_M := $(shell uname -m)
 
 ifeq ($(UNAME_S),Linux)
 	# Linux (e.g. Ubuntu)
-	CFLAGS += -I/opt/mozjpeg/include
+	CFLAGS += -I$(MOZJPEG_PREFIX)/include
 	ifeq ($(UNAME_M),x86_64)
-		LIBJPEG = /opt/mozjpeg/lib64/libjpeg.a
+		LIBJPEG = $(MOZJPEG_PREFIX)/lib64/libjpeg.a
 	else
-		LIBJPEG = /opt/mozjpeg/lib/libjpeg.a
+		LIBJPEG = $(MOZJPEG_PREFIX)/lib/libjpeg.a
 	endif
 else
 	ifeq ($(UNAME_S),Darwin)
 		# Mac OS X
-		LIBJPEG = /opt/mozjpeg/lib/libjpeg.a
-		CFLAGS += -I/opt/mozjpeg/include
+		LIBJPEG = $(MOZJPEG_PREFIX)/lib/libjpeg.a
+		CFLAGS += -I$(MOZJPEG_PREFIX)/include
 	else
 		# Windows
 		LIBJPEG = ../mozjpeg/libjpeg.a
