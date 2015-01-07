@@ -9,17 +9,17 @@ UNAME_M := $(shell uname -m)
 
 ifeq ($(UNAME_S),Linux)
 	# Linux (e.g. Ubuntu)
-	CFLAGS += -I/opt/libmozjpeg/include
+	CFLAGS += -I/opt/mozjpeg/include
 	ifeq ($(UNAME_M),x86_64)
-		LIBJPEG = /opt/libmozjpeg/lib64/libjpeg.a
+		LIBJPEG = /opt/mozjpeg/lib64/libjpeg.a
 	else
-		LIBJPEG = /opt/libmozjpeg/lib/libjpeg.a
+		LIBJPEG = /opt/mozjpeg/lib/libjpeg.a
 	endif
 else
 	ifeq ($(UNAME_S),Darwin)
 		# Mac OS X
-		LIBJPEG = /usr/local/opt/mozjpeg/lib/libjpeg.a
-		CFLAGS += -I/usr/local/opt/mozjpeg/include
+		LIBJPEG = /opt/mozjpeg/lib/libjpeg.a
+		CFLAGS += -I/opt/mozjpeg/include
 	else
 		# Windows
 		LIBJPEG = ../mozjpeg/libjpeg.a
