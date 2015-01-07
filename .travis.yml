@@ -7,7 +7,9 @@ before_install:
     - sudo apt-get install -qq build-essential autoconf nasm
     - git clone https://github.com/mozilla/mozjpeg.git
     - cd mozjpeg
-    - git checkout 7faa703ebf7360e5c0a37d71a74c293232998340
+    - git fetch origin refs/tags/v3.0:refs/tags/v3.0
+    - git fetch --all
+    - git checkout tags/v3.0
     - autoreconf -fiv
     - ./configure --with-jpeg8
     - make && sudo make install
