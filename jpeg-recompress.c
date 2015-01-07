@@ -322,100 +322,113 @@ int main (int argc, char **argv) {
     // Do a binary search to find the optimal encoding quality for the
     // given target SSIM value.
     int min = jpegMin, max = jpegMax;
+    int last[] = {-1, -1, -1, -1, -1};
+
     for (int attempt = attempts - 1; attempt >= 0; --attempt) {
         float metric;
         int quality = min + (max - min) / 2;
         int progressive = attempt ? 0 : !noProgressive;
         int optimize = accurate ? 1 : (attempt ? 0 : 1);
+        int current[] = {min, max, quality, progressive, optimize};
+        
+        // don't run if all parameters are the same as last time
+        if (memcmp(&last, &current, sizeof(last)) != 0) {
+            memcpy(&last, &current, sizeof(last));
 
-        // Recompress to a new quality level, without optimizations (for speed)
-        compressedSize = encodeJpeg(&compressed, original, width, height, JCS_RGB, quality, progressive, optimize);
+            // Recompress to a new quality level, without optimizations (for speed)
+            compressedSize = encodeJpeg(&compressed, original, width, height, JCS_RGB, quality, progressive, optimize);
 
-        // Load compressed luma for quality comparison
-        compressedGraySize = decodeJpeg(compressed, compressedSize, &compressedGray, &width, &height, JCS_GRAYSCALE);
+            // Load compressed luma for quality comparison
+            compressedGraySize = decodeJpeg(compressed, compressedSize, &compressedGray, &width, &height, JCS_GRAYSCALE);
 
-        if (!compressedGraySize) {
-          fprintf(stderr, "Unable to decode file that was just encoded!\n");
-          return 1;
-        }
+            if (!compressedGraySize) {
+              fprintf(stderr, "Unable to decode file that was just encoded!\n");
+              return 1;
+            }
 
-        if (!attempt) {
-            fprintf(stderr, "Final optimized ");
-        }
+            if (!attempt) {
+                fprintf(stderr, "Final optimized ");
+            }
 
-        // Measure quality difference
-        switch (method) {
-            case MS_SSIM:
-                metric = iqa_ms_ssim(originalGray, compressedGray, width, height, width, 0);
-                fprintf(stderr, "ms-ssim");
-                break;
-            case SMALLFRY:
-                metric = smallfry_metric(originalGray, compressedGray, width, height);
-                fprintf(stderr, "smallfry");
-                break;
-            case MPE:
-                metric = meanPixelError(originalGray, compressedGray, width, height, 1);
-                fprintf(stderr, "mpe");
-                break;
-            case SSIM: default:
-                metric = iqa_ssim(originalGray, compressedGray, width, height, width, 0, 0);
-                fprintf(stderr, "ssim");
-                break;
-        }
+            // Measure quality difference
+            switch (method) {
+                case MS_SSIM:
+                    metric = iqa_ms_ssim(originalGray, compressedGray, width, height, width, 0);
+                    fprintf(stderr, "ms-ssim");
+                    break;
+                case SMALLFRY:
+                    metric = smallfry_metric(originalGray, compressedGray, width, height);
+                    fprintf(stderr, "smallfry");
+                    break;
+                case MPE:
+                    metric = meanPixelError(originalGray, compressedGray, width, height, 1);
+                    fprintf(stderr, "mpe");
+                    break;
+                case SSIM: default:
+                    metric = iqa_ssim(originalGray, compressedGray, width, height, width, 0, 0);
+                    fprintf(stderr, "ssim");
+                    break;
+            }
 
-        if (attempt) {
-            fprintf(stderr, " at q=%i (%i - %i): %f\n", quality, min, max, metric);
-        } else {
-            fprintf(stderr, " at q=%i: %f\n", quality, metric);
-        }
+            if (attempt) {
+                fprintf(stderr, " at q=%i (%i - %i): %f\n", quality, min, max, metric);
+            } else {
+                fprintf(stderr, " at q=%i: %f\n", quality, metric);
+            }
 
-        if (metric < target) {
-            if (compressedSize >= bufSize) {
-                fprintf(stderr, "Output file would be larger than input!\n");
-                free(compressed);
-                free(compressedGray);
+            if (metric < target) {
+                if (compressedSize >= bufSize) {
+                    fprintf(stderr, "Output file would be larger than input!\n");
+                    free(compressed);
+                    free(compressedGray);
 
-                if (copyFiles) {
-                    file = openOutput(cmd.argv[1]);
-                    fwrite(buf, bufSize, 1, file);
-                    fclose(file);
+                    if (copyFiles) {
+                        file = openOutput(cmd.argv[1]);
+                        fwrite(buf, bufSize, 1, file);
+                        fclose(file);
 
-                    free(buf);
+                        free(buf);
 
-                    return 0;
-                } else {
-                    free(buf);
-                    return 1;
+                        return 0;
+                    } else {
+                        free(buf);
+                        return 1;
+                    }
+                }
+
+                switch (method) {
+                    case SSIM: case MS_SSIM: case SMALLFRY:
+                        // Too distorted, increase quality
+                        min = quality + 1;
+                        break;
+                    case MPE:
+                        // Higher than required, decrease quality
+                        max = quality - 1;
+                        break;
+                }
+            } else {
+                switch (method) {
+                    case SSIM: case MS_SSIM: case SMALLFRY:
+                        // Higher than required, decrease quality
+                        max = quality - 1;
+                        break;
+                    case MPE:
+                        // Too distorted, increase quality
+                        min = quality + 1;
+                        break;
                 }
             }
-
-            switch (method) {
-                case SSIM: case MS_SSIM: case SMALLFRY:
-                    // Too distorted, increase quality
-                    min = quality + 1;
-                    break;
-                case MPE:
-                    // Higher than required, decrease quality
-                    max = quality - 1;
-                    break;
-            }
-        } else {
-            switch (method) {
-                case SSIM: case MS_SSIM: case SMALLFRY:
-                    // Higher than required, decrease quality
-                    max = quality - 1;
-                    break;
-                case MPE:
-                    // Too distorted, increase quality
-                    min = quality + 1;
-                    break;
-            }
         }
-
         // If we aren't done yet, then free the image data
         if (attempt) {
-            free(compressed);
-            free(compressedGray);
+            if (compressed) {
+                free(compressed);
+                compressed = NULL;
+            }
+            if (compressedGray) {
+                free(compressedGray);
+                compressedGray = NULL;
+            }
         }
     }
 
