@@ -124,17 +124,15 @@ unsigned long encodeJpeg(unsigned char **jpeg, unsigned char *buf, int width, in
     cinfo.input_components = pixelFormat == JCS_RGB ? 3 : 1;
     cinfo.in_color_space = pixelFormat;
 
-    if (optimize) {
-        cinfo.use_moz_defaults = TRUE;
-    }
-
     jpeg_set_defaults(&cinfo);
 
     if (optimize && !progressive) {
         // Moz defaults, disable progressive
         cinfo.scan_info = NULL;
         cinfo.num_scans = 0;
-        cinfo.optimize_scans = FALSE;
+        if (jpeg_c_bool_param_supported(&cinfo, JBOOLEAN_OPTIMIZE_SCANS)) {
+            jpeg_c_set_bool_param(&cinfo, JBOOLEAN_OPTIMIZE_SCANS, FALSE);
+        }
     }
 
     if (!optimize && progressive) {
