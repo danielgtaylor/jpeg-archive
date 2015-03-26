@@ -124,7 +124,29 @@ unsigned long encodeJpeg(unsigned char **jpeg, unsigned char *buf, int width, in
     cinfo.input_components = pixelFormat == JCS_RGB ? 3 : 1;
     cinfo.in_color_space = pixelFormat;
 
+    if (!optimize) {
+        // Not optimizing for space, so use a much faster compression
+        // profile. This is about twice as fast and can be used when
+        // testing visual quality *before* doing the final encoding.
+        // Note: This *must* be set before calling `jpeg_set_defaults`
+        // as it modifies how that call works.
+        if (jpeg_c_int_param_supported(&cinfo, JINT_COMPRESS_PROFILE)) {
+            jpeg_c_set_int_param(&cinfo, JINT_COMPRESS_PROFILE, JCP_FASTEST);
+        }
+    }
+
     jpeg_set_defaults(&cinfo);
+
+    if (!optimize) {
+        // Disable trellis quantization if we aren't optimizing. This saves
+        // a little processing.
+        if (jpeg_c_bool_param_supported(&cinfo, JBOOLEAN_TRELLIS_QUANT)) {
+            jpeg_c_set_bool_param(&cinfo, JBOOLEAN_TRELLIS_QUANT, FALSE);
+        }
+        if (jpeg_c_bool_param_supported(&cinfo, JBOOLEAN_TRELLIS_QUANT_DC)) {
+            jpeg_c_set_bool_param(&cinfo, JBOOLEAN_TRELLIS_QUANT_DC, FALSE);
+        }
+    }
 
     if (optimize && !progressive) {
         // Moz defaults, disable progressive
