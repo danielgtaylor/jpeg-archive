@@ -1,0 +1,14 @@
+version: {build}
+environment:
+  CC: gcc
+install:
+- choco install mingw -y
+- appveyor DownloadFile https://www.dropbox.com/s/b551b2a1qle5urf/mozjpeg.zip?dl=1
+- ps: >-
+    [System.Reflection.Assembly]::LoadWithPartialName("System.IO.Compression.FileSystem")
+
+    [System.IO.Compression.ZipFile]::ExtractToDirectory('mozjpeg.zip', '.')
+build_script:
+- C:\tools\mingw64\bin\mingw32-make
+test_script:
+- C:\tools\mingw64\bin\mingw32-make test
