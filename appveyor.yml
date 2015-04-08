@@ -1,8 +1,8 @@
 version: '{build}'
-os: MinGW
 environment:
   CC: gcc
 install:
+- cinst mingw
 - cd %APPVEYOR_BUILD_FOLDER%\..
 - mkdir mozjpeg
 - cd mozjpeg
@@ -15,14 +15,12 @@ cache:
 build_script:
 - cd %APPVEYOR_BUILD_FOLDER%
 - cd
-- dir ..
-- dir ..\mozjpeg
-- set PATH=%PATH%;C:\mingw\bin
+- set PATH=%PATH%;C:\tools\mingw64\bin
 - mingw32-make
 after_build:
 - 7z a jpeg-archive.zip %APPVEYOR_BUILD_FOLDER%\*.exe
 - appveyor PushArtifact jpeg-archive.zip
 test_script:
 - cd %APPVEYOR_BUILD_FOLDER%
-- set PATH=%PATH%;C:\mingw\bin
+- set PATH=%PATH%;C:\tools\mingw64\bin
 - mingw32-make test
