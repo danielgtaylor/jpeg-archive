@@ -78,6 +78,11 @@ SmallFry | `-m smallfry` | Linear-weighted BBCQ-like ([original project](https:/
 
 **Note**: The SmallFry algorithm may be [patented](http://www.jpegmini.com/main/technology) so use with caution.
 
+#### Subsampling
+The JPEG format allows for subsampling of the color channels to save space. For each 2x2 block of pixels per color channel (four pixels total) it can store four pixels (all of them), two pixels or a single pixel. By default, the JPEG encoder subsamples the non-luma channels to two pixels (often referred to as 4:2:0 subsampling). Most digital cameras do the same because of limitations in the human eye. This may lead to unintended behavior for specific use cases (see #12 for an example), so you can use `--subsample disable` to disable this subsampling.
+
+#### Example Commands
+
 ```bash
 # Default settings
 jpeg-recompress image.jpg compressed.jpg
@@ -90,6 +95,9 @@ jpeg-recompress --accurate --quality high --min 60 image.jpg compressed.jpg
 
 # Use SmallFry instead of SSIM
 jpeg-recompress --method smallfry image.jpg compressed.jpg
+
+# Use 4:4:4 sampling (disables subsampling).
+jpeg-recmopress --subsample disable image.jpg compressed.jpg
 
 # Remove fisheye distortion (Tokina 10-17mm on APS-C @ 10mm)
 jpeg-recompress --defish 2.6 --zoom 1.2 image.jpg defished.jpg

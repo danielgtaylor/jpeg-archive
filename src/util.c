@@ -104,7 +104,7 @@ unsigned long decodeJpeg(unsigned char *buf, unsigned long bufSize, unsigned cha
     return row_stride * (*height);
 }
 
-unsigned long encodeJpeg(unsigned char **jpeg, unsigned char *buf, int width, int height, int pixelFormat, int quality, int progressive, int optimize) {
+unsigned long encodeJpeg(unsigned char **jpeg, unsigned char *buf, int width, int height, int pixelFormat, int quality, int progressive, int optimize, int subsample) {
     long unsigned int jpegSize = 0;
     struct jpeg_compress_struct cinfo;
     struct jpeg_error_mgr jerr;
@@ -160,6 +160,15 @@ unsigned long encodeJpeg(unsigned char **jpeg, unsigned char *buf, int width, in
     if (!optimize && progressive) {
         // No moz defaults, set scan progression
         jpeg_simple_progression(&cinfo);
+    }
+
+    if (subsample == SUBSAMPLE_444) {
+        cinfo.comp_info[0].h_samp_factor = 1;
+        cinfo.comp_info[0].v_samp_factor = 1;
+        cinfo.comp_info[1].h_samp_factor = 1;
+        cinfo.comp_info[1].v_samp_factor = 1;
+        cinfo.comp_info[2].h_samp_factor = 1;
+        cinfo.comp_info[2].v_samp_factor = 1;
     }
 
     jpeg_set_quality(&cinfo, quality, TRUE);
