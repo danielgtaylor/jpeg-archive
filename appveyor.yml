@@ -3,12 +3,16 @@ environment:
   CC: gcc
 install:
 - choco install mingw -y
+- cd c:\projects
 - appveyor DownloadFile https://www.dropbox.com/s/b551b2a1qle5urf/mozjpeg.zip?dl=1
-- ps: >-
-    [System.Reflection.Assembly]::LoadWithPartialName("System.IO.Compression.FileSystem")
-
-    [System.IO.Compression.ZipFile]::ExtractToDirectory('mozjpeg.zip', '.')
+- 7z e mozjpeg.zip
+cache:
+- C:\ProgramData\chocolatey\bin -> appveyor.yml
+- C:\ProgramData\chocolatey\lib -> appveyor.yml
+- C:\tools -> appveyor.yml
 build_script:
 - C:\tools\mingw64\bin\mingw32-make
+after_build:
+- appveyor PushArtifact jpeg-recompress.exe
 test_script:
 - C:\tools\mingw64\bin\mingw32-make test
