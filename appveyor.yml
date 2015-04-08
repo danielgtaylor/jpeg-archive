@@ -3,17 +3,19 @@ environment:
   CC: gcc
 install:
 - choco install mingw -y
-- cd %APPVEYOR_BUILD_FOLDER%
+- cd %APPVEYOR_BUILD_FOLDER%\..
 - appveyor DownloadFile https://www.dropbox.com/s/b551b2a1qle5urf/mozjpeg.zip?dl=1
 - 7z e mozjpeg.zip -y
 cache:
-- C:\ProgramData\chocolatey\bin -> appveyor.yml
-- C:\ProgramData\chocolatey\lib -> appveyor.yml
-- C:\tools -> appveyor.yml
+- C:\ProgramData\chocolatey\bin
+- C:\ProgramData\chocolatey\lib
+- C:\tools
 build_script:
+- cd %APPVEYOR_BUILD_FOLDER%
 - C:\tools\mingw64\bin\mingw32-make
 after_build:
 - 7z a jpeg-archive.zip %APPVEYOR_BUILD_FOLDER%\*.exe
 - appveyor PushArtifact jpeg-archive.zip
 test_script:
+- cd %APPVEYOR_BUILD_FOLDER%
 - C:\tools\mingw64\bin\mingw32-make test
