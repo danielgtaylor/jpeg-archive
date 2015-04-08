@@ -177,7 +177,7 @@ $ cd ..
 # Build jpeg-archive
 $ git clone https://github.com/danielgtaylor/jpeg-archive
 $ cd jpeg-archive
-$ mingw32-make
+$ CC=gcc mingw32-make
 ```
 
 JPEG-Archive should now be built.
