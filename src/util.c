@@ -6,7 +6,7 @@
 
 #define INPUT_BUFFER_SIZE 102400
 
-const char *VERSION = "2.0.1";
+const char *VERSION = "2.1.0";
 
 long readFile(char *name, void **buffer) {
     FILE *file;
