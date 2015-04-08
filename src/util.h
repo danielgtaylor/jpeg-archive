@@ -10,6 +10,20 @@
 
 const char *VERSION;
 
+// Subsampling method, which defines how much of the data from
+// each color channel is included in the image per 2x2 block.
+// A value of 4 means all four pixels are included, while 2
+// means that only two of the four are included (hence the term
+// subsampling). Subsampling works really well for photos, but
+// can have issues with crisp colored borders (e.g. red text).
+enum SUBSAMPLING_METHOD {
+    // Default is 4:2:0
+    SUBSAMPLE_DEFAULT,
+    // Using 4:4:4 is more detailed and will prevent fine text
+    // from getting blurry (e.g. screenshots)
+    SUBSAMPLE_444
+};
+
 /*
     Read a file into a buffer and return the length.
 */
@@ -33,7 +47,7 @@ unsigned long decodePpm(unsigned char *buf, unsigned long bufSize, unsigned char
 /*
     Encode a buffer of image pixels into a JPEG.
 */
-unsigned long encodeJpeg(unsigned char **jpeg, unsigned char *buf, int width, int height, int pixelFormat, int quality, int progressive, int optimize);
+unsigned long encodeJpeg(unsigned char **jpeg, unsigned char *buf, int width, int height, int pixelFormat, int quality, int progressive, int optimize, int subsample);
 
 /*
     Get JPEG metadata (EXIF, IPTC, XMP, etc) and return a buffer

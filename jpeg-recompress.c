@@ -65,6 +65,9 @@ int copyFiles = 1;
 // Whether to favor accuracy over speed
 int accurate = 0;
 
+// Chroma subsampling method
+int subsample = SUBSAMPLE_DEFAULT;
+
 static void setAttempts(command_t *self) {
     attempts = atoi(self->arg);
 }
@@ -206,6 +209,16 @@ static void setTargetFromPreset() {
     }
 }
 
+static void setSubsampling(command_t *self) {
+    if (!strcmp("default", self->arg)) {
+        subsample = SUBSAMPLE_DEFAULT;
+    } else if (!strcmp("disable", self->arg)) {
+        subsample = SUBSAMPLE_444;
+    } else {
+        fprintf(stderr, "Unknown sampling method '%s', using default!\n", self->arg);
+    }
+}
+
 // Open a file for writing
 FILE *openOutput(char *name) {
     if (strcmp("-", name) == 0) {
@@ -249,6 +262,7 @@ int main (int argc, char **argv) {
     command_option(&cmd, "-r", "--ppm", "Parse input as PPM instead of JPEG", setPpm);
     command_option(&cmd, "-c", "--no-copy", "Disable copying files that will not be compressed", setCopyFiles);
     command_option(&cmd, "-p", "--no-progressive", "Disable progressive encoding", setNoProgressive);
+    command_option(&cmd, "-S", "--subsample [arg]", "Set subsampling method. Valid values: 'default', 'disable'. [default]", setSubsampling);
     command_parse(&cmd, argc, argv);
 
     if (cmd.argc < 2) {
@@ -329,7 +343,7 @@ int main (int argc, char **argv) {
         int optimize = accurate ? 1 : (attempt ? 0 : 1);
 
         // Recompress to a new quality level, without optimizations (for speed)
-        compressedSize = encodeJpeg(&compressed, original, width, height, JCS_RGB, quality, progressive, optimize);
+        compressedSize = encodeJpeg(&compressed, original, width, height, JCS_RGB, quality, progressive, optimize, subsample);
 
         // Load compressed luma for quality comparison
         compressedGraySize = decodeJpeg(compressed, compressedSize, &compressedGray, &width, &height, JCS_GRAYSCALE);
