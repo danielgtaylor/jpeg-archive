@@ -12,6 +12,9 @@ cache:
 - C:\tools
 build_script:
 - cd %APPVEYOR_BUILD_FOLDER%
+- cd
+- dir ..
+- dir ../mozjpeg
 - set PATH=%PATH%;C:\tools\mingw64\bin
 - mingw32-make
 after_build:
