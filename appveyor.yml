@@ -7,11 +7,7 @@ install:
 - mkdir mozjpeg
 - cd mozjpeg
 - appveyor DownloadFile https://www.dropbox.com/s/b551b2a1qle5urf/mozjpeg.zip?dl=1
-- 7z e mozjpeg.zip -y
-cache:
-- C:\ProgramData\chocolatey\bin
-- C:\ProgramData\chocolatey\lib
-- C:\tools
+- 7z e mozjpeg.zip -y > extract.log
 build_script:
 - cd %APPVEYOR_BUILD_FOLDER%
 - cd
