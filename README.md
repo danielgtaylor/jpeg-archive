@@ -1,4 +1,4 @@
-JPEG Archive [![Build Status](http://img.shields.io/travis/danielgtaylor/jpeg-archive.svg?style=flat)](https://travis-ci.org/danielgtaylor/jpeg-archive) [![Version](http://img.shields.io/badge/version-2.0.1-blue.svg?style=flat)](https://github.com/danielgtaylor/jpeg-archive/releases) [![License](http://img.shields.io/badge/license-MIT-red.svg?style=flat)](http://dgt.mit-license.org/)
+JPEG Archive [![Build Status](http://img.shields.io/travis/danielgtaylor/jpeg-archive.svg?style=flat)](https://travis-ci.org/danielgtaylor/jpeg-archive) [![Build status](https://ci.appveyor.com/api/projects/status/1p7hrrq380xuqlyh?svg=true)](https://ci.appveyor.com/project/danielgtaylor/jpeg-archive) [![Version](http://img.shields.io/badge/version-2.0.1-blue.svg?style=flat)](https://github.com/danielgtaylor/jpeg-archive/releases) [![License](http://img.shields.io/badge/license-MIT-red.svg?style=flat)](http://dgt.mit-license.org/)
 ============
 Utilities for archiving photos for saving to long term storage or serving over the web. The goals are:
 
@@ -16,7 +16,7 @@ Contributions to this project are very welcome.
 
 Download
 --------
-You can download the latest source and binary releases from the [JPEG Archive releases page](https://github.com/danielgtaylor/jpeg-archive/releases).
+You can download the latest source and binary releases from the [JPEG Archive releases page](https://github.com/danielgtaylor/jpeg-archive/releases). Windows binaries for the latest commit are available from the [Windows CI build server](https://ci.appveyor.com/project/danielgtaylor/jpeg-archive/build/artifacts).
 
 If you are looking for an easy way to run these utilities in parallel over many files to utilize all CPU cores, please also download [Ladon](https://github.com/danielgtaylor/ladon). You can then use the `jpeg-archive` command below or use `ladon` directly. Example:
 
@@ -169,8 +169,8 @@ $ export PATH=$PATH:/c/mingw/mingw32/bin:/c/Program\ Files \(x68\)/nasm
 # Build mozjpeg or download https://www.dropbox.com/s/98jppfgds2xjblu/libjpeg.a
 $ git clone https://github.com/mozilla/mozjpeg.git
 $ cd mozjpeg
-$ cmake -G "MSYS Makefiles" -D CMAKE_C_COMPILER=/c/mingw/mingw32/bin/gcc.exe -D
-CMAKE_MAKE_PROGRAM=/c/mingw/mingw32/bin/mingw32-make.exe  -DWITH_JPEG8=1 .
+$ cmake -G "MSYS Makefiles" -D CMAKE_C_COMPILER=/c/mingw/bin/gcc.exe -D
+CMAKE_MAKE_PROGRAM=/c/mingw/bin/mingw32-make.exe  -DWITH_JPEG8=1 .
 $ mingw32-make
 $ cd ..
 
@@ -203,7 +203,7 @@ Links / Alternatives
 
 License
 -------
-JPEG-Archive is copyright &copy; 2014 Daniel G. Taylor
+JPEG-Archive is copyright &copy; 2015 Daniel G. Taylor
 Image Quality Assessment (IQA) is copyright 2011, Tom Distler (http://tdistler.com)
 SmallFry is copyright 2014, Derek Buitenhuis (https://github.com/dwbuiten)
 
