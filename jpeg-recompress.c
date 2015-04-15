@@ -15,6 +15,11 @@
 #include "src/smallfry.h"
 #include "src/util.h"
 
+#ifdef _WIN32
+    #include <io.h>
+    #include <fcntl.h>
+#endif
+
 const char *COMMENT = "Compressed by jpeg-recompress";
 
 // Comparison method
@@ -222,6 +227,10 @@ static void setSubsampling(command_t *self) {
 // Open a file for writing
 FILE *openOutput(char *name) {
     if (strcmp("-", name) == 0) {
+        #ifdef _WIN32
+            setmode(fileno(stdout), O_BINARY);
+        #endif
+
         return stdout;
     } else {
         return fopen(name, "wb");

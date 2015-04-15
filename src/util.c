@@ -4,6 +4,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef _WIN32
+    #include <io.h>
+    #include <fcntl.h>
+#endif
+
 #define INPUT_BUFFER_SIZE 102400
 
 const char *VERSION = "2.1.0";
@@ -18,6 +23,13 @@ long readFile(char *name, void **buffer) {
     // Open file
     if (strcmp("-", name) == 0) {
         file = stdin;
+
+        #ifdef _WIN32
+            // We need to use binary mode on Windows otherwise we get
+            // corrupted files. See this issue:
+            // https://github.com/danielgtaylor/jpeg-archive/issues/14
+            setmode(fileno(stdin), O_BINARY);
+        #endif
     } else {
         file = fopen(name, "rb");
 
