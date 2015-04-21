@@ -4,6 +4,7 @@
     between JPEG quality 40 and 95 to find the best match. Also makes sure
     that huffman tables are optimized if they weren't already.
 */
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -72,6 +73,9 @@ int accurate = 0;
 
 // Chroma subsampling method
 int subsample = SUBSAMPLE_DEFAULT;
+
+// Quiet mode (less output)
+int quiet = 0;
 
 static void setAttempts(command_t *self) {
     attempts = atoi(self->arg);
@@ -224,6 +228,10 @@ static void setSubsampling(command_t *self) {
     }
 }
 
+static void setQuiet(command_t *self) {
+    quiet = 1;
+}
+
 // Open a file for writing
 FILE *openOutput(char *name) {
     if (strcmp("-", name) == 0) {
@@ -234,6 +242,17 @@ FILE *openOutput(char *name) {
         return stdout;
     } else {
         return fopen(name, "wb");
+    }
+}
+
+// Logs an informational message, taking quiet mode into account
+void info(const char *format, ...) {
+    va_list argptr;
+
+    if (!quiet) {
+        va_start(argptr, format);
+        vfprintf(stderr, format, argptr);
+        va_end(argptr);
     }
 }
 
@@ -272,6 +291,7 @@ int main (int argc, char **argv) {
     command_option(&cmd, "-c", "--no-copy", "Disable copying files that will not be compressed", setCopyFiles);
     command_option(&cmd, "-p", "--no-progressive", "Disable progressive encoding", setNoProgressive);
     command_option(&cmd, "-S", "--subsample [arg]", "Set subsampling method. Valid values: 'default', 'disable'. [default]", setSubsampling);
+    command_option(&cmd, "-Q", "--quiet", "Only print out errors.", setQuiet);
     command_parse(&cmd, argc, argv);
 
     if (cmd.argc < 2) {
@@ -304,7 +324,7 @@ int main (int argc, char **argv) {
     }
 
     if (defishStrength) {
-        fprintf(stderr, "Defishing...\n");
+        info("Defishing...\n");
         tmpImage = malloc(width * height * 3);
         defish(original, tmpImage, width, height, 3, defishStrength, defishZoom);
         free(original);
@@ -317,8 +337,8 @@ int main (int argc, char **argv) {
     if (!ppm) {
         // Read metadata (EXIF / IPTC / XMP tags)
         if (getMetadata(buf, bufSize, &metaBuf, &metaSize, COMMENT)) {
-            fprintf(stderr, "File already processed by jpeg-recompress!\n");
             if (copyFiles) {
+                info("File already processed by jpeg-recompress!\n");
                 file = openOutput(cmd.argv[1]);
                 fwrite(buf, bufSize, 1, file);
                 fclose(file);
@@ -327,6 +347,7 @@ int main (int argc, char **argv) {
 
                 return 0;
             } else {
+                fprintf(stderr, "File already processed by jpeg-recompress!\n");
                 free(buf);
                 return 2;
             }
@@ -337,7 +358,7 @@ int main (int argc, char **argv) {
         // Pretend we have no metadata
         metaSize = 0;
     } else {
-        fprintf(stderr, "Metadata size is %ukb\n", metaSize / 1024);
+        info("Metadata size is %ukb\n", metaSize / 1024);
     }
 
     if (!originalSize || !originalGraySize) { return 1; }
@@ -363,42 +384,42 @@ int main (int argc, char **argv) {
         }
 
         if (!attempt) {
-            fprintf(stderr, "Final optimized ");
+            info("Final optimized ");
         }
 
         // Measure quality difference
         switch (method) {
             case MS_SSIM:
                 metric = iqa_ms_ssim(originalGray, compressedGray, width, height, width, 0);
-                fprintf(stderr, "ms-ssim");
+                info("ms-ssim");
                 break;
             case SMALLFRY:
                 metric = smallfry_metric(originalGray, compressedGray, width, height);
-                fprintf(stderr, "smallfry");
+                info("smallfry");
                 break;
             case MPE:
                 metric = meanPixelError(originalGray, compressedGray, width, height, 1);
-                fprintf(stderr, "mpe");
+                info("mpe");
                 break;
             case SSIM: default:
                 metric = iqa_ssim(originalGray, compressedGray, width, height, width, 0, 0);
-                fprintf(stderr, "ssim");
+                info("ssim");
                 break;
         }
 
         if (attempt) {
-            fprintf(stderr, " at q=%i (%i - %i): %f\n", quality, min, max, metric);
+            info(" at q=%i (%i - %i): %f\n", quality, min, max, metric);
         } else {
-            fprintf(stderr, " at q=%i: %f\n", quality, metric);
+            info(" at q=%i: %f\n", quality, metric);
         }
 
         if (metric < target) {
             if (compressedSize >= bufSize) {
-                fprintf(stderr, "Output file would be larger than input!\n");
                 free(compressed);
                 free(compressedGray);
 
                 if (copyFiles) {
+                    info("Output file would be larger than input!\n");
                     file = openOutput(cmd.argv[1]);
                     fwrite(buf, bufSize, 1, file);
                     fclose(file);
@@ -407,6 +428,7 @@ int main (int argc, char **argv) {
 
                     return 0;
                 } else {
+                    fprintf(stderr, "Output file would be larger than input!\n");
                     free(buf);
                     return 1;
                 }
@@ -447,7 +469,7 @@ int main (int argc, char **argv) {
     // Calculate and show savings, if any
     int percent = (compressedSize + metaSize) * 100 / bufSize;
     unsigned long saved = (bufSize > compressedSize) ? bufSize - compressedSize - metaSize : 0;
-    fprintf(stderr, "New size is %i%% of original (saved %lu kb)\n", percent, saved / 1024);
+    info("New size is %i%% of original (saved %lu kb)\n", percent, saved / 1024);
 
     if (compressedSize >= bufSize) {
         fprintf(stderr, "Output file is larger than input, aborting!\n");
