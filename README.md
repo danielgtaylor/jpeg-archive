@@ -161,6 +161,16 @@ Mac users can install it via [Homebrew](http://brew.sh/):
 $ brew install mozjpeg
 ```
 
+#### FreeBSD
+
+```bash
+$ pkg install mozjpeg
+$ git clone https://github.com/danielgtaylor/jpeg-archive.git
+$ cd jpeg-archive/
+$ gmake
+$ sudo gmake install
+```
+
 #### Windows
 The `Makefile` should work with MinGW/Cygwin/etc and standard GCC. Patches welcome.
 
