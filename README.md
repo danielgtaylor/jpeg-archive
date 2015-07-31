@@ -158,7 +158,17 @@ sudo make install
 Mac users can install it via [Homebrew](http://brew.sh/):
 
 ```bash
-$ brew install mozjpeg
+brew install mozjpeg
+```
+
+#### FreeBSD
+
+```bash
+pkg install mozjpeg
+git clone https://github.com/danielgtaylor/jpeg-archive.git
+cd jpeg-archive/
+gmake
+sudo gmake install
 ```
 
 #### Windows
@@ -175,20 +185,19 @@ Run Github for windows. In the settings, set **Git Bash** as the shell. Open Git
 
 ```bash
 # Update PATH to include MinGW/NASM bin folder, location on your system may vary
-$ export PATH=$PATH:/c/mingw/mingw32/bin:/c/Program\ Files \(x68\)/nasm
+export PATH=$PATH:/c/mingw/mingw32/bin:/c/Program\ Files \(x68\)/nasm
 
 # Build mozjpeg or download https://www.dropbox.com/s/98jppfgds2xjblu/libjpeg.a
-$ git clone https://github.com/mozilla/mozjpeg.git
-$ cd mozjpeg
-$ cmake -G "MSYS Makefiles" -D CMAKE_C_COMPILER=/c/mingw/bin/gcc.exe -D
-CMAKE_MAKE_PROGRAM=/c/mingw/bin/mingw32-make.exe  -DWITH_JPEG8=1 .
-$ mingw32-make
-$ cd ..
+git clone https://github.com/mozilla/mozjpeg.git
+cd mozjpeg
+cmake -G "MSYS Makefiles" -D CMAKE_C_COMPILER=/c/mingw/bin/gcc.exe -D CMAKE_MAKE_PROGRAM=/c/mingw/bin/mingw32-make.exe  -DWITH_JPEG8=1 .
+mingw32-make
+cd ..
 
 # Build jpeg-archive
-$ git clone https://github.com/danielgtaylor/jpeg-archive
-$ cd jpeg-archive
-$ CC=gcc mingw32-make
+git clone https://github.com/danielgtaylor/jpeg-archive
+cd jpeg-archive
+CC=gcc mingw32-make
 ```
 
 JPEG-Archive should now be built.
