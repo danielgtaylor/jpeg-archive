@@ -97,7 +97,7 @@ jpeg-recompress --accurate --quality high --min 60 image.jpg compressed.jpg
 jpeg-recompress --method smallfry image.jpg compressed.jpg
 
 # Use 4:4:4 sampling (disables subsampling).
-jpeg-recmopress --subsample disable image.jpg compressed.jpg
+jpeg-recompress --subsample disable image.jpg compressed.jpg
 
 # Remove fisheye distortion (Tokina 10-17mm on APS-C @ 10mm)
 jpeg-recompress --defish 2.6 --zoom 1.2 image.jpg defished.jpg
