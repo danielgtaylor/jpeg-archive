@@ -223,8 +223,8 @@ unsigned long decodePpm(unsigned char *buf, unsigned long bufSize, unsigned char
     // Read to first newline
     while (buf[pos++] != '\n') {}
 
-    // Discard for any comment lines
-    while (buf[pos] == '#') {
+    // Discard for any comment and empty lines
+    while (buf[pos] == '#' || buf[pos] == '\n') {
         while (buf[pos] != '\n') {
             pos++;
         }
