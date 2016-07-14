@@ -16,25 +16,19 @@ ifeq ($(UNAME_S),Linux)
 	else
 		LIBJPEG = $(MOZJPEG_PREFIX)/lib/libjpeg.a
 	endif
+else ifeq ($(UNAME_S),Darwin)
+	# Mac OS X
+	MOZJPEG_PREFIX ?= /usr/local/opt/mozjpeg
+	LIBJPEG = $(MOZJPEG_PREFIX)/lib/libjpeg.a
+	CFLAGS += -I$(MOZJPEG_PREFIX)/include
+else ifeq ($(UNAME_S),FreeBSD)
+	# FreeBSD
+	LIBJPEG = $(PREFIX)/lib/mozjpeg/libjpeg.so
+	CFLAGS += -I$(PREFIX)/include/mozjpeg
 else
-	ifeq ($(UNAME_S),Darwin)
-		# Mac OS X
-		MOZJPEG_PREFIX ?= /usr/local/opt/mozjpeg
-		LIBJPEG = $(MOZJPEG_PREFIX)/lib/libjpeg.a
-		CFLAGS += -I$(MOZJPEG_PREFIX)/include
-	else
-		# Windows
-		LIBJPEG = ../mozjpeg/libjpeg.a
-		CFLAGS += -I../mozjpeg
-		MAKE = mingw32-make
-	endif
-	ifeq ($(UNAME_S),FreeBSD)
-                # FreeBSD
-                LIBJPEG = $(PREFIX)/lib/mozjpeg/libjpeg.so
-                CFLAGS += -I$(PREFIX)/include/mozjpeg
-                MAKE = gmake
-        endif
-
+	# Windows
+	LIBJPEG = ../mozjpeg/libjpeg.a
+	CFLAGS += -I../mozjpeg
 endif
 
 LIBIQA=src/iqa/build/release/libiqa.a
