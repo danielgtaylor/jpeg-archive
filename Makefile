@@ -29,12 +29,11 @@ else
 		MAKE = mingw32-make
 	endif
 	ifeq ($(UNAME_S),FreeBSD)
-                # FreeBSD
-                LIBJPEG = $(PREFIX)/lib/mozjpeg/libjpeg.so
-                CFLAGS += -I$(PREFIX)/include/mozjpeg
-                MAKE = gmake
-        endif
-
+		# FreeBSD
+		LIBJPEG = $(PREFIX)/lib/mozjpeg/libjpeg.so
+		CFLAGS += -I$(PREFIX)/include/mozjpeg
+		MAKE = gmake
+	endif
 endif
 
 LIBIQA=src/iqa/build/release/libiqa.a
