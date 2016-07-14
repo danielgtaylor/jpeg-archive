@@ -25,12 +25,10 @@ else ifeq ($(UNAME_S),FreeBSD)
 	# FreeBSD
 	LIBJPEG = $(PREFIX)/lib/mozjpeg/libjpeg.so
 	CFLAGS += -I$(PREFIX)/include/mozjpeg
-	MAKE = gmake
 else
 	# Windows
 	LIBJPEG = ../mozjpeg/libjpeg.a
 	CFLAGS += -I../mozjpeg
-	MAKE = mingw32-make
 endif
 
 LIBIQA=src/iqa/build/release/libiqa.a
