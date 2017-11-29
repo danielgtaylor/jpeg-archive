@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This script requires ladon, dcraw, exiftool, and jpeg-recompress
+# This script requires ladon/parallel, dcraw, exiftool, and jpeg-recompress
 # Usage:
 #   $ cd path/to/photos
 #   $ jpeg-archive
@@ -20,6 +20,14 @@ if [[ $1 == '--version' ]]; then
     exit 255
 fi
 
+PARALLEL_CMD=$(command -v ladon)
+[[ -z "$PARALLEL_CMD" ]] && PARALLEL_CMD=$(command -v parallel)
+
+if [[ -z "$PARALLEL_CMD" ]]; then
+    echo 'jpeg-archive: this script requires either Ladon or GNU Parallel'
+    exit 1
+fi
+
 set -e
 
 # Cleanup old files
@@ -27,13 +35,13 @@ rm -rf Comp
 rm -rf /tmp/comp
 
 echo 'Converting RAW files...'
-ladon -m /tmp/comp/RELDIR '**/*.+(cr2|nef|dng)' -- "dcraw -w -q 3 -c RELPATH | jpeg-recompress ${@:--q high} --ppm - /tmp/comp/RELDIR/BASENAME.jpg"
+$PARALLEL_CMD -m /tmp/comp/RELDIR '**/*.+(cr2|nef|dng)' -- "dcraw -w -q 3 -c RELPATH | jpeg-recompress ${@:--q high} --ppm - /tmp/comp/RELDIR/BASENAME.jpg"
 
 echo 'Copying EXIF data...'
-ladon '**/*.+(cr2|nef|dng)' -- exiftool -overwrite_original -TagsFromFile RELPATH -all:all /tmp/comp/RELDIR/BASENAME.jpg
+$PARALLEL_CMD '**/*.+(cr2|nef|dng)' -- exiftool -overwrite_original -TagsFromFile RELPATH -all:all /tmp/comp/RELDIR/BASENAME.jpg
 
 echo 'Recompressing JPEG files'
-ladon -m /tmp/comp/RELDIR '**/*.jpg' -- jpeg-recompress ${@:--q high} RELPATH /tmp/comp/RELPATH
+$PARALLEL_CMD -m /tmp/comp/RELDIR '**/*.jpg' -- jpeg-recompress ${@:--q high} RELPATH /tmp/comp/RELPATH
 
 mv /tmp/comp Comp
 
