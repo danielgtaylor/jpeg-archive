@@ -4,7 +4,7 @@
 #include "util.h"
 
 void scale(unsigned char *image, int width, int height, unsigned char **newImage, int newWidth, int newHeight) {
-    *newImage = malloc((unsigned long) width * height * 1);
+    *newImage = malloc((unsigned long) newWidth * newHeight);
 
     for (int y = 0; y < newHeight; y++) {
         for (int x = 0; x < newWidth; x++) {
@@ -18,7 +18,7 @@ void scale(unsigned char *image, int width, int height, unsigned char **newImage
 }
 
 void genHash(unsigned char *image, int width, int height, unsigned char **hash) {
-    *hash = malloc((unsigned long) width * height + 1);
+    *hash = malloc((unsigned long) width * height);
 
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
