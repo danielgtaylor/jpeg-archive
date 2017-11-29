@@ -5,17 +5,12 @@ MAKE ?= make
 PREFIX ?= /usr/local
 
 UNAME_S := $(shell uname -s)
-UNAME_M := $(shell uname -m)
 
 ifeq ($(UNAME_S),Linux)
 	# Linux (e.g. Ubuntu)
 	MOZJPEG_PREFIX ?= /opt/mozjpeg
 	CFLAGS += -I$(MOZJPEG_PREFIX)/include
-	ifeq ($(UNAME_M),x86_64)
-		LIBJPEG = $(MOZJPEG_PREFIX)/lib64/libjpeg.a
-	else
-		LIBJPEG = $(MOZJPEG_PREFIX)/lib/libjpeg.a
-	endif
+	LIBJPEG = $(MOZJPEG_PREFIX)/lib/libjpeg.a
 else ifeq ($(UNAME_S),Darwin)
 	# Mac OS X
 	MOZJPEG_PREFIX ?= /usr/local/opt/mozjpeg
