@@ -10,5 +10,5 @@ if [ ! -d test-files ]; then
 fi
 
 for file in test-files/*; do
-    ./jpeg-recompress "$file" "test-output/`basename $file`"
+    ../jpeg-recompress "$file" "test-output/`basename $file`"
 done

@@ -8,5 +8,5 @@ test-files
 test-output
 comparison
 comparison.png
-test.jpg
-test
+test/test.jpg
+test/test

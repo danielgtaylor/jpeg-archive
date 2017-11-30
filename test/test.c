@@ -1,8 +1,8 @@
-#include "src/edit.h"
-#include "src/hash.h"
-#include "src/util.h"
+#include "../src/edit.h"
+#include "../src/hash.h"
+#include "../src/util.h"
 
-#include "src/test/describe.h"
+#include "../src/test/describe.h"
 
 describe ("Unit Tests", {
     it ("Should clamp values", {

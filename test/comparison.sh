@@ -10,10 +10,10 @@ if [ ! -f nikon_d3x.jpg ]; then
 fi
 
 # Create encodings
-../jpeg-recompress -m mpe nikon_d3x.jpg test-mpe.jpg
-../jpeg-recompress -m ssim nikon_d3x.jpg test-ssim.jpg
-#../jpeg-recompress -m ms-ssim nikon_d3x.jpg test-ms-ssim.jpg
-../jpeg-recompress -m smallfry nikon_d3x.jpg test-smallfry.jpg
+../../jpeg-recompress -m mpe nikon_d3x.jpg test-mpe.jpg
+../../jpeg-recompress -m ssim nikon_d3x.jpg test-ssim.jpg
+#../../jpeg-recompress -m ms-ssim nikon_d3x.jpg test-ms-ssim.jpg
+../../jpeg-recompress -m smallfry nikon_d3x.jpg test-smallfry.jpg
 
 # Crop images
 convert nikon_d3x.jpg -crop 360x400+1604+1934! -gravity northwest -fill white -pointsize 16 -annotate +10+10 "Original from camera \(`du -k nikon_d3x.jpg | python2 -c 'kb = raw_input().split()[0]; print("%.2f MiB" % (float(kb) / 1024))'`\)" crop-orig.png
@@ -24,5 +24,3 @@ convert test-smallfry.jpg -crop 360x400+1604+1934! -gravity northwest -fill whit
 
 # Create montage
 montage -geometry +0+0 crop-orig.png crop-ssim.png crop-smallfry.png crop-mpe.png ../comparison.png
-
-cd ..

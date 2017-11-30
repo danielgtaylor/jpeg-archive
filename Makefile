@@ -45,9 +45,9 @@ jpeg-hash: jpeg-hash.c src/util.o src/hash.o src/commander.o
 %.o: %.c %.h
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-test: test.c src/util.o src/edit.o src/hash.o
-	$(CC) $(CFLAGS) -o $@ $^ $(LIBJPEG) $(LDFLAGS)
-	./test
+test: test/test.c src/util.o src/edit.o src/hash.o
+	$(CC) $(CFLAGS) -o test/$@ $^ $(LIBJPEG) $(LDFLAGS)
+	./test/$@
 
 install: all
 	mkdir -p $(PREFIX)/bin
@@ -57,4 +57,6 @@ install: all
 	cp jpeg-hash $(PREFIX)/bin/
 
 clean:
-	rm -rf jpeg-recompress jpeg-compare jpeg-hash test src/*.o src/iqa/build
+	rm -rf jpeg-recompress jpeg-compare jpeg-hash test/test src/*.o src/iqa/build
+
+.PHONY: test install clean
