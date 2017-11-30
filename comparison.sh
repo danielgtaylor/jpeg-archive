@@ -6,7 +6,7 @@ mkdir -p comparison
 cd comparison
 
 if [ ! -f nikon_d3x.jpg ]; then
-    wget http://static.nikonusa.com/D3X_gallery/images/pic_004b.jpg -O nikon_d3x.jpg
+    curl http://static.nikonusa.com/D3X_gallery/images/pic_004b.jpg >nikon_d3x.jpg
 fi
 
 # Create encodings
