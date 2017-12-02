@@ -3,13 +3,13 @@ JPEG Archive [![Build Status](http://img.shields.io/travis/danielgtaylor/jpeg-ar
 Utilities for archiving photos for saving to long term storage or serving over the web. The goals are:
 
  * Use a common, well supported format (JPEG)
- * Minimize storage space & cost
+ * Minimize storage space and cost
  * Identify duplicates / similar photos
 
 Approach:
 
- * Commandline utilities & scripts
- * Simple options & useful help
+ * Command line utilities and scripts
+ * Simple options and useful help
  * Good quality output via sane defaults
 
 Contributions to this project are very welcome.
@@ -18,7 +18,7 @@ Download
 --------
 You can download the latest source and binary releases from the [JPEG Archive releases page](https://github.com/danielgtaylor/jpeg-archive/releases). Windows binaries for the latest commit are available from the [Windows CI build server](https://ci.appveyor.com/project/danielgtaylor/jpeg-archive/build/artifacts).
 
-If you are looking for an easy way to run these utilities in parallel over many files to utilize all CPU cores, please also download [Ladon](https://github.com/danielgtaylor/ladon). You can then use the `jpeg-archive` command below or use `ladon` directly. Example:
+If you are looking for an easy way to run these utilities in parallel over many files to utilize all CPU cores, please also download [Ladon](https://github.com/danielgtaylor/ladon) or [GNU Parallel](https://www.gnu.org/software/parallel/). You can then use the `jpeg-archive` command below or use `ladon` directly. Example:
 
 ```bash
 # Re-compress JPEGs and replace the originals
@@ -36,7 +36,7 @@ The following utilities are part of this project. All of them accept a `--help` 
 Compress RAW and JPEG files in a folder utilizing all CPU cores. This is a simple bash script that uses the utilities below. It requires:
 
 * Bash
-* [Ladon](https://github.com/danielgtaylor/ladon)
+* [Ladon](https://github.com/danielgtaylor/ladon) or [GNU Parallel](https://www.gnu.org/software/parallel/)
 * [dcraw](http://www.cybercom.net/~dcoffin/dcraw/)
 * [exiftool](http://www.sno.phy.queensu.ca/~phil/exiftool/)
 * jpeg-recompress (part of this project)
