@@ -223,9 +223,9 @@ Links / Alternatives
 
 License
 -------
-JPEG-Archive is copyright &copy; 2015 Daniel G. Taylor
-Image Quality Assessment (IQA) is copyright 2011, Tom Distler (http://tdistler.com)
-SmallFry is copyright 2014, Derek Buitenhuis (https://github.com/dwbuiten)
+* JPEG-Archive is copyright &copy; 2015 Daniel G. Taylor
+* Image Quality Assessment (IQA) is copyright 2011, Tom Distler (http://tdistler.com)
+* SmallFry is copyright 2014, Derek Buitenhuis (https://github.com/dwbuiten)
 
 All are released under an MIT license.
 
