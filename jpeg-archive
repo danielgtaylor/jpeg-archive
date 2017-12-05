@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # This script requires ladon/parallel, dcraw, exiftool, and jpeg-recompress
 # Usage:
@@ -6,24 +6,24 @@
 #   $ jpeg-archive
 # Compressed JPEGs are now in ./Comp/*
 
-if [[ $1 == '--help' ]]; then
+if [ "$1" = '--help' ]; then
     echo 'JPEG-Archive - Compress RAW and JPEG images in the current folder'
     echo 'Usage: jpeg-archive [options]'
     echo ''
     echo 'Possible compression options:'
-    echo "`jpeg-recompress --help | tail -n+6`"
+    echo "$(jpeg-recompress --help | tail -n+6)"
     exit 255
 fi
 
-if [[ $1 == '--version' ]]; then
+if [ "$1" = '--version' ]; then
     jpeg-recompress --version
     exit 255
 fi
 
 PARALLEL_CMD=$(command -v ladon)
-[[ -z "$PARALLEL_CMD" ]] && PARALLEL_CMD=$(command -v parallel)
+[ -z "$PARALLEL_CMD" ] && PARALLEL_CMD=$(command -v parallel)
 
-if [[ -z "$PARALLEL_CMD" ]]; then
+if [ -z "$PARALLEL_CMD" ]; then
     echo 'jpeg-archive: this script requires either Ladon or GNU Parallel'
     exit 1
 fi
@@ -31,8 +31,7 @@ fi
 set -e
 
 # Cleanup old files
-rm -rf Comp
-rm -rf /tmp/comp
+rm -rf Comp /tmp/comp
 
 echo 'Converting RAW files...'
 $PARALLEL_CMD -m /tmp/comp/RELDIR '**/*.+(cr2|nef|dng)' -- "dcraw -w -q 3 -c RELPATH | jpeg-recompress ${@:--q high} --ppm - /tmp/comp/RELDIR/BASENAME.jpg"

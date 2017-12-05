@@ -33,9 +33,9 @@ Utilities
 The following utilities are part of this project. All of them accept a `--help` parameter to see the available options.
 
 ### jpeg-archive
-Compress RAW and JPEG files in a folder utilizing all CPU cores. This is a simple bash script that uses the utilities below. It requires:
+Compress RAW and JPEG files in a folder utilizing all CPU cores. This is a simple shell script that uses the utilities below. It requires:
 
-* Bash
+* a POSIX-compatible shell such as Bash
 * [Ladon](https://github.com/danielgtaylor/ladon) or [GNU Parallel](https://www.gnu.org/software/parallel/)
 * [dcraw](http://www.cybercom.net/~dcoffin/dcraw/)
 * [exiftool](http://www.sno.phy.queensu.ca/~phil/exiftool/)
