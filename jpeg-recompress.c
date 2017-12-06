@@ -340,6 +340,11 @@ int main (int argc, char **argv) {
             if (copyFiles) {
                 info("File already processed by jpeg-recompress!\n");
                 file = openOutput(cmd.argv[1]);
+                if (file == NULL) {
+                  fprintf(stderr, "Could not open output file.");
+                  return 1;
+                }
+
                 fwrite(buf, bufSize, 1, file);
                 fclose(file);
 
@@ -421,6 +426,11 @@ int main (int argc, char **argv) {
                 if (copyFiles) {
                     info("Output file would be larger than input!\n");
                     file = openOutput(cmd.argv[1]);
+                    if (file == NULL) {
+                      fprintf(stderr, "Could not open output file.");
+                      return 1;
+                    }
+
                     fwrite(buf, bufSize, 1, file);
                     fclose(file);
 
@@ -478,6 +488,10 @@ int main (int argc, char **argv) {
 
     // Open output file for writing
     file = openOutput(cmd.argv[1]);
+    if (file == NULL) {
+      fprintf(stderr, "Could not open output file.");
+      return 1;
+    }
 
     // Write output
     fwrite(compressed, 20, 1, file); /* 0xffd8 and JFIF marker */
