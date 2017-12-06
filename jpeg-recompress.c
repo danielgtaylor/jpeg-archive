@@ -340,10 +340,10 @@ int main (int argc, char **argv) {
             if (copyFiles) {
                 info("File already processed by jpeg-recompress!\n");
                 file = openOutput(cmd.argv[1]);
-		if (file == NULL) {
-		  fprintf(stderr, "Could not open output file.");
-		  return 18;
-		}
+                if (file == NULL) {
+                  fprintf(stderr, "Could not open output file.");
+                  return 1;
+                }
 
                 fwrite(buf, bufSize, 1, file);
                 fclose(file);
@@ -428,7 +428,7 @@ int main (int argc, char **argv) {
                     file = openOutput(cmd.argv[1]);
                     if (file == NULL) {
                       fprintf(stderr, "Could not open output file.");
-                      return 18;
+                      return 1;
                     }
 
                     fwrite(buf, bufSize, 1, file);
@@ -490,7 +490,7 @@ int main (int argc, char **argv) {
     file = openOutput(cmd.argv[1]);
     if (file == NULL) {
       fprintf(stderr, "Could not open output file.");
-      return 18;
+      return 1;
     }
 
     // Write output
