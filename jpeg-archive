@@ -20,10 +20,10 @@ if [ "$1" = '--version' ]; then
     exit 255
 fi
 
-PARALLEL_CMD=$(command -v ladon)
-[ -z "$PARALLEL_CMD" ] && PARALLEL_CMD=$(command -v parallel)
+LADON=$(command -v ladon)
+PARALLEL=$(command -v parallel)
 
-if [ -z "$PARALLEL_CMD" ]; then
+if [ -z "$LADON" -a -z "$PARALLEL" ]; then
     echo 'jpeg-archive: this script requires either Ladon or GNU Parallel'
     exit 1
 fi
@@ -33,14 +33,28 @@ set -e
 # Cleanup old files
 rm -rf Comp /tmp/comp
 
-echo 'Converting RAW files...'
-$PARALLEL_CMD -m /tmp/comp/RELDIR '**/*.+(cr2|nef|dng)' -- "dcraw -w -q 3 -c RELPATH | jpeg-recompress ${@:--q high} --ppm - /tmp/comp/RELDIR/BASENAME.jpg"
+if [ -n "$LADON" ]; then
+	echo 'Converting RAW files...'
+	"$LADON" -m /tmp/comp/RELDIR '**/*.+(cr2|nef|dng)' -- "dcraw -w -q 3 -c RELPATH | jpeg-recompress ${@:--q high} --ppm - /tmp/comp/RELDIR/BASENAME.jpg"
 
-echo 'Copying EXIF data...'
-$PARALLEL_CMD '**/*.+(cr2|nef|dng)' -- exiftool -overwrite_original -TagsFromFile RELPATH -all:all /tmp/comp/RELDIR/BASENAME.jpg
+	echo 'Copying EXIF data...'
+	"$LADON" '**/*.+(cr2|nef|dng)' -- exiftool -overwrite_original -TagsFromFile RELPATH -all:all /tmp/comp/RELDIR/BASENAME.jpg
 
-echo 'Recompressing JPEG files'
-$PARALLEL_CMD -m /tmp/comp/RELDIR '**/*.jpg' -- jpeg-recompress ${@:--q high} RELPATH /tmp/comp/RELPATH
+	echo 'Recompressing JPEG files'
+	"$LADON" -m /tmp/comp/RELDIR '**/*.jpg' -- jpeg-recompress ${@:--q high} RELPATH /tmp/comp/RELPATH
+elif [ -n "$PARALLEL" ]; then
+	echo 'Converting RAW files...'
+	find . -name '*.cr2' -o -name '*.nef' -o -name '*.dng' | \
+		"$PARALLEL" --no-notice "mkdir -p /tmp/comp/{//}; dcraw -w -q 3 -c {} | jpeg-recompress ${@:--q high} --ppm - /tmp/comp/{.}.jpg"
+
+	echo 'Copying EXIF data...'
+	find . -name '*.cr2' -o -name '*.nef' -o -name '*.dng' | \
+		"$PARALLEL" --no-notice "exiftool -overwrite_original -TagsFromFile {} -all:all /tmp/comp/{.}.jpg"
+
+	echo 'Recompressing JPEG files'
+	find . -name '*.jpg' | \
+		"$PARALLEL" --no-notice "mkdir -p /tmp/comp/{//}; jpeg-recompress ${@:--q high} {} /tmp/comp/{}"
+fi
 
 mv /tmp/comp Comp
 
