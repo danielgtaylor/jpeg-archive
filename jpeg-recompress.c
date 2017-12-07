@@ -494,7 +494,7 @@ int main (int argc, char **argv) {
     }
 
     /* Check that the metadata starts with a SOI marker. */
-    if (compressed[0] != 0xff || compressed[1] != 0xd8) {
+    if (!checkJpegMagic(compressed, compressedSize)) {
         fprintf(stderr, "Missing SOI marker, aborting!\n");
         return 1;
     }

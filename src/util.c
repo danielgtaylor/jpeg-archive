@@ -70,6 +70,10 @@ unsigned long decodeJpegFile(const char *filename, unsigned char **image, int *w
     return decodeJpeg(buf, bufSize, image, width, height, pixelFormat);
 }
 
+int checkJpegMagic(const unsigned char *buf, unsigned long size) {
+    return (size >= 2 && buf[0] == 0xff && buf[1] == 0xd8);
+}
+
 unsigned long decodeJpeg(unsigned char *buf, unsigned long bufSize, unsigned char **image, int *width, int *height, int pixelFormat) {
     struct jpeg_decompress_struct cinfo;
     struct jpeg_error_mgr jerr;
@@ -211,11 +215,15 @@ unsigned long decodePpmFile(const char *filename, unsigned char **image, int *wi
     return decodePpm(buf, bufSize, image, width, height);
 }
 
+int checkPpmMagic(const unsigned char *buf, unsigned long size) {
+    return (size >= 2 && buf[0] == 'P' && buf[1] == '6');
+}
+
 unsigned long decodePpm(unsigned char *buf, unsigned long bufSize, unsigned char **image, int *width, int *height) {
     unsigned long pos = 0, imageDataSize;
     int depth;
 
-    if (bufSize < 2 || buf[0] != 'P' || buf[1] != '6') {
+    if (!checkPpmMagic(buf, bufSize)) {
         fprintf(stderr, "Not a valid PPM format image!\n");
         return 0;
     }

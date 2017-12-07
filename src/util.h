@@ -35,6 +35,7 @@ long readFile(char *name, void **buffer);
     See libjpeg.txt for a (very long) explanation.
 */
 unsigned long decodeJpegFile(const char *filename, unsigned char **image, int *width, int *height, int pixelFormat);
+int checkJpegMagic(const unsigned char *buf, unsigned long size);
 unsigned long decodeJpeg(unsigned char *buf, unsigned long bufSize, unsigned char **image, int *width, int *height, int pixelFormat);
 
 /*
@@ -42,6 +43,7 @@ unsigned long decodeJpeg(unsigned char *buf, unsigned long bufSize, unsigned cha
     Returns the size of the image pixel array.
 */
 unsigned long decodePpmFile(const char *filename, unsigned char **image, int *width, int *height);
+int checkPpmMagic(const unsigned char *buf, unsigned long size);
 unsigned long decodePpm(unsigned char *buf, unsigned long bufSize, unsigned char **image, int *width, int *height);
 
 /*
