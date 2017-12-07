@@ -6,16 +6,14 @@
 #   $ jpeg-archive
 # Compressed JPEGs are now in ./Comp/*
 
-if [ "$1" = '--help' ]; then
+if [ "$1" = '-h' -o "$1" = '--help' ]; then
     echo 'JPEG-Archive - Compress RAW and JPEG images in the current folder'
     echo 'Usage: jpeg-archive [options]'
     echo ''
     echo 'Possible compression options:'
     echo "$(jpeg-recompress --help | tail -n+6)"
     exit 255
-fi
-
-if [ "$1" = '--version' ]; then
+elif [ "$1" = '-v' -o "$1" = '--version' ]; then
     jpeg-recompress --version
     exit 255
 fi
