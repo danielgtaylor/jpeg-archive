@@ -493,28 +493,42 @@ int main (int argc, char **argv) {
         return 1;
     }
 
-    // Write output
-    fwrite(compressed, 20, 1, file); /* 0xffd8 and JFIF marker */
+    /* Check that the metadata starts with a SOI marker. */
+    if (compressed[0] != 0xff || compressed[1] != 0xd8) {
+        fprintf(stderr, "Missing SOI marker, aborting!\n");
+        return 1;
+    }
 
-    // Write comment so we know not to reprocess this file
-    // in the future if it gets passed in again.
-    // 0xfffe (COM marker), two-byte big-endian length, string
+    /* Make sure APP0 is recorded immediately after the SOI marker. */
+    if (compressed[2] != 0xff || compressed[3] != 0xe0) {
+        fprintf(stderr, "Missing APP0 marker, aborting!\n");
+        return 1;
+    }
+
+    /* Write SOI marker and APP0 metadata to the output file. */
+    int app0_len = (compressed[4] << 8) + compressed[5];
+    fwrite(compressed, 4 + app0_len, 1, file);
+
+    /*
+     * Write comment (COM metadata) so we know not to reprocess this file in
+     * the future if it gets passed in again.
+     */
     fputc(0xff, file);
     fputc(0xfe, file);
     fputc(0x00, file);
-    fputc(32, file);
-    fwrite(COMMENT, 30, 1, file);
+    fputc(strlen(COMMENT) + 2, file);
+    fwrite(COMMENT, strlen(COMMENT), 1, file);
 
-    // Write metadata markers
+    /* Write additional metadata markers. */
     if (!strip && !ppm) {
         fwrite(metaBuf, metaSize, 1, file);
     }
 
-    // Write image data
-    fwrite(compressed + 20, compressedSize - 20, 1, file);
+    /* Write image data. */
+    fwrite(compressed + 4 + app0_len, compressedSize - 4 - app0_len, 1, file);
     fclose(file);
 
-    // Cleanup
+    /* Cleanup. */
     command_free(&cmd);
 
     if (!strip && !ppm) {
