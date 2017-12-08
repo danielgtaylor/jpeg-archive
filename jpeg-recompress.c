@@ -63,7 +63,7 @@ float defishStrength = 0.0;
 float defishZoom = 1.0;
 
 // Input format
-int ppm = 0;
+enum filetype inputFiletype = FILETYPE_JPEG;
 
 // Whether to copy files that cannot be compressed
 int copyFiles = 1;
@@ -138,7 +138,7 @@ static void setZoom(command_t *self) {
 }
 
 static void setPpm(command_t *self) {
-    ppm = 1;
+    inputFiletype = FILETYPE_PPM;
 }
 
 static void setCopyFiles(command_t *self) {
@@ -315,12 +315,15 @@ int main (int argc, char **argv) {
 
     if (!bufSize) { return 1; }
 
-    if (!ppm) {
+    if (inputFiletype == FILETYPE_JPEG) {
         // Decode the JPEG
         originalSize = decodeJpeg(buf, bufSize, &original, &width, &height, JCS_RGB);
-    } else {
+    } else if (inputFiletype == FILETYPE_PPM) {
         // Decode the PPM
         originalSize = decodePpm(buf, bufSize, &original, &width, &height);
+    } else {
+        fprintf(stderr, "Unknown input file format!");
+        return 1;
     }
 
     if (defishStrength) {
@@ -334,7 +337,7 @@ int main (int argc, char **argv) {
     // Convert RGB input into Y
     originalGraySize = grayscale(original, &originalGray, width, height);
 
-    if (!ppm) {
+    if (inputFiletype == FILETYPE_JPEG) {
         // Read metadata (EXIF / IPTC / XMP tags)
         if (getMetadata(buf, bufSize, &metaBuf, &metaSize, COMMENT)) {
             if (copyFiles) {
@@ -520,7 +523,7 @@ int main (int argc, char **argv) {
     fwrite(COMMENT, strlen(COMMENT), 1, file);
 
     /* Write additional metadata markers. */
-    if (!strip && !ppm) {
+    if (inputFiletype == FILETYPE_JPEG && !strip) {
         fwrite(metaBuf, metaSize, 1, file);
     }
 
@@ -531,7 +534,7 @@ int main (int argc, char **argv) {
     /* Cleanup. */
     command_free(&cmd);
 
-    if (!strip && !ppm) {
+    if (inputFiletype == FILETYPE_JPEG && !strip) {
         free(metaBuf);
     }
 

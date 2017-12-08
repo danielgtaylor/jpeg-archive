@@ -39,7 +39,7 @@ int method = FAST;
 int size = 16;
 
 // Use PPM input?
-int ppm = 0;
+enum filetype inputFiletype = FILETYPE_JPEG;
 
 static void setSize(command_t *self) {
     size = atoi(self->arg);
@@ -60,7 +60,7 @@ static void setMethod(command_t *self) {
 }
 
 static void setPpm(command_t *self) {
-    ppm = 1;
+    inputFiletype = FILETYPE_PPM;
 }
 
 int compareFast(const char *filename1, const char *filename2) {
@@ -106,7 +106,7 @@ int compare(const char *filename1, const char *filename2) {
     }
 
     // Decode files
-    if (ppm) {
+    if (inputFiletype == FILETYPE_PPM) {
         if (!decodePpmFile(filename1, &image1, &width1, &height1)) {
             printf("Error decoding %s\n", filename1);
             return 1;
@@ -117,11 +117,14 @@ int compare(const char *filename1, const char *filename2) {
             free(image1);
             image1 = image1Gray;
         }
-    } else {
+    } else if (inputFiletype == FILETYPE_JPEG) {
         if (!decodeJpegFile(filename1, &image1, &width1, &height1, format)) {
             printf("Error decoding %s\n", filename1);
             return 1;
         }
+    } else {
+        fprintf(stderr, "Unknown input file format!");
+        return 1;
     }
 
     if (!decodeJpegFile(filename2, &image2, &width2, &height2, format)) {

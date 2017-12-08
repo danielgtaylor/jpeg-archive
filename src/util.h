@@ -24,6 +24,12 @@ enum SUBSAMPLING_METHOD {
     SUBSAMPLE_444
 };
 
+enum filetype {
+    FILETYPE_UNKNOWN,
+    FILETYPE_JPEG,
+    FILETYPE_PPM
+};
+
 /*
     Read a file into a buffer and return the length.
 */
