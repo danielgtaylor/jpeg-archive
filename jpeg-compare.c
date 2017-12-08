@@ -128,12 +128,6 @@ int compare(const char *filename1, const char *filename2) {
             break;
     }
 
-    /* Detect input file types. */
-    if (inputFiletype1 == FILETYPE_AUTO)
-        inputFiletype1 = detectFiletype(filename1);
-    if (inputFiletype2 == FILETYPE_AUTO)
-        inputFiletype2 = detectFiletype(filename2);
-
     // Decode files
     if (!decodeFile(filename1, &image1, inputFiletype1, &width1, &height1, format)) {
         fprintf(stderr, "invalid input file: %s\n", filename1);
@@ -199,10 +193,21 @@ int main (int argc, char **argv) {
         return 255;
     }
 
+    /* Detect input file types. */
+    if (inputFiletype1 == FILETYPE_AUTO)
+        inputFiletype1 = detectFiletype(cmd.argv[0]);
+    if (inputFiletype2 == FILETYPE_AUTO)
+        inputFiletype2 = detectFiletype(cmd.argv[1]);
+
     // Calculate and print output
     switch (method) {
         case FAST:
-            error = compareFast(cmd.argv[0], cmd.argv[1]);
+            if (inputFiletype1 == FILETYPE_JPEG && inputFiletype2 == FILETYPE_JPEG) {
+                error = compareFast(cmd.argv[0], cmd.argv[1]);
+            } else {
+                printf("fast comparison only works with JPEG files!\n");
+                error = 255;
+            }
             break;
         case PSNR: case SSIM: case MS_SSIM:
             error = compare(cmd.argv[0], cmd.argv[1]);
