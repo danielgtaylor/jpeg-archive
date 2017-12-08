@@ -59,17 +59,6 @@ long readFile(char *name, void **buffer) {
     return fileLen;
 }
 
-unsigned long decodeJpegFile(const char *filename, unsigned char **image, int *width, int *height, int pixelFormat) {
-    unsigned char *buf = NULL;
-    long bufSize = 0;
-
-    bufSize = readFile((char *) filename, (void **) &buf);
-
-    if (!bufSize) { return 0; }
-
-    return decodeJpeg(buf, bufSize, image, width, height, pixelFormat);
-}
-
 int checkJpegMagic(const unsigned char *buf, unsigned long size) {
     return (size >= 2 && buf[0] == 0xff && buf[1] == 0xd8);
 }
@@ -204,17 +193,6 @@ unsigned long encodeJpeg(unsigned char **jpeg, unsigned char *buf, int width, in
     return jpegSize;
 }
 
-unsigned long decodePpmFile(const char *filename, unsigned char **image, int *width, int *height) {
-    unsigned char *buf = NULL;
-    long bufSize = 0;
-
-    bufSize = readFile((char *) filename, (void **) &buf);
-
-    if (!bufSize) { return 0; }
-
-    return decodePpm(buf, bufSize, image, width, height);
-}
-
 int checkPpmMagic(const unsigned char *buf, unsigned long size) {
     return (size >= 2 && buf[0] == 'P' && buf[1] == '6');
 }
@@ -270,6 +248,27 @@ unsigned long decodePpm(unsigned char *buf, unsigned long bufSize, unsigned char
     memcpy((void *) *image, (void *) buf + pos, imageDataSize);
 
     return (*width) * (*height);
+}
+
+unsigned long decodeFile(const char *filename, unsigned char **image, enum filetype type, int *width, int *height, int pixelFormat) {
+    unsigned char *buf = NULL;
+    long bufSize = 0;
+    long ret = 0;
+
+    bufSize = readFile((char *)filename, (void **)&buf);
+
+    if (!bufSize)
+        return 0;
+
+    if (type == FILETYPE_PPM)
+        ret = decodePpm(buf, bufSize, image, width, height);
+    else if (type == FILETYPE_JPEG)
+        ret = decodeJpeg(buf, bufSize, image, width, height, pixelFormat);
+    else
+        ret = 0;
+
+    free(buf);
+    return ret;
 }
 
 int getMetadata(const unsigned char *buf, unsigned int bufSize, unsigned char **meta, unsigned int *metaSize, const char *comment) {

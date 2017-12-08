@@ -310,19 +310,14 @@ int main (int argc, char **argv) {
         setTargetFromPreset();
     }
 
-    // Read original
+    /*
+     * Read original image and decode. We need the raw buffer contents and its
+     * size to obtain meta data and the original file size later.
+     */
     bufSize = readFile((char *) cmd.argv[0], (void **) &buf);
-
-    if (!bufSize) { return 1; }
-
-    if (inputFiletype == FILETYPE_JPEG) {
-        // Decode the JPEG
-        originalSize = decodeJpeg(buf, bufSize, &original, &width, &height, JCS_RGB);
-    } else if (inputFiletype == FILETYPE_PPM) {
-        // Decode the PPM
-        originalSize = decodePpm(buf, bufSize, &original, &width, &height);
-    } else {
-        fprintf(stderr, "Unknown input file format!");
+    originalSize = decodeFile((char *) cmd.argv[0], &original, inputFiletype, &width, &height, JCS_RGB);
+    if (!originalSize) {
+        fprintf(stderr, "invalid input file: %s\n", cmd.argv[0]);
         return 1;
     }
 

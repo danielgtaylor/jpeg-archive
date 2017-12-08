@@ -106,29 +106,19 @@ int compare(const char *filename1, const char *filename2) {
     }
 
     // Decode files
-    if (inputFiletype == FILETYPE_PPM) {
-        if (!decodePpmFile(filename1, &image1, &width1, &height1)) {
-            printf("Error decoding %s\n", filename1);
-            return 1;
-        }
-
-        if (1 == components) {
-            grayscale(image1, &image1Gray, width1, height1);
-            free(image1);
-            image1 = image1Gray;
-        }
-    } else if (inputFiletype == FILETYPE_JPEG) {
-        if (!decodeJpegFile(filename1, &image1, &width1, &height1, format)) {
-            printf("Error decoding %s\n", filename1);
-            return 1;
-        }
-    } else {
-        fprintf(stderr, "Unknown input file format!");
+    if (!decodeFile(filename1, &image1, inputFiletype, &width1, &height1, format)) {
+        fprintf(stderr, "invalid input file: %s\n", filename1);
         return 1;
     }
 
-    if (!decodeJpegFile(filename2, &image2, &width2, &height2, format)) {
-        printf("Error decoding %s\n", filename2);
+    if (1 == components) {
+        grayscale(image1, &image1Gray, width1, height1);
+        free(image1);
+        image1 = image1Gray;
+    }
+
+    if (!decodeFile(filename2, &image2, FILETYPE_JPEG, &width2, &height2, format)) {
+        fprintf(stderr, "invalid input file: %s\n", filename2);
         return 1;
     }
 

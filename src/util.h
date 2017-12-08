@@ -36,19 +36,17 @@ enum filetype {
 long readFile(char *name, void **buffer);
 
 /*
-    Decode a file or buffer into a JPEG image with the given pixel format.
+    Decode a buffer into a JPEG image with the given pixel format.
     Returns the size of the image pixel array.
     See libjpeg.txt for a (very long) explanation.
 */
-unsigned long decodeJpegFile(const char *filename, unsigned char **image, int *width, int *height, int pixelFormat);
 int checkJpegMagic(const unsigned char *buf, unsigned long size);
 unsigned long decodeJpeg(unsigned char *buf, unsigned long bufSize, unsigned char **image, int *width, int *height, int pixelFormat);
 
 /*
-    Decode a file or buffer into a PPM image.
+    Decode buffer into a PPM image.
     Returns the size of the image pixel array.
 */
-unsigned long decodePpmFile(const char *filename, unsigned char **image, int *width, int *height);
 int checkPpmMagic(const unsigned char *buf, unsigned long size);
 unsigned long decodePpm(unsigned char *buf, unsigned long bufSize, unsigned char **image, int *width, int *height);
 
@@ -56,6 +54,9 @@ unsigned long decodePpm(unsigned char *buf, unsigned long bufSize, unsigned char
     Encode a buffer of image pixels into a JPEG.
 */
 unsigned long encodeJpeg(unsigned char **jpeg, unsigned char *buf, int width, int height, int pixelFormat, int quality, int progressive, int optimize, int subsample);
+
+/* Decode an image file with a given format. */
+unsigned long decodeFile(const char *filename, unsigned char **image, enum filetype type, int *width, int *height, int pixelFormat);
 
 /*
     Get JPEG metadata (EXIF, IPTC, XMP, etc) and return a buffer
