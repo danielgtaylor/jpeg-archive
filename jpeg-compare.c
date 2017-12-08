@@ -39,7 +39,8 @@ int method = FAST;
 int size = 16;
 
 // Use PPM input?
-enum filetype inputFiletype = FILETYPE_AUTO;
+enum filetype inputFiletype1 = FILETYPE_AUTO;
+enum filetype inputFiletype2 = FILETYPE_AUTO;
 
 static void setSize(command_t *self) {
     size = atoi(self->arg);
@@ -59,19 +60,30 @@ static void setMethod(command_t *self) {
     }
 }
 
-static void setInputFiletype(command_t *self) {
+static void setInputFiletype1(command_t *self) {
     if (!strcmp("auto", self->arg))
-        inputFiletype = FILETYPE_AUTO;
+        inputFiletype1 = FILETYPE_AUTO;
     else if (!strcmp("jpeg", self->arg))
-        inputFiletype = FILETYPE_JPEG;
+        inputFiletype1 = FILETYPE_JPEG;
     else if (!strcmp("ppm", self->arg))
-        inputFiletype = FILETYPE_PPM;
+        inputFiletype1 = FILETYPE_PPM;
     else
-        inputFiletype = FILETYPE_UNKNOWN;
+        inputFiletype1 = FILETYPE_UNKNOWN;
+}
+
+static void setInputFiletype2(command_t *self) {
+    if (!strcmp("auto", self->arg))
+        inputFiletype2 = FILETYPE_AUTO;
+    else if (!strcmp("jpeg", self->arg))
+        inputFiletype2 = FILETYPE_JPEG;
+    else if (!strcmp("ppm", self->arg))
+        inputFiletype2 = FILETYPE_PPM;
+    else
+        inputFiletype2 = FILETYPE_UNKNOWN;
 }
 
 static void setPpm(command_t *self) {
-    inputFiletype = FILETYPE_PPM;
+    inputFiletype1 = FILETYPE_PPM;
 }
 
 int compareFast(const char *filename1, const char *filename2) {
@@ -116,12 +128,14 @@ int compare(const char *filename1, const char *filename2) {
             break;
     }
 
-    /* Detect input file type. */
-    if (inputFiletype == FILETYPE_AUTO)
-        inputFiletype = detectFiletype(filename1);
+    /* Detect input file types. */
+    if (inputFiletype1 == FILETYPE_AUTO)
+        inputFiletype1 = detectFiletype(filename1);
+    if (inputFiletype2 == FILETYPE_AUTO)
+        inputFiletype2 = detectFiletype(filename2);
 
     // Decode files
-    if (!decodeFile(filename1, &image1, inputFiletype, &width1, &height1, format)) {
+    if (!decodeFile(filename1, &image1, inputFiletype1, &width1, &height1, format)) {
         fprintf(stderr, "invalid input file: %s\n", filename1);
         return 1;
     }
@@ -132,7 +146,7 @@ int compare(const char *filename1, const char *filename2) {
         image1 = image1Gray;
     }
 
-    if (!decodeFile(filename2, &image2, FILETYPE_JPEG, &width2, &height2, format)) {
+    if (!decodeFile(filename2, &image2, inputFiletype2, &width2, &height2, format)) {
         fprintf(stderr, "invalid input file: %s\n", filename2);
         return 1;
     }
@@ -176,7 +190,8 @@ int main (int argc, char **argv) {
     command_option(&cmd, "-s", "--size [arg]", "Set fast comparison image hash size", setSize);
     command_option(&cmd, "-m", "--method [arg]", "Set comparison method to one of 'fast', 'psnr', 'ssim', or 'ms-ssim' [fast]", setMethod);
     command_option(&cmd, "-r", "--ppm", "Parse first input as PPM", setPpm);
-    command_option(&cmd, "-T", "--input-filetype [arg]", "Set input file type to one of 'auto', 'jpeg', 'ppm' [auto]", setInputFiletype);
+    command_option(&cmd, "-T", "--input-filetype [arg]", "Set first input file type to one of 'auto', 'jpeg', 'ppm' [auto]", setInputFiletype1);
+    command_option(&cmd, "-U", "--second-filetype [arg]", "Set second input file type to one of 'auto', 'jpeg', 'ppm' [auto]", setInputFiletype2);
     command_parse(&cmd, argc, argv);
 
     if (cmd.argc < 2) {
