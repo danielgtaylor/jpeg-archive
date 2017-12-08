@@ -12,7 +12,7 @@ fi
 # Create encodings
 ../../jpeg-recompress -m mpe nikon_d3x.jpg test-mpe.jpg
 ../../jpeg-recompress -m ssim nikon_d3x.jpg test-ssim.jpg
-#../../jpeg-recompress -m ms-ssim nikon_d3x.jpg test-ms-ssim.jpg
+../../jpeg-recompress -m ms-ssim nikon_d3x.jpg test-ms-ssim.jpg
 ../../jpeg-recompress -m smallfry nikon_d3x.jpg test-smallfry.jpg
 
 # Crop images
@@ -23,4 +23,4 @@ convert test-ms-ssim.jpg -crop 360x400+1604+1934! -gravity northwest -fill white
 convert test-smallfry.jpg -crop 360x400+1604+1934! -gravity northwest -fill white -pointsize 16 -annotate +10+10 "Compressed SmallFry \(`du -k test-smallfry.jpg | python2 -c 'kb = raw_input().split()[0]; print("%.2f MiB" % (float(kb) / 1024))'`\)" crop-smallfry.png
 
 # Create montage
-montage -geometry +0+0 crop-orig.png crop-ssim.png crop-smallfry.png crop-mpe.png ../comparison.png
+montage -geometry +0+0 crop-orig.png crop-ssim.png crop-ms-ssim.png crop-smallfry.png crop-mpe.png ../comparison.png
