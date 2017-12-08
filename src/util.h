@@ -26,6 +26,7 @@ enum SUBSAMPLING_METHOD {
 
 enum filetype {
     FILETYPE_UNKNOWN,
+    FILETYPE_AUTO,
     FILETYPE_JPEG,
     FILETYPE_PPM
 };
@@ -54,6 +55,9 @@ unsigned long decodePpm(unsigned char *buf, unsigned long bufSize, unsigned char
     Encode a buffer of image pixels into a JPEG.
 */
 unsigned long encodeJpeg(unsigned char **jpeg, unsigned char *buf, int width, int height, int pixelFormat, int quality, int progressive, int optimize, int subsample);
+
+/* Automatically detect the file type of a given file. */
+enum filetype detectFiletype(const char *filename);
 
 /* Decode an image file with a given format. */
 unsigned long decodeFile(const char *filename, unsigned char **image, enum filetype type, int *width, int *height, int pixelFormat);

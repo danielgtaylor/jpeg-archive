@@ -39,7 +39,7 @@ int method = FAST;
 int size = 16;
 
 // Use PPM input?
-enum filetype inputFiletype = FILETYPE_JPEG;
+enum filetype inputFiletype = FILETYPE_AUTO;
 
 static void setSize(command_t *self) {
     size = atoi(self->arg);
@@ -57,6 +57,17 @@ static void setMethod(command_t *self) {
     } else {
         method = UNKNOWN;
     }
+}
+
+static void setInputFiletype(command_t *self) {
+    if (!strcmp("auto", self->arg))
+        inputFiletype = FILETYPE_AUTO;
+    else if (!strcmp("jpeg", self->arg))
+        inputFiletype = FILETYPE_JPEG;
+    else if (!strcmp("ppm", self->arg))
+        inputFiletype = FILETYPE_PPM;
+    else
+        inputFiletype = FILETYPE_UNKNOWN;
 }
 
 static void setPpm(command_t *self) {
@@ -104,6 +115,10 @@ int compare(const char *filename1, const char *filename2) {
             components = 1;
             break;
     }
+
+    /* Detect input file type. */
+    if (inputFiletype == FILETYPE_AUTO)
+        inputFiletype = detectFiletype(filename1);
 
     // Decode files
     if (!decodeFile(filename1, &image1, inputFiletype, &width1, &height1, format)) {
@@ -160,7 +175,8 @@ int main (int argc, char **argv) {
     cmd.usage = "[options] image1.jpg image2.jpg";
     command_option(&cmd, "-s", "--size [arg]", "Set fast comparison image hash size", setSize);
     command_option(&cmd, "-m", "--method [arg]", "Set comparison method to one of 'fast', 'psnr', 'ssim', or 'ms-ssim' [fast]", setMethod);
-    command_option(&cmd, "-r", "--ppm", "Parse first input as PPM instead of JPEG", setPpm);
+    command_option(&cmd, "-r", "--ppm", "Parse first input as PPM", setPpm);
+    command_option(&cmd, "-T", "--input-filetype [arg]", "Set input file type to one of 'auto', 'jpeg', 'ppm' [auto]", setInputFiletype);
     command_parse(&cmd, argc, argv);
 
     if (cmd.argc < 2) {

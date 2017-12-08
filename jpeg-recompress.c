@@ -63,7 +63,7 @@ float defishStrength = 0.0;
 float defishZoom = 1.0;
 
 // Input format
-enum filetype inputFiletype = FILETYPE_JPEG;
+enum filetype inputFiletype = FILETYPE_AUTO;
 
 // Whether to copy files that cannot be compressed
 int copyFiles = 1;
@@ -135,6 +135,17 @@ static void setDefish(command_t *self) {
 
 static void setZoom(command_t *self) {
     defishZoom = atof(self->arg);
+}
+
+static void setInputFiletype(command_t *self) {
+    if (!strcmp("auto", self->arg))
+        inputFiletype = FILETYPE_AUTO;
+    else if (!strcmp("jpeg", self->arg))
+        inputFiletype = FILETYPE_JPEG;
+    else if (!strcmp("ppm", self->arg))
+        inputFiletype = FILETYPE_PPM;
+    else
+        inputFiletype = FILETYPE_UNKNOWN;
 }
 
 static void setPpm(command_t *self) {
@@ -287,10 +298,11 @@ int main (int argc, char **argv) {
     command_option(&cmd, "-s", "--strip", "Strip metadata", setStrip);
     command_option(&cmd, "-d", "--defish [arg]", "Set defish strength [0.0]", setDefish);
     command_option(&cmd, "-z", "--zoom [arg]", "Set defish zoom [1.0]", setZoom);
-    command_option(&cmd, "-r", "--ppm", "Parse input as PPM instead of JPEG", setPpm);
+    command_option(&cmd, "-r", "--ppm", "Parse input as PPM", setPpm);
     command_option(&cmd, "-c", "--no-copy", "Disable copying files that will not be compressed", setCopyFiles);
     command_option(&cmd, "-p", "--no-progressive", "Disable progressive encoding", setNoProgressive);
     command_option(&cmd, "-S", "--subsample [arg]", "Set subsampling method. Valid values: 'default', 'disable'. [default]", setSubsampling);
+    command_option(&cmd, "-T", "--input-filetype [arg]", "Set input file type to one of 'auto', 'jpeg', 'ppm' [auto]", setInputFiletype);
     command_option(&cmd, "-Q", "--quiet", "Only print out errors.", setQuiet);
     command_parse(&cmd, argc, argv);
 
@@ -309,6 +321,10 @@ int main (int argc, char **argv) {
     if (!target) {
         setTargetFromPreset();
     }
+
+    /* Detect input file type. */
+    if (inputFiletype == FILETYPE_AUTO)
+        inputFiletype = detectFiletype((char *) cmd.argv[0]);
 
     /*
      * Read original image and decode. We need the raw buffer contents and its
