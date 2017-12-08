@@ -30,28 +30,19 @@ void genHash(unsigned char *image, int width, int height, unsigned char **hash) 
 }
 
 int jpegHash(const char *filename, unsigned char **hash, int size) {
-    unsigned char *buf;
-    long bufSize = 0;
     unsigned char *image;
     unsigned long imageSize = 0;
     unsigned char *scaled;
     int width, height;
 
-    bufSize = readFile((char *) filename, (void **) &buf);
+    imageSize = decodeFile(filename, &image, FILETYPE_JPEG, &width, &height, JCS_GRAYSCALE);
 
-    if (!bufSize) { return 1; }
-
-    imageSize = decodeJpeg(buf, bufSize, &image, &width, &height, JCS_GRAYSCALE);
-
-    if (!imageSize) { return 1; }
-    free(buf);
+    if (!imageSize)
+        return 1;
 
     scale(image, width, height, &scaled, size, size);
-
     free(image);
-
     genHash(scaled, size, size, hash);
-
     free(scaled);
 
     return 0;
