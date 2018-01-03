@@ -111,7 +111,7 @@ int compareFast(const char *filename1, const char *filename2) {
 }
 
 int compare(const char *filename1, const char *filename2) {
-    unsigned char *image1, *image2, *image1Gray = NULL;
+    unsigned char *image1, *image2, *image1Gray = NULL, *image2Gray = NULL;
     int width1, width2, height1, height2;
     int format, components;
     float diff;
@@ -143,6 +143,12 @@ int compare(const char *filename1, const char *filename2) {
     if (!decodeFile(filename2, &image2, inputFiletype2, &width2, &height2, format)) {
         fprintf(stderr, "invalid input file: %s\n", filename2);
         return 1;
+    }
+
+    if (1 == components && FILETYPE_PPM == inputFiletype2) {
+        grayscale(image2, &image2Gray, width2, height2);
+        free(image2);
+        image2 = image2Gray;
     }
 
     // Ensure width/height are equal
