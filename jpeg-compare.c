@@ -17,11 +17,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 
 #include "src/commander.h"
 #include "src/edit.h"
 #include "src/hash.h"
 #include "src/iqa/include/iqa.h"
+#include "src/smallfry.h"
 #include "src/util.h"
 
 // Comparison method
@@ -30,7 +32,8 @@ enum METHOD {
     FAST,
     PSNR,
     SSIM,
-    MS_SSIM
+    MS_SSIM,
+    SMALLFRY
 };
 
 int method = FAST;
@@ -55,6 +58,8 @@ static void setMethod(command_t *self) {
         method = SSIM;
     } else if (!strcmp("ms-ssim", self->arg)) {
         method = MS_SSIM;
+    } else if (!strcmp("smallfry", self->arg)) {
+        method = SMALLFRY;
     } else {
         method = UNKNOWN;
     }
@@ -163,6 +168,10 @@ int compare(const char *filename1, const char *filename2) {
             diff = iqa_psnr(image1, image2, width1, height1, width1 * components);
             printf("PSNR: %f\n", diff);
             break;
+        case SMALLFRY:
+            diff = smallfry_metric(image1, image2, width1, height1);
+            printf("SMALLFRY: %f\n", diff);
+            break;
         case MS_SSIM:
             diff = iqa_ms_ssim(image1, image2, width1, height1, width1 * components, 0);
             printf("MS-SSIM: %f\n", diff);
@@ -215,7 +224,7 @@ int main (int argc, char **argv) {
                 error = 255;
             }
             break;
-        case PSNR: case SSIM: case MS_SSIM:
+        case PSNR: case SSIM: case MS_SSIM: case SMALLFRY:
             error = compare(cmd.argv[0], cmd.argv[1]);
             break;
         default:
