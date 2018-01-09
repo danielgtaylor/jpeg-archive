@@ -41,6 +41,13 @@ enum METHOD {
 
 int method = FAST;
 
+/* Long command line options. */
+enum longopts {
+    OPT_SHORT = 1000
+};
+
+int printPrefix = 1;
+
 // Hash size when method is FAST
 int size = 16;
 
@@ -147,19 +154,27 @@ int compare(const char *filename1, const char *filename2) {
     switch (method) {
         case PSNR:
             diff = iqa_psnr(image1, image2, width1, height1, width1 * components);
-            printf("PSNR: %f\n", diff);
+            if (printPrefix)
+                printf("PSNR: ");
+            printf("%f\n", diff);
             break;
         case SMALLFRY:
             diff = smallfry_metric(image1, image2, width1, height1);
-            printf("SMALLFRY: %f\n", diff);
+            if (printPrefix)
+                printf("SMALLFRY: ");
+            printf("%f\n", diff);
             break;
         case MS_SSIM:
             diff = iqa_ms_ssim(image1, image2, width1, height1, width1 * components, 0);
-            printf("MS-SSIM: %f\n", diff);
+            if (printPrefix)
+                printf("MS-SSIM: ");
+            printf("%f\n", diff);
             break;
         case SSIM: default:
             diff = iqa_ssim(image1, image2, width1, height1, width1 * components, 0, 0);
-            printf("SSIM: %f\n", diff);
+            if (printPrefix)
+                printf("SSIM: ");
+            printf("%f\n", diff);
             break;
     }
 
@@ -184,6 +199,7 @@ void usage(void) {
     printf("  -r, --ppm                    parse first input as PPM instead of JPEG\n");
     printf("  -T, --input-filetype [arg]   set first input file type to one of 'auto', 'jpeg', 'ppm' [auto]\n");
     printf("  -U, --second-filetype [arg]  set second input file type to one of 'auto', 'jpeg', 'ppm' [auto]\n");
+    printf("      --short                  do not prefix output with the name of the used method\n");
 }
 
 int main (int argc, char **argv) {
@@ -196,6 +212,7 @@ int main (int argc, char **argv) {
         { "ppm", no_argument, 0, 'r' },
         { "input-filetype", required_argument, 0, 'T' },
         { "second-filetype", required_argument, 0, 'U' },
+        { "short", no_argument, 0, OPT_SHORT },
         { 0, 0, 0, 0 }
     };
     int opt, longind = 0;
@@ -222,6 +239,9 @@ int main (int argc, char **argv) {
             break;
         case 'U':
             inputFiletype2 = parseInputFiletype(optarg);
+            break;
+        case OPT_SHORT:
+            printPrefix = 0;
             break;
         };
     }
