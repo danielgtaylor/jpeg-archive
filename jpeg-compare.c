@@ -14,17 +14,20 @@
     to get false positives, in which case a slower PSNR or SSIM
     comparison will help.
 */
+
+#include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
 
-#include "src/commander.h"
 #include "src/edit.h"
 #include "src/hash.h"
 #include "src/iqa/include/iqa.h"
 #include "src/smallfry.h"
 #include "src/util.h"
+
+static const char *progname = "jpeg-compare";
 
 // Comparison method
 enum METHOD {
@@ -45,50 +48,28 @@ int size = 16;
 enum filetype inputFiletype1 = FILETYPE_AUTO;
 enum filetype inputFiletype2 = FILETYPE_AUTO;
 
-static void setSize(command_t *self) {
-    size = atoi(self->arg);
+static enum METHOD parseMethod(const char *s) {
+    if (!strcmp("fast", s))
+        return FAST;
+    if (!strcmp("psnr", s))
+        return PSNR;
+    if (!strcmp("ssim", s))
+        return SSIM;
+    if (!strcmp("ms-ssim", s))
+        return MS_SSIM;
+    if (!strcmp("smallfry", s))
+        return SMALLFRY;
+    return UNKNOWN;
 }
 
-static void setMethod(command_t *self) {
-    if (!strcmp("fast", self->arg)) {
-        method = FAST;
-    } else if (!strcmp("psnr", self->arg)) {
-        method = PSNR;
-    } else if (!strcmp("ssim", self->arg)) {
-        method = SSIM;
-    } else if (!strcmp("ms-ssim", self->arg)) {
-        method = MS_SSIM;
-    } else if (!strcmp("smallfry", self->arg)) {
-        method = SMALLFRY;
-    } else {
-        method = UNKNOWN;
-    }
-}
-
-static void setInputFiletype1(command_t *self) {
-    if (!strcmp("auto", self->arg))
-        inputFiletype1 = FILETYPE_AUTO;
-    else if (!strcmp("jpeg", self->arg))
-        inputFiletype1 = FILETYPE_JPEG;
-    else if (!strcmp("ppm", self->arg))
-        inputFiletype1 = FILETYPE_PPM;
-    else
-        inputFiletype1 = FILETYPE_UNKNOWN;
-}
-
-static void setInputFiletype2(command_t *self) {
-    if (!strcmp("auto", self->arg))
-        inputFiletype2 = FILETYPE_AUTO;
-    else if (!strcmp("jpeg", self->arg))
-        inputFiletype2 = FILETYPE_JPEG;
-    else if (!strcmp("ppm", self->arg))
-        inputFiletype2 = FILETYPE_PPM;
-    else
-        inputFiletype2 = FILETYPE_UNKNOWN;
-}
-
-static void setPpm(command_t *self) {
-    inputFiletype1 = FILETYPE_PPM;
+static enum filetype parseInputFiletype(const char *s) {
+    if (!strcmp("auto", s))
+        return FILETYPE_AUTO;
+    if (!strcmp("jpeg", s))
+        return FILETYPE_JPEG;
+    if (!strcmp("ppm", s))
+        return FILETYPE_PPM;
+    return FILETYPE_UNKNOWN;
 }
 
 int compareFast(const char *filename1, const char *filename2) {
@@ -189,50 +170,88 @@ int compare(const char *filename1, const char *filename2) {
     return 0;
 }
 
+void version(void) {
+    printf("%s\n", VERSION);
+}
+
+void usage(void) {
+    printf("usage: %s [options] image1.jpg image2.jpg\n\n", progname);
+    printf("options:\n\n");
+    printf("  -V, --version                output program version\n");
+    printf("  -h, --help                   output program help\n");
+    printf("  -s, --size [arg]             set fast comparison image hash size\n");
+    printf("  -m, --method [arg]           set comparison method to one of 'fast', 'psnr', 'ssim', or 'ms-ssim' [fast]\n");
+    printf("  -r, --ppm                    parse first input as PPM instead of JPEG\n");
+    printf("  -T, --input-filetype [arg]   set first input file type to one of 'auto', 'jpeg', 'ppm' [auto]\n");
+    printf("  -U, --second-filetype [arg]  set second input file type to one of 'auto', 'jpeg', 'ppm' [auto]\n");
+}
+
 int main (int argc, char **argv) {
-    int error;
+    const char *optstring = "VhS:m:rT:U:";
+    static const struct option opts[] = {
+        { "version", no_argument, 0, 'V' },
+        { "help", no_argument, 0, 'h' },
+        { "size", required_argument, 0, 'S' },
+        { "method", required_argument, 0, 'm' },
+        { "ppm", no_argument, 0, 'r' },
+        { "input-filetype", required_argument, 0, 'T' },
+        { "second-filetype", required_argument, 0, 'U' },
+        { 0, 0, 0, 0 }
+    };
+    int opt, longind = 0;
 
-    // Parse commandline options
-    command_t cmd;
-    command_init(&cmd, argv[0], VERSION);
-    cmd.usage = "[options] image1.jpg image2.jpg";
-    command_option(&cmd, "-s", "--size [arg]", "Set fast comparison image hash size", setSize);
-    command_option(&cmd, "-m", "--method [arg]", "Set comparison method to one of 'fast', 'psnr', 'ssim', or 'ms-ssim' [fast]", setMethod);
-    command_option(&cmd, "-r", "--ppm", "Parse first input as PPM", setPpm);
-    command_option(&cmd, "-T", "--input-filetype [arg]", "Set first input file type to one of 'auto', 'jpeg', 'ppm' [auto]", setInputFiletype1);
-    command_option(&cmd, "-U", "--second-filetype [arg]", "Set second input file type to one of 'auto', 'jpeg', 'ppm' [auto]", setInputFiletype2);
-    command_parse(&cmd, argc, argv);
+    while ((opt = getopt_long(argc, argv, optstring, opts, &longind)) != -1) {
+        switch (opt) {
+        case 'V':
+            version();
+            return 0;
+        case 'h':
+            usage();
+            return 0;
+        case 's':
+            size = atoi(optarg);
+            break;
+        case 'm':
+            method = parseMethod(optarg);
+            break;
+        case 'r':
+            inputFiletype1 = FILETYPE_PPM;
+            break;
+        case 'T':
+            inputFiletype1 = parseInputFiletype(optarg);
+            break;
+        case 'U':
+            inputFiletype2 = parseInputFiletype(optarg);
+            break;
+        };
+    }
 
-    if (cmd.argc < 2) {
-        command_help(&cmd);
+    if (argc - optind != 2) {
+        usage();
         return 255;
     }
 
     /* Detect input file types. */
     if (inputFiletype1 == FILETYPE_AUTO)
-        inputFiletype1 = detectFiletype(cmd.argv[0]);
+        inputFiletype1 = detectFiletype(argv[optind]);
     if (inputFiletype2 == FILETYPE_AUTO)
-        inputFiletype2 = detectFiletype(cmd.argv[1]);
+        inputFiletype2 = detectFiletype(argv[optind + 1]);
 
     // Calculate and print output
     switch (method) {
         case FAST:
-            if (inputFiletype1 == FILETYPE_JPEG && inputFiletype2 == FILETYPE_JPEG) {
-                error = compareFast(cmd.argv[0], cmd.argv[1]);
-            } else {
+            if (inputFiletype1 != FILETYPE_JPEG || inputFiletype2 != FILETYPE_JPEG) {
                 printf("fast comparison only works with JPEG files!\n");
-                error = 255;
+                return 255;
             }
-            break;
-        case PSNR: case SSIM: case MS_SSIM: case SMALLFRY:
-            error = compare(cmd.argv[0], cmd.argv[1]);
-            break;
+            return compareFast(argv[optind], argv[optind + 1]);
+        case PSNR:
+        case SSIM:
+        case MS_SSIM:
+        case SMALLFRY:
+            return compare(argv[optind], argv[optind + 1]);
         default:
             printf("Unknown comparison method!\n");
-            error = 255;
+            return 255;
     }
-
-    command_free(&cmd);
-
-    return error;
 }
