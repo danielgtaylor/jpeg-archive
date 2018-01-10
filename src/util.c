@@ -13,7 +13,7 @@
 
 const char *VERSION = "2.1.1";
 
-long readFile(char *name, void **buffer) {
+long readFile(const char *name, void **buffer) {
     FILE *file;
     size_t fileLen = 0;
     size_t bytesRead = 0;
@@ -255,7 +255,7 @@ enum filetype detectFiletype(const char *filename) {
     long bufSize = 0;
     enum filetype ret = FILETYPE_UNKNOWN;
 
-    bufSize = readFile((char *)filename, (void **)&buf);
+    bufSize = readFile(filename, (void **)&buf);
 
     if (checkJpegMagic(buf, bufSize))
         ret = FILETYPE_JPEG;
@@ -271,7 +271,7 @@ unsigned long decodeFile(const char *filename, unsigned char **image, enum filet
     long bufSize = 0;
     long ret = 0;
 
-    bufSize = readFile((char *)filename, (void **)&buf);
+    bufSize = readFile(filename, (void **)&buf);
 
     if (!bufSize)
         return 0;

@@ -34,7 +34,7 @@ enum filetype {
 /*
     Read a file into a buffer and return the length.
 */
-long readFile(char *name, void **buffer);
+long readFile(const char *name, void **buffer);
 
 /*
     Decode a buffer into a JPEG image with the given pixel format.
