@@ -4,6 +4,7 @@
     between JPEG quality 40 and 95 to find the best match. Also makes sure
     that huffman tables are optimized if they weren't already.
 */
+#include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -13,6 +14,7 @@
 #include "src/commander.h"
 #include "src/edit.h"
 #include "src/iqa/include/iqa.h"
+#include "src/recompress.h"
 #include "src/smallfry.h"
 #include "src/util.h"
 
@@ -23,77 +25,41 @@
 
 const char *COMMENT = "Compressed by jpeg-recompress";
 
-// Comparison method
-enum METHOD {
-    UNKNOWN,
-    SSIM,
-    MS_SSIM,
-    SMALLFRY,
-    MPE
+recompress_options_t options = {
+    .method = METHOD_SSIM,
+    .attempts = 6,
+    .target = 0,
+    .preset = QUALITY_MEDIUM,
+    .jpegMin = 40,
+    .jpegMax = 95,
+    .strip = false,
+    .noProgressive = false,
+    .defishStrength = 0.0,
+    .defishZoom = 1.0,
+    .inputFiletype = FILETYPE_AUTO,
+    .copyFiles = true,
+    .accurate = false,
+    .subsample = SUBSAMPLE_DEFAULT,
+    .quiet = false
 };
-
-int method = SSIM;
-
-// Number of binary search steps
-int attempts = 6;
-
-// Target quality (SSIM) value
-enum QUALITY_PRESET {
-    LOW,
-    MEDIUM,
-    HIGH,
-    VERYHIGH
-};
-
-float target = 0;
-int preset = MEDIUM;
-
-// Min/max JPEG quality
-int jpegMin = 40;
-int jpegMax = 95;
-
-// Strip metadata from the file?
-int strip = 0;
-
-// Disable progressive mode?
-int noProgressive = 0;
-
-// Defish the image?
-float defishStrength = 0.0;
-float defishZoom = 1.0;
-
-// Input format
-enum filetype inputFiletype = FILETYPE_AUTO;
-
-// Whether to copy files that cannot be compressed
-int copyFiles = 1;
-
-// Whether to favor accuracy over speed
-int accurate = 0;
-
-// Chroma subsampling method
-int subsample = SUBSAMPLE_DEFAULT;
-
-// Quiet mode (less output)
-int quiet = 0;
 
 static void setAttempts(command_t *self) {
-    attempts = atoi(self->arg);
+    options.attempts = atoi(self->arg);
 }
 
 static void setTarget(command_t *self) {
-    target = atof(self->arg);
+    options.target = atof(self->arg);
 }
 
 static void setQuality(command_t *self) {
     if (!strcmp("low", self->arg)) {
-        preset = LOW;
+        options.preset = QUALITY_LOW;
     } else if (!strcmp("medium", self->arg)) {
-        preset = MEDIUM;
+        options.preset = QUALITY_MEDIUM;
     } else if (!strcmp("high", self->arg)) {
-        preset = HIGH;
+        options.preset = QUALITY_HIGH;
     } else if (!strcmp("veryhigh", self->arg)) {
-        preset = VERYHIGH;
+        options.preset = QUALITY_VERYHIGH;
     } else {
         fprintf(stderr, "Unknown quality preset '%s'!\n", self->arg);
     }
@@ -101,146 +67,133 @@ static void setQuality(command_t *self) {
 
 static void setMethod(command_t *self) {
     if (!strcmp("ssim", self->arg)) {
-        method = SSIM;
+        options.method = METHOD_SSIM;
     } else if (!strcmp("ms-ssim", self->arg)) {
-        method = MS_SSIM;
+        options.method = METHOD_MS_SSIM;
     } else if (!strcmp("smallfry", self->arg)) {
-        method = SMALLFRY;
+        options.method = METHOD_SMALLFRY;
     } else if (!strcmp("mpe", self->arg)) {
-        method = MPE;
+        options.method = METHOD_MPE;
     } else {
-        method = UNKNOWN;
+        options.method = METHOD_UNKNOWN;
     }
 }
 
 static void setNoProgressive(command_t *self) {
-    noProgressive = 1;
+    options.noProgressive = true;
 }
 
 static void setMinimum(command_t *self) {
-    jpegMin = atoi(self->arg);
+    options.jpegMin = atoi(self->arg);
 }
 
 static void setMaximum(command_t *self) {
-    jpegMax = atoi(self->arg);
+    options.jpegMax = atoi(self->arg);
 }
 
 static void setStrip(command_t *self) {
-    strip = 1;
+    options.strip = true;
 }
 
 static void setDefish(command_t *self) {
-    defishStrength = atof(self->arg);
+    options.defishStrength = atof(self->arg);
 }
 
 static void setZoom(command_t *self) {
-    defishZoom = atof(self->arg);
+    options.defishZoom = atof(self->arg);
 }
 
 static void setInputFiletype(command_t *self) {
     if (!strcmp("auto", self->arg))
-        inputFiletype = FILETYPE_AUTO;
+        options.inputFiletype = FILETYPE_AUTO;
     else if (!strcmp("jpeg", self->arg))
-        inputFiletype = FILETYPE_JPEG;
+        options.inputFiletype = FILETYPE_JPEG;
     else if (!strcmp("ppm", self->arg))
-        inputFiletype = FILETYPE_PPM;
+        options.inputFiletype = FILETYPE_PPM;
     else
-        inputFiletype = FILETYPE_UNKNOWN;
+        options.inputFiletype = FILETYPE_UNKNOWN;
 }
 
 static void setPpm(command_t *self) {
-    inputFiletype = FILETYPE_PPM;
+    options.inputFiletype = FILETYPE_PPM;
 }
 
 static void setCopyFiles(command_t *self) {
-    copyFiles = 0;
+    options.copyFiles = false;
 }
 
 static void setAccurate(command_t *self) {
-    accurate = 1;
+    options.accurate = true;
 }
 
-static void setTargetFromPreset() {
+static float getTargetFromPreset(enum METHOD method,
+                                 enum QUALITY_PRESET preset) {
     switch (method) {
-        case SSIM:
+        case METHOD_SSIM:
             switch (preset) {
-                case LOW:
-                    target = 0.999;
-                    break;
-                case MEDIUM:
-                    target = 0.9999;
-                    break;
-                case HIGH:
-                    target = 0.99995;
-                    break;
-                case VERYHIGH:
-                    target = 0.99999;
-                    break;
+                case QUALITY_LOW:
+                    return 0.999;
+                case QUALITY_MEDIUM:
+                    return 0.9999;
+                case QUALITY_HIGH:
+                    return 0.99995;
+                case QUALITY_VERYHIGH:
+                    return 0.99999;
             }
             break;
-        case MS_SSIM:
+        case METHOD_MS_SSIM:
             switch (preset) {
-                case LOW:
-                    target = 0.85;
-                    break;
-                case MEDIUM:
-                    target = 0.94;
-                    break;
-                case HIGH:
-                    target = 0.96;
-                    break;
-                case VERYHIGH:
-                    target = 0.98;
-                    break;
+                case QUALITY_LOW:
+                    return 0.85;
+                case QUALITY_MEDIUM:
+                    return 0.94;
+                case QUALITY_HIGH:
+                    return 0.96;
+                case QUALITY_VERYHIGH:
+                    return 0.98;
             }
             break;
-        case SMALLFRY:
+        case METHOD_SMALLFRY:
             switch (preset) {
-                case LOW:
-                    target = 100.75;
-                    break;
-                case MEDIUM:
-                    target = 102.25;
-                    break;
-                case HIGH:
-                    target = 103.8;
-                    break;
-                case VERYHIGH:
-                    target = 105.5;
-                    break;
+                case QUALITY_LOW:
+                    return 100.75;
+                case QUALITY_MEDIUM:
+                    return 102.25;
+                case QUALITY_HIGH:
+                    return 103.8;
+                case QUALITY_VERYHIGH:
+                    return 105.5;
             }
             break;
-        case MPE:
+        case METHOD_MPE:
             switch (preset) {
-                case LOW:
-                    target = 1.5;
-                    break;
-                case MEDIUM:
-                    target = 1.0;
-                    break;
-                case HIGH:
-                    target = 0.8;
-                    break;
-                case VERYHIGH:
-                    target = 0.6;
-                    break;
+                case QUALITY_LOW:
+                    return 1.5;
+                case QUALITY_MEDIUM:
+                    return 1.0;
+                case QUALITY_HIGH:
+                    return 0.8;
+                case QUALITY_VERYHIGH:
+                    return 0.6;
             }
             break;
     }
+    assert(("should be unreachable. All cases handled?",0));
+    return 0.0;
 }
 
 static void setSubsampling(command_t *self) {
     if (!strcmp("default", self->arg)) {
-        subsample = SUBSAMPLE_DEFAULT;
+        options.subsample = SUBSAMPLE_DEFAULT;
     } else if (!strcmp("disable", self->arg)) {
-        subsample = SUBSAMPLE_444;
+        options.subsample = SUBSAMPLE_444;
     } else {
         fprintf(stderr, "Unknown sampling method '%s', using default!\n", self->arg);
     }
 }
 
 static void setQuiet(command_t *self) {
-    quiet = 1;
+    options.quiet = true;
 }
 
 // Open a file for writing
@@ -260,7 +213,7 @@ FILE *openOutput(char *name) {
 void info(const char *format, ...) {
     va_list argptr;
 
-    if (!quiet) {
+    if (!options.quiet) {
         va_start(argptr, format);
         vfprintf(stderr, format, argptr);
         va_end(argptr);
@@ -268,6 +221,7 @@ void info(const char *format, ...) {
 }
 
 int main (int argc, char **argv) {
+    enum filetype inputFiletype = FILETYPE_UNKNOWN;
     unsigned char *buf;
     long bufSize = 0;
     unsigned char *original;
@@ -311,20 +265,23 @@ int main (int argc, char **argv) {
         return 255;
     }
 
-    if (method == UNKNOWN) {
+    if (options.method == METHOD_UNKNOWN) {
         fprintf(stderr, "Invalid method!");
         command_help(&cmd);
         return 255;
     }
 
     // No target passed, use preset!
-    if (!target) {
-        setTargetFromPreset();
+    if (!options.target) {
+        options.target = getTargetFromPreset(options.method, options.preset);
     }
 
     /* Detect input file type. */
-    if (inputFiletype == FILETYPE_AUTO)
-        inputFiletype = detectFiletype((char *) cmd.argv[0]);
+    if (options.inputFiletype == FILETYPE_AUTO) {
+        inputFiletype = detectFiletype((char *)cmd.argv[0]);
+    } else {
+        inputFiletype = options.inputFiletype;
+    }
 
     /*
      * Read original image and decode. We need the raw buffer contents and its
@@ -337,10 +294,11 @@ int main (int argc, char **argv) {
         return 1;
     }
 
-    if (defishStrength) {
+    if (options.defishStrength) {
         info("Defishing...\n");
         tmpImage = malloc(width * height * 3);
-        defish(original, tmpImage, width, height, 3, defishStrength, defishZoom);
+        defish(original, tmpImage, width, height, 3, options.defishStrength,
+               options.defishZoom);
         free(original);
         original = tmpImage;
     }
@@ -351,7 +309,7 @@ int main (int argc, char **argv) {
     if (inputFiletype == FILETYPE_JPEG) {
         // Read metadata (EXIF / IPTC / XMP tags)
         if (getMetadata(buf, bufSize, &metaBuf, &metaSize, COMMENT)) {
-            if (copyFiles) {
+            if (options.copyFiles) {
                 info("File already processed by jpeg-recompress!\n");
                 file = openOutput(cmd.argv[1]);
                 if (file == NULL) {
@@ -373,7 +331,7 @@ int main (int argc, char **argv) {
         }
     }
 
-    if (strip) {
+    if (options.strip) {
         // Pretend we have no metadata
         metaSize = 0;
     } else {
@@ -384,15 +342,17 @@ int main (int argc, char **argv) {
 
     // Do a binary search to find the optimal encoding quality for the
     // given target SSIM value.
-    int min = jpegMin, max = jpegMax;
-    for (int attempt = attempts - 1; attempt >= 0; --attempt) {
+    int min = options.jpegMin, max = options.jpegMax;
+    for (int attempt = options.attempts - 1; attempt >= 0; --attempt) {
         float metric;
         int quality = min + (max - min) / 2;
-        int progressive = attempt ? 0 : !noProgressive;
-        int optimize = accurate ? 1 : (attempt ? 0 : 1);
+        int progressive = attempt ? 0 : !options.noProgressive;
+        int optimize = options.accurate ? 1 : (attempt ? 0 : 1);
 
         // Recompress to a new quality level, without optimizations (for speed)
-        compressedSize = encodeJpeg(&compressed, original, width, height, JCS_RGB, quality, progressive, optimize, subsample);
+        compressedSize = encodeJpeg(&compressed, original, width, height,
+                                    JCS_RGB, quality, progressive, optimize,
+                                    options.subsample);
 
         // Load compressed luma for quality comparison
         compressedGraySize = decodeJpeg(compressed, compressedSize, &compressedGray, &width, &height, JCS_GRAYSCALE);
@@ -407,20 +367,20 @@ int main (int argc, char **argv) {
         }
 
         // Measure quality difference
-        switch (method) {
-            case MS_SSIM:
+        switch (options.method) {
+            case METHOD_MS_SSIM:
                 metric = iqa_ms_ssim(originalGray, compressedGray, width, height, width, 0);
                 info("ms-ssim");
                 break;
-            case SMALLFRY:
+            case METHOD_SMALLFRY:
                 metric = smallfry_metric(originalGray, compressedGray, width, height);
                 info("smallfry");
                 break;
-            case MPE:
+            case METHOD_MPE:
                 metric = meanPixelError(originalGray, compressedGray, width, height, 1);
                 info("mpe");
                 break;
-            case SSIM: default:
+            case METHOD_SSIM: default:
                 metric = iqa_ssim(originalGray, compressedGray, width, height, width, 0, 0);
                 info("ssim");
                 break;
@@ -432,12 +392,12 @@ int main (int argc, char **argv) {
             info(" at q=%i: %f\n", quality, metric);
         }
 
-        if (metric < target) {
+        if (metric < options.target) {
             if (compressedSize >= bufSize) {
                 free(compressed);
                 free(compressedGray);
 
-                if (copyFiles) {
+                if (options.copyFiles) {
                     info("Output file would be larger than input!\n");
                     file = openOutput(cmd.argv[1]);
                     if (file == NULL) {
@@ -458,23 +418,23 @@ int main (int argc, char **argv) {
                 }
             }
 
-            switch (method) {
-                case SSIM: case MS_SSIM: case SMALLFRY:
+            switch (options.method) {
+                case METHOD_SSIM: case METHOD_MS_SSIM: case METHOD_SMALLFRY:
                     // Too distorted, increase quality
                     min = quality + 1;
                     break;
-                case MPE:
+                case METHOD_MPE:
                     // Higher than required, decrease quality
                     max = quality - 1;
                     break;
             }
         } else {
-            switch (method) {
-                case SSIM: case MS_SSIM: case SMALLFRY:
+            switch (options.method) {
+                case METHOD_SSIM: case METHOD_MS_SSIM: case METHOD_SMALLFRY:
                     // Higher than required, decrease quality
                     max = quality - 1;
                     break;
-                case MPE:
+                case METHOD_MPE:
                     // Too distorted, increase quality
                     min = quality + 1;
                     break;
@@ -534,7 +494,7 @@ int main (int argc, char **argv) {
     fwrite(COMMENT, strlen(COMMENT), 1, file);
 
     /* Write additional metadata markers. */
-    if (inputFiletype == FILETYPE_JPEG && !strip) {
+    if (inputFiletype == FILETYPE_JPEG && !options.strip) {
         fwrite(metaBuf, metaSize, 1, file);
     }
 
@@ -545,7 +505,7 @@ int main (int argc, char **argv) {
     /* Cleanup. */
     command_free(&cmd);
 
-    if (inputFiletype == FILETYPE_JPEG && !strip) {
+    if (inputFiletype == FILETYPE_JPEG && !options.strip) {
         free(metaBuf);
     }
 
