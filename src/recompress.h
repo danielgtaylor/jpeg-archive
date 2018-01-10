@@ -8,6 +8,8 @@
 
 #include "util.h"
 
+#define ERROR_MESSAGE_MAX_LENGTH 1024
+
 // Comparison method
 enum METHOD {
     METHOD_UNKNOWN,
@@ -56,5 +58,25 @@ typedef struct {
     // Quiet mode (less output)
     bool quiet;
 } recompress_options_t;
+
+/*
+ * Error information for a failed recompress.
+ */
+
+typedef struct {
+    int statusCode;
+    char message[ERROR_MESSAGE_MAX_LENGTH];
+} recompress_error_t;
+
+/*
+    Recompress a JPEG file while attempting to keep visual quality the same
+    by using structural similarity (SSIM) as a metric. Does a binary search
+    between JPEG quality 40 and 95 to find the best match. Also makes sure
+    that huffman tables are optimized if they weren't already.
+*/
+
+bool recompress(const char *input, const char *output,
+                const recompress_options_t *options,
+                recompress_error_t **error);
 
 #endif
