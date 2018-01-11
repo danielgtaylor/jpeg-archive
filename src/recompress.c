@@ -32,18 +32,15 @@ static FILE *openOutput(const char *name) {
     }
 }
 
-// Quiet mode (less output)
-char quiet = false;
-
 // Logs an informational message, taking quiet mode into account
-static void info(const char *format, ...) {
-    va_list argptr;
+static void info(char quiet, const char *format, ...) {
+  va_list argptr;
 
-    if (!quiet) {
-        va_start(argptr, format);
-        vfprintf(stderr, format, argptr);
-        va_end(argptr);
-    }
+  if (!quiet) {
+    va_start(argptr, format);
+    vfprintf(stderr, format, argptr);
+    va_end(argptr);
+  }
 }
 
 static float getTargetFromPreset(enum METHOD method,
@@ -174,7 +171,7 @@ bool recompress(const char *input, const char *output,
     }
 
     if (options->defishStrength) {
-        info("Defishing...\n");
+        info(options->quiet, "Defishing...\n");
         tmpImage = malloc(width * height * 3);
         assert(tmpImage);
         defish(original, tmpImage, width, height, 3, options->defishStrength,
@@ -190,7 +187,8 @@ bool recompress(const char *input, const char *output,
         // Read metadata (EXIF / IPTC / XMP tags)
         if (getMetadata(buf, bufSize, &metaBuf, &metaSize, COMMENT)) {
             if (options->copyFiles) {
-                info("File already processed by jpeg-recompress!\n");
+                info(options->quiet,
+                     "File already processed by jpeg-recompress!\n");
                 file = openOutput(output);
                 if (file == NULL) {
                     return err(error, 1, "Could not open output file.");
@@ -214,7 +212,7 @@ bool recompress(const char *input, const char *output,
         // Pretend we have no metadata
         metaSize = 0;
     } else {
-        info("Metadata size is %ukb\n", metaSize / 1024);
+        info(options->quiet, "Metadata size is %ukb\n", metaSize / 1024);
     }
 
     if (!originalSize || !originalGraySize) {
@@ -246,7 +244,7 @@ bool recompress(const char *input, const char *output,
         }
 
         if (!attempt) {
-            info("Final optimized ");
+            info(options->quiet, "Final optimized ");
         }
 
         // Measure quality difference
@@ -254,31 +252,32 @@ bool recompress(const char *input, const char *output,
             case METHOD_MS_SSIM:
                 metric = iqa_ms_ssim(originalGray, compressedGray, width,
                                     height, width, 0);
-                info("ms-ssim");
+                info(options->quiet, "ms-ssim");
                 break;
             case METHOD_SMALLFRY:
                 metric = smallfry_metric(originalGray, compressedGray, width,
                                          height);
-                info("smallfry");
+                info(options->quiet, "smallfry");
                 break;
             case METHOD_MPE:
                 metric =
                     meanPixelError(originalGray, compressedGray, width, height,
                                    1);
-                info("mpe");
+                info(options->quiet, "mpe");
                 break;
             case METHOD_SSIM:
             default:
                 metric = iqa_ssim(originalGray, compressedGray, width, height,
                                   width, 0, 0);
-                info("ssim");
+                info(options->quiet, "ssim");
                 break;
         }
 
         if (attempt) {
-            info(" at q=%i (%i - %i): %f\n", quality, min, max, metric);
+            info(options->quiet, " at q=%i (%i - %i): %f\n",
+                 quality, min, max, metric);
         } else {
-            info(" at q=%i: %f\n", quality, metric);
+            info(options->quiet, " at q=%i: %f\n", quality, metric);
         }
 
         if (metric < target) {
@@ -287,7 +286,8 @@ bool recompress(const char *input, const char *output,
                 free(compressedGray);
 
                 if (options->copyFiles) {
-                    info("Output file would be larger than input!\n");
+                    info(options->quiet,
+                         "Output file would be larger than input!\n");
                     file = openOutput(output);
                     if (file == NULL) {
                         return err(error, 1, "Could not open output file.");
@@ -346,8 +346,8 @@ bool recompress(const char *input, const char *output,
     int percent = (compressedSize + metaSize) * 100 / bufSize;
     unsigned long saved =
         (bufSize > compressedSize) ? bufSize - compressedSize - metaSize : 0;
-    info("New size is %i%% of original (saved %lu kb)\n", percent,
-         saved / 1024);
+    info(options->quiet, "New size is %i%% of original (saved %lu kb)\n",
+         percent, saved / 1024);
 
     if (compressedSize >= bufSize) {
         return err(error, 1, "Output file is larger than input, aborting!\n");
