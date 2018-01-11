@@ -168,7 +168,7 @@ int main (int argc, char **argv) {
 
     if (!res) {
         int code = (*error)->statusCode;
-        fprintf(stderr, (*error)->message);
+        fprintf(stderr, "%s\n", (*error)->message);
         free(*error);
         free(error);
         return code;

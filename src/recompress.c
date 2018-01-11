@@ -39,6 +39,7 @@ static void info(char quiet, const char *format, ...) {
   if (!quiet) {
     va_start(argptr, format);
     vfprintf(stderr, format, argptr);
+    fprintf(stderr, "\n");
     va_end(argptr);
   }
 }
@@ -167,11 +168,11 @@ bool recompress(const char *input, const char *output,
     originalSize = decodeFile(input, &original, inputFiletype, &width, &height,
                               JCS_RGB);
     if (!originalSize) {
-        return err(error, 1, "invalid input file: %s\n", input);
+        return err(error, 1, "invalid input file: %s", input);
     }
 
     if (options->defishStrength) {
-        info(options->quiet, "Defishing...\n");
+        info(options->quiet, "Defishing...");
         tmpImage = malloc(width * height * 3);
         assert(tmpImage);
         defish(original, tmpImage, width, height, 3, options->defishStrength,
@@ -188,7 +189,7 @@ bool recompress(const char *input, const char *output,
         if (getMetadata(buf, bufSize, &metaBuf, &metaSize, COMMENT)) {
             if (options->copyFiles) {
                 info(options->quiet,
-                     "File already processed by jpeg-recompress!\n");
+                     "File already processed by jpeg-recompress!");
                 file = openOutput(output);
                 if (file == NULL) {
                     return err(error, 1, "Could not open output file.");
@@ -201,7 +202,7 @@ bool recompress(const char *input, const char *output,
 
                 return true;
             } else {
-                err(error, 2, "File already processed by jpeg-recompress!\n");
+                err(error, 2, "File already processed by jpeg-recompress!");
                 free(buf);
                 return false;
             }
@@ -212,7 +213,7 @@ bool recompress(const char *input, const char *output,
         // Pretend we have no metadata
         metaSize = 0;
     } else {
-        info(options->quiet, "Metadata size is %ukb\n", metaSize / 1024);
+        info(options->quiet, "Metadata size is %ukb", metaSize / 1024);
     }
 
     if (!originalSize || !originalGraySize) {
@@ -240,7 +241,7 @@ bool recompress(const char *input, const char *output,
 
         if (!compressedGraySize) {
             return err(error, 1,
-                       "Unable to decode file that was just encoded!\n");
+                       "Unable to decode file that was just encoded!");
         }
 
         if (!attempt) {
@@ -274,10 +275,10 @@ bool recompress(const char *input, const char *output,
         }
 
         if (attempt) {
-            info(options->quiet, " at q=%i (%i - %i): %f\n",
+            info(options->quiet, " at q=%i (%i - %i): %f",
                  quality, min, max, metric);
         } else {
-            info(options->quiet, " at q=%i: %f\n", quality, metric);
+            info(options->quiet, " at q=%i: %f", quality, metric);
         }
 
         if (metric < target) {
@@ -287,7 +288,7 @@ bool recompress(const char *input, const char *output,
 
                 if (options->copyFiles) {
                     info(options->quiet,
-                         "Output file would be larger than input!\n");
+                         "Output file would be larger than input!");
                     file = openOutput(output);
                     if (file == NULL) {
                         return err(error, 1, "Could not open output file.");
@@ -300,7 +301,7 @@ bool recompress(const char *input, const char *output,
 
                     return true;
                 } else {
-                    err(error, 1, "Output file would be larger than input!\n");
+                    err(error, 1, "Output file would be larger than input!");
                     free(buf);
                     return false;
                 }
@@ -346,11 +347,11 @@ bool recompress(const char *input, const char *output,
     int percent = (compressedSize + metaSize) * 100 / bufSize;
     unsigned long saved =
         (bufSize > compressedSize) ? bufSize - compressedSize - metaSize : 0;
-    info(options->quiet, "New size is %i%% of original (saved %lu kb)\n",
+    info(options->quiet, "New size is %i%% of original (saved %lu kb)",
          percent, saved / 1024);
 
     if (compressedSize >= bufSize) {
-        return err(error, 1, "Output file is larger than input, aborting!\n");
+        return err(error, 1, "Output file is larger than input, aborting!");
     }
 
     // Open output file for writing
@@ -361,12 +362,12 @@ bool recompress(const char *input, const char *output,
 
     /* Check that the metadata starts with a SOI marker. */
     if (!checkJpegMagic(compressed, compressedSize)) {
-        return err(error, 1, "Missing SOI marker, aborting!\n");
+        return err(error, 1, "Missing SOI marker, aborting!");
     }
 
     /* Make sure APP0 is recorded immediately after the SOI marker. */
     if (compressed[2] != 0xff || compressed[3] != 0xe0) {
-        return err(error, 1, "Missing APP0 marker, aborting!\n");
+        return err(error, 1, "Missing APP0 marker, aborting!");
     }
 
     /* Write SOI marker and APP0 metadata to the output file. */
