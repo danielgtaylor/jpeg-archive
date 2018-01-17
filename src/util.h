@@ -8,7 +8,7 @@
 #include <sys/types.h>
 #include <jpeglib.h>
 
-const char *VERSION;
+extern const char *VERSION;
 
 // Subsampling method, which defines how much of the data from
 // each color channel is included in the image per 2x2 block.
