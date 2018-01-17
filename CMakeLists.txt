@@ -15,3 +15,8 @@ target_link_libraries (jpeg-hash jpegarchive IQA MOZJPEG -lm)
 
 add_executable (jpeg-recompress jpeg-recompress.c)
 target_link_libraries (jpeg-recompress jpegarchive IQA MOZJPEG -lm)
+
+install (
+    TARGETS jpeg-compare jpeg-hash jpeg-recompress
+    DESTINATION bin
+)
