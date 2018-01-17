@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 # This script requires ImageMagick and Ghostscript
 
 mkdir -p comparison
@@ -10,10 +12,10 @@ if [ ! -f nikon_d3x.jpg ]; then
 fi
 
 # Create encodings
-../../jpeg-recompress -m mpe nikon_d3x.jpg test-mpe.jpg
-../../jpeg-recompress -m ssim nikon_d3x.jpg test-ssim.jpg
-../../jpeg-recompress -m ms-ssim nikon_d3x.jpg test-ms-ssim.jpg
-../../jpeg-recompress -m smallfry nikon_d3x.jpg test-smallfry.jpg
+../../build/jpeg-recompress -m mpe nikon_d3x.jpg test-mpe.jpg
+../../build/jpeg-recompress -m ssim nikon_d3x.jpg test-ssim.jpg
+../../build/jpeg-recompress -m ms-ssim nikon_d3x.jpg test-ms-ssim.jpg
+../../build/jpeg-recompress -m smallfry nikon_d3x.jpg test-smallfry.jpg
 
 # Crop images
 convert nikon_d3x.jpg -crop 360x400+1604+1934! -gravity northwest -fill white -pointsize 16 -annotate +10+10 "Original from camera \(`du -k nikon_d3x.jpg | python2 -c 'kb = raw_input().split()[0]; print("%.2f MiB" % (float(kb) / 1024))'`\)" crop-orig.png

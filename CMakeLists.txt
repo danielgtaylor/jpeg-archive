@@ -1,9 +1,12 @@
 cmake_minimum_required (VERSION 3.0)
 project (jpeg-archive)
 
+enable_testing ()
+
 include (ExternalProject)
 
 add_subdirectory (src)
+add_subdirectory (test)
 
 include_directories (SYSTEM ${MOZJPEG_INCLUDE_DIR})
 
