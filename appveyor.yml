@@ -8,12 +8,12 @@ build_script:
 - mkdir build
 - cd build
 - setx PATH "%PATH%;C:\tools\mingw64\bin;C:\Program Files\NASM;C:\ProgramData\chocolatey\lib\ninja\tools;C:\Program Files\CMake\bin"
-- cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
-- ninja
+- cmake.exe -G Ninja -DCMAKE_BUILD_TYPE=Release ..
+- ninja.exe
 after_build:
 - 7z a jpeg-archive.zip build\*.exe
 - appveyor PushArtifact jpeg-archive.zip
 test_script:
 - cd build
 - setx PATH "%PATH%;C:\tools\mingw64\bin;C:\Program Files\NASM;C:\ProgramData\chocolatey\lib\ninja\tools;C:\Program Files\CMake\bin"
-- ninja test
+- ninja.exe test
