@@ -1,9 +1,11 @@
-cmake_minimum_required (VERSION 3.0)
+cmake_minimum_required (VERSION 3.1)
 project (jpeg-archive)
 
 enable_testing ()
 
 include (ExternalProject)
+
+set (CMAKE_C_STANDARD 99)
 
 add_subdirectory (src)
 add_subdirectory (test)
