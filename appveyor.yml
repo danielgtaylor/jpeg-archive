@@ -2,21 +2,17 @@ version: '{build}'
 environment:
   CC: gcc
 install:
-- cinst mingw
-- cd %APPVEYOR_BUILD_FOLDER%\..
-- mkdir mozjpeg
-- cd mozjpeg
-- appveyor DownloadFile https://www.dropbox.com/s/b551b2a1qle5urf/mozjpeg.zip?dl=1
-- 7z e mozjpeg.zip -y > extract.log
+- cinst mingw cmake ninja nasm
 build_script:
-- cd %APPVEYOR_BUILD_FOLDER%
-- cd
-- set PATH=%PATH%;C:\tools\mingw64\bin
-- mingw32-make
+- mkdir build
+- cd build
+- set PATH="%PATH%;C:\tools\mingw64\bin;C:\Program Files\NASM"
+- cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
+- ninja
 after_build:
-- 7z a jpeg-archive.zip %APPVEYOR_BUILD_FOLDER%\*.exe
+- 7z a jpeg-archive.zip build\*.exe
 - appveyor PushArtifact jpeg-archive.zip
 test_script:
-- cd %APPVEYOR_BUILD_FOLDER%
-- set PATH=%PATH%;C:\tools\mingw64\bin
-- mingw32-make test
+- cd build
+- set PATH="%PATH%;C:\tools\mingw64\bin;C:\Program Files\NASM"
+- ninja test
