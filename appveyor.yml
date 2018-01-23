@@ -5,7 +5,7 @@ install:
 - cinst mingw cmake ninja nasm
 build_script:
 - set PATH=%PATH%;C:\tools\mingw64\bin;C:\Program Files\NASM;C:\ProgramData\chocolatey\lib\ninja\tools;C:\Program Files\CMake\bin
-- cd %APPVEYOR_BUILD_FOLDER%\build
+- cd %APPVEYOR_BUILD_FOLDER%
 - mkdir build
 - cd build
 - cmake.exe -G Ninja -DCMAKE_BUILD_TYPE=Release ..
