@@ -3,12 +3,10 @@ environment:
   CC: gcc
 install:
 - cinst mingw cmake ninja nasm
-- refreshenv
 build_script:
+- set PATH=%PATH%;C:\tools\mingw64\bin;C:\Program Files\NASM;C:\ProgramData\chocolatey\lib\ninja\tools;C:\Program Files\CMake\bin
 - mkdir build
 - cd build
-- echo %PATH%
-- setx PATH "%PATH%;C:\tools\mingw64\bin;C:\Program Files\NASM;C:\ProgramData\chocolatey\lib\ninja\tools;C:\Program Files\CMake\bin"
 - cmake.exe -G Ninja -DCMAKE_BUILD_TYPE=Release ..
 - ninja.exe
 after_build:
@@ -16,5 +14,5 @@ after_build:
 - appveyor PushArtifact jpeg-archive.zip
 test_script:
 - cd build
-- setx PATH "%PATH%;C:\tools\mingw64\bin;C:\Program Files\NASM;C:\ProgramData\chocolatey\lib\ninja\tools;C:\Program Files\CMake\bin"
+- set PATH=%PATH%;C:\tools\mingw64\bin;C:\Program Files\NASM;C:\ProgramData\chocolatey\lib\ninja\tools;C:\Program Files\CMake\bin
 - ninja.exe test
