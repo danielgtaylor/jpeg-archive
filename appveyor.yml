@@ -2,21 +2,18 @@ version: '{build}'
 environment:
   CC: gcc
 install:
-- cinst mingw
-- cd %APPVEYOR_BUILD_FOLDER%\..
-- mkdir mozjpeg
-- cd mozjpeg
-- appveyor DownloadFile https://www.dropbox.com/s/b551b2a1qle5urf/mozjpeg.zip?dl=1
-- 7z e mozjpeg.zip -y > extract.log
+- cinst mingw cmake ninja nasm
 build_script:
+- set PATH=%PATH%;C:\tools\mingw64\bin;C:\Program Files\NASM;C:\ProgramData\chocolatey\lib\ninja\tools;C:\Program Files\CMake\bin
 - cd %APPVEYOR_BUILD_FOLDER%
-- cd
-- set PATH=%PATH%;C:\tools\mingw64\bin
-- mingw32-make
+- mkdir build
+- cd build
+- cmake.exe -G Ninja -DCMAKE_BUILD_TYPE=Release ..
+- ninja.exe
 after_build:
-- 7z a jpeg-archive.zip %APPVEYOR_BUILD_FOLDER%\*.exe
+- 7z a jpeg-archive.zip %APPVEYOR_BUILD_FOLDER%\build\*.exe
 - appveyor PushArtifact jpeg-archive.zip
 test_script:
-- cd %APPVEYOR_BUILD_FOLDER%
-- set PATH=%PATH%;C:\tools\mingw64\bin
-- mingw32-make test
+- set PATH=%PATH%;C:\ProgramData\chocolatey\lib\ninja\tools
+- cd %APPVEYOR_BUILD_FOLDER%\build
+- ninja.exe test

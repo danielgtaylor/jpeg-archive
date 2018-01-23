@@ -138,76 +138,91 @@ jpeg-hash image.jpg
 
 Building
 --------
+
 ### Dependencies
- * [mozjpeg](https://github.com/mozilla/mozjpeg)
+ * CMake
+ * Make
+   - Can also use other build tools, like [Ninja](https://ninja-build.org/) to
+     build this code; however, `make` is still required for external sources.
+ * [MozJPEG](https://github.com/mozilla/mozjpeg) dependencies
+   - nasm
+   - autoconf
+   - automake
+   - libtool
 
 #### Ubuntu
 Ubuntu users can install via `apt-get`:
 
 ```bash
-sudo apt-get install build-essential autoconf pkg-config nasm libtool
-git clone https://github.com/mozilla/mozjpeg.git
-cd mozjpeg
-autoreconf -fiv
-./configure --with-jpeg8
-make
-sudo make install
+sudo apt-get install build-essential autoconf pkg-config nasm libtool cmake
 ```
 
 #### Mac OS X
 Mac users can install it via [Homebrew](http://brew.sh/):
 
 ```bash
-brew install mozjpeg
+brew install autoconf automake libtool pkg-config nasm cmake
+```
+
+or via [MacPorts](https://www.macports.org/):
+
+```bash
+sudo port install autoconf automake libtool pkg-config nasm cmake
 ```
 
 #### FreeBSD
 
 ```bash
-pkg install mozjpeg
-git clone https://github.com/danielgtaylor/jpeg-archive.git
-cd jpeg-archive/
-gmake
-sudo gmake install
+pkg install autoconf automake libtool pkg-config nasm cmake
 ```
 
 #### Windows
-The `Makefile` should work with MinGW/Cygwin/etc and standard GCC. Patches welcome.
 
-To get everything you need to build, install these:
+Recommend using [Chocolatey](https://chocolatey.org/).
 
-* [CMake](http://www.cmake.org/files/v3.0/cmake-3.0.0-win32-x86.exe)
-* [NASM](http://www.nasm.us/pub/nasm/releasebuilds/2.11.05/win32/)
-* [MinGW](http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/installer/mingw-w64-install.exe/download) (installed to e.g. `C:\mingw`)
-* [Github for Windows](https://windows.github.com/)
+```bash
+choco install /y cmake mingw nasm git
+```
 
-Run Github for windows. In the settings, set **Git Bash** as the shell. Open Git Shell from the start menu.
+Run the `Git Bash` cmd app.
 
 ```bash
 # Update PATH to include MinGW/NASM bin folder, location on your system may vary
-export PATH=$PATH:/c/mingw/mingw32/bin:/c/Program\ Files \(x68\)/nasm
-
-# Build mozjpeg or download https://www.dropbox.com/s/98jppfgds2xjblu/libjpeg.a
-git clone https://github.com/mozilla/mozjpeg.git
-cd mozjpeg
-cmake -G "MSYS Makefiles" -D CMAKE_C_COMPILER=/c/mingw/bin/gcc.exe -D CMAKE_MAKE_PROGRAM=/c/mingw/bin/mingw32-make.exe  -DWITH_JPEG8=1 .
-mingw32-make
-cd ..
-
-# Build jpeg-archive
-git clone https://github.com/danielgtaylor/jpeg-archive
-cd jpeg-archive
-CC=gcc mingw32-make
+export PATH=$PATH:/c/tools/mingw64//bin:/c/Program\ Files/NASM
 ```
 
-JPEG-Archive should now be built.
+### Compiling
 
-### Compiling (Linux and Mac OS X)
-The `Makefile` should work as-is on Ubuntu and Mac OS X. Other platforms may need to set the location of `libjpeg.a` or make other tweaks.
+This is going to assume out-of-source builds.
 
 ```bash
+mkdir build
+cd build
+```
+
+Next, run CMake with your choice of Build tool and build the apps
+
+#### Linux/OSX Makefiles
+
+```bash
+cmake -G 'Unix Makefiles' -DCMAKE_BUILD_TYPE=Release ..
 make
 ```
+
+Windows
+
+```bash
+cmake -G 'MSYS Makefiles' -DCMAKE-MAKE_PROGRAM=mingw32-make -DCMAKE_BUILD_TYPE=Release ..
+make
+```
+
+#### Ninja on Linux/OSX/Windows
+
+```bash
+cmake -G Ninja -DCMAKE_BUILD_TYPE=Release ..
+ninja
+```
+
 
 ### Installation
 Install the binaries into `/usr/local/bin`:
