@@ -45,7 +45,6 @@ endif
 
 $(LIBJPEG): | src/mozjpeg
 	cd $| && $(MAKE)
-	touch $@
 
 $(LIBIQA):
 	cd src/iqa; RELEASE=1 $(MAKE)
