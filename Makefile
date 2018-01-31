@@ -80,7 +80,9 @@ clean:
 		jpeg-hash \
 		test/test \
 		src/*.o \
-		src/iqa/build \
-		src/mozjpeg
+		src/iqa/build
 
-.PHONY: test install clean
+fullclean: clean
+	rm -rf src/mozjpeg
+
+.PHONY: test install clean fullclean
