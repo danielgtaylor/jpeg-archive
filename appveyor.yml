@@ -6,7 +6,7 @@ install:
 build_script:
 - set PATH=%PATH%;C:\tools\mingw64\bin;C:\Program Files\NASM;C:\Program Files\CMake\bin
 - cd %APPVEYOR_BUILD_FOLDER%
-- set MAKEFLAGS=-j2 -l2
+- set MAKEFLAGS=-j 2
 - mingw32-make
 after_build:
 - 7z a jpeg-archive.zip %APPVEYOR_BUILD_FOLDER%\*.exe
