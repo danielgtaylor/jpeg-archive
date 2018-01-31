@@ -2,9 +2,6 @@ language: c
 compiler:
     - clang
     - gcc
-env:
-  global:
-    - MAKEFLAGS="-j 2"
 before_install:
     - sudo apt-get update -qq
     - sudo apt-get install -qq build-essential autoconf nasm
