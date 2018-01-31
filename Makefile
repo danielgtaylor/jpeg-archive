@@ -43,8 +43,8 @@ else
 			-DWITH_JPEG8=1 .
 endif
 
-$(LIBJPEG): src/mozjpeg
-	cd $< && $(MAKE)
+$(LIBJPEG): | src/mozjpeg
+	cd $| && $(MAKE)
 	touch $@
 
 $(LIBIQA):
@@ -59,7 +59,7 @@ jpeg-compare: jpeg-compare.c src/util.o src/hash.o src/edit.o src/commander.o sr
 jpeg-hash: jpeg-hash.c src/util.o src/hash.o src/commander.o $(LIBJPEG)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-%.o: %.c %.h src/mozjpeg
+%.o: %.c %.h | src/mozjpeg
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 test: test/test.c src/util.o src/edit.o src/hash.o $(LIBJPEG)
