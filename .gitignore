@@ -1,3 +1,4 @@
+*.exe
 src/*.o
 src/iqa/.svn
 src/iqa/build

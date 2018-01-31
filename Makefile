@@ -30,22 +30,21 @@ all: jpeg-recompress jpeg-compare jpeg-hash
 
 src/mozjpeg:
 	git clone -b v3.3.1 --single-branch https://github.com/mozilla/mozjpeg.git $@
-
-$(LIBJPEG): src/mozjpeg
 ifeq ($(OS),Unixy)
-	cd $< && \
+	cd $@ && \
 		$(AUTORECONF) -fiv && \
-		./configure --with-jpeg8 && \
-		$(MAKE)
+		./configure --with-jpeg8
 else
-	cd $< && \
+	cd $@ && \
 		$(CMAKE) -G "MSYS Makefiles" \
 			-DCMAKE_C_COMPILER=$(CC) \
 			-DCMAKE_MAKE_PROGRAM=$(MAKE) \
 			-DCMAKE_BUILD_TYPE=RELWITHDEBINFO \
-			-DWITH_JPEG8=1 . && \
-		$(MAKE)
+			-DWITH_JPEG8=1 .
 endif
+
+$(LIBJPEG): src/mozjpeg
+	cd $< && $(MAKE)
 	touch $@
 
 $(LIBIQA):
