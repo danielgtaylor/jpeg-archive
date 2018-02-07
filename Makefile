@@ -2,49 +2,18 @@ CC ?= gcc
 CFLAGS += -std=c99 -Wall -O3
 LDFLAGS += -lm
 MAKE ?= make
-AUTORECONF ?= autoreconf
-CMAKE ?= cmake
 PREFIX ?= /usr/local
 
-UNAME_S := $(shell uname -s)
-ifeq ($(UNAME_S),Linux)
-	OS = Unixy
-else ifeq ($(UNAME_S),Darwin)
-	OS = Unixy
-else ifeq ($(UNAME_S),FreeBSD)
-	OS = Unixy
-else
-	OS = Windows
-endif
-
-ifeq ($(OS),Unixy)
-	LIBJPEG = src/mozjpeg/.libs/libjpeg.a
-else
-	LIBJPEG = src/mozjpeg/libjpeg.a
-endif
-CFLAGS += -Isrc/mozjpeg
-
-LIBIQA=src/iqa/build/release/libiqa.a
+DIR_DEPS =
 
 all: jpeg-recompress jpeg-compare jpeg-hash
 
-src/mozjpeg:
-	git clone -b v3.3.1 --single-branch https://github.com/mozilla/mozjpeg.git $@
-ifeq ($(OS),Unixy)
-	cd $@ && \
-		$(AUTORECONF) -fiv && \
-		./configure --with-jpeg8
-else
-	cd $@ && \
-		$(CMAKE) -G "MSYS Makefiles" \
-			-DCMAKE_C_COMPILER=$(CC) \
-			-DCMAKE_MAKE_PROGRAM=$(MAKE) \
-			-DCMAKE_BUILD_TYPE=RELEASE \
-			-DWITH_JPEG8=1 .
+include find_mozjpeg.mk
+ifeq ($(MOZJPEG_FOUND),0)
+include mozjpeg.mk
 endif
 
-$(LIBJPEG): | src/mozjpeg
-	cd $| && $(MAKE)
+LIBIQA = src/iqa/build/release/libiqa.a
 
 $(LIBIQA):
 	cd src/iqa; RELEASE=1 $(MAKE)
@@ -58,7 +27,7 @@ jpeg-compare: jpeg-compare.c src/util.o src/hash.o src/edit.o src/commander.o sr
 jpeg-hash: jpeg-hash.c src/util.o src/hash.o src/commander.o $(LIBJPEG)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-%.o: %.c %.h | src/mozjpeg
+%.o: %.c %.h | $(DIR_DEPS)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 test: test/test.c src/util.o src/edit.o src/hash.o $(LIBJPEG)
@@ -81,7 +50,4 @@ clean:
 		src/*.o \
 		src/iqa/build
 
-fullclean: clean
-	rm -rf src/mozjpeg
-
-.PHONY: test install clean fullclean
+.PHONY: test install clean
