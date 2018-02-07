@@ -39,6 +39,8 @@ endif
 $(LIBJPEG): | $(DIR_DEPS)
 	cd $| && $(MAKE)
 
+LIB_DEPS += $(LIBJPEG)
+
 mozjpegclean:
 	cd src/mozjpeg && $(MAKE) clean
 

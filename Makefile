@@ -5,6 +5,7 @@ MAKE ?= make
 PREFIX ?= /usr/local
 
 DIR_DEPS =
+LIB_DEPS =
 
 all: jpeg-recompress jpeg-compare jpeg-hash
 
@@ -18,19 +19,21 @@ LIBIQA = src/iqa/build/release/libiqa.a
 $(LIBIQA):
 	cd src/iqa; RELEASE=1 $(MAKE)
 
-jpeg-recompress: jpeg-recompress.c src/util.o src/edit.o src/smallfry.o src/commander.o $(LIBIQA) $(LIBJPEG)
+LIB_DEPS += $(LIBIQA)
+
+jpeg-recompress: jpeg-recompress.c src/util.o src/edit.o src/smallfry.o src/commander.o $(LIB_DEPS)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-jpeg-compare: jpeg-compare.c src/util.o src/hash.o src/edit.o src/commander.o src/smallfry.o $(LIBIQA) $(LIBJPEG)
+jpeg-compare: jpeg-compare.c src/util.o src/hash.o src/edit.o src/commander.o src/smallfry.o $(LIB_DEPS)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-jpeg-hash: jpeg-hash.c src/util.o src/hash.o src/commander.o $(LIBJPEG)
+jpeg-hash: jpeg-hash.c src/util.o src/hash.o src/commander.o $(LIB_DEPS)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 %.o: %.c %.h | $(DIR_DEPS)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-test: test/test.c src/util.o src/edit.o src/hash.o $(LIBJPEG)
+test: test/test.c src/util.o src/edit.o src/hash.o $(LIB_DEPS)
 	$(CC) $(CFLAGS) -o test/$@ $^ $(LDFLAGS)
 	./test/$@
 

@@ -14,5 +14,5 @@ endif
 
 ifeq ($(MOZJPEG_FOUND),1)
 	CFLAGS += -I$(MOZJPEG_PREFIX)/include
-	LIBJPEG = $(wildcard $(MOZJPEG_PREFIX)/lib*/libjpeg.a))
+	LDFLAGS += $(wildcard $(MOZJPEG_PREFIX)/lib*/libjpeg.a)
 endif
