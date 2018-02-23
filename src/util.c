@@ -207,21 +207,31 @@ unsigned long decodePpm(unsigned char *buf, unsigned long bufSize, unsigned char
     }
 
     // Read to first newline
-    while (buf[pos++] != '\n') {}
+    while (buf[pos++] != '\n' && pos < bufSize);
 
     // Discard for any comment and empty lines
-    while (buf[pos] == '#' || buf[pos] == '\n') {
+    while ((buf[pos] == '#' || buf[pos] == '\n') && pos < bufSize) {
         while (buf[pos] != '\n') {
             pos++;
         }
         pos++;
     }
 
+    if (pos >= bufSize) {
+        fprintf(stderr, "Not a valid PPM format image!\n");
+        return 0;
+    }
+
     // Read width/height
     sscanf((const char *) buf + pos, "%d %d", width, height);
 
     // Go to next line
-    while (buf[pos++] != '\n') {}
+    while (buf[pos++] != '\n' && pos < bufSize);
+
+    if (pos >= bufSize) {
+        fprintf(stderr, "Not a valid PPM format image!\n");
+        return 0;
+    }
 
     // Read bit depth
     sscanf((const char*) buf + pos, "%d", &depth);
@@ -232,7 +242,7 @@ unsigned long decodePpm(unsigned char *buf, unsigned long bufSize, unsigned char
     }
 
     // Go to next line
-    while (buf[pos++] != '\n') {}
+    while (buf[pos++] != '\n' && pos < bufSize);
 
     // Width * height * red/green/blue
     imageDataSize = (*width) * (*height) * 3;
