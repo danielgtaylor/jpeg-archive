@@ -322,16 +322,21 @@ int main (int argc, char **argv) {
         setTargetFromPreset();
     }
 
+    char *inputPath = (char *) cmd.argv[0];
+    char *outputPath = cmd.argv[1];
+
+    /* Read the input into a buffer. */
+    bufSize = readFile(inputPath, (void **) &buf);
+
     /* Detect input file type. */
     if (inputFiletype == FILETYPE_AUTO)
-        inputFiletype = detectFiletype((char *) cmd.argv[0]);
+        inputFiletype = detectFiletypeFromBuffer(buf, bufSize);
 
     /*
      * Read original image and decode. We need the raw buffer contents and its
      * size to obtain meta data and the original file size later.
      */
-    bufSize = readFile((char *) cmd.argv[0], (void **) &buf);
-    originalSize = decodeFile((char *) cmd.argv[0], &original, inputFiletype, &width, &height, JCS_RGB);
+    originalSize = decodeFileFromBuffer(buf, bufSize, &original, inputFiletype, &width, &height, JCS_RGB);
     if (!originalSize) {
         fprintf(stderr, "invalid input file: %s\n", cmd.argv[0]);
         return 1;
@@ -353,7 +358,7 @@ int main (int argc, char **argv) {
         if (getMetadata(buf, bufSize, &metaBuf, &metaSize, COMMENT)) {
             if (copyFiles) {
                 info("File already processed by jpeg-recompress!\n");
-                file = openOutput(cmd.argv[1]);
+                file = openOutput(outputPath);
                 if (file == NULL) {
                     fprintf(stderr, "Could not open output file.");
                     return 1;

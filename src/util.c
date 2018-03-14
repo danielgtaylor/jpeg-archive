@@ -276,6 +276,17 @@ enum filetype detectFiletype(const char *filename) {
     return ret;
 }
 
+enum filetype detectFiletypeFromBuffer(unsigned char *buf, long bufSize) {
+    enum filetype ret = FILETYPE_UNKNOWN;
+
+    if (checkJpegMagic(buf, bufSize))
+        ret = FILETYPE_JPEG;
+    else if (checkPpmMagic(buf, bufSize))
+        ret = FILETYPE_PPM;
+
+    return ret;
+}
+
 unsigned long decodeFile(const char *filename, unsigned char **image, enum filetype type, int *width, int *height, int pixelFormat) {
     unsigned char *buf = NULL;
     long bufSize = 0;
@@ -294,6 +305,22 @@ unsigned long decodeFile(const char *filename, unsigned char **image, enum filet
         ret = 0;
 
     free(buf);
+    return ret;
+}
+
+unsigned long decodeFileFromBuffer(unsigned char *buf, long bufSize, unsigned char **image, enum filetype type, int *width, int *height, int pixelFormat) {
+    long ret = 0;
+
+    if (!bufSize)
+        return 0;
+
+    if (type == FILETYPE_PPM)
+        ret = decodePpm(buf, bufSize, image, width, height);
+    else if (type == FILETYPE_JPEG)
+        ret = decodeJpeg(buf, bufSize, image, width, height, pixelFormat);
+    else
+        ret = 0;
+
     return ret;
 }
 
