@@ -127,7 +127,7 @@ int compare(const char *filename1, const char *filename2) {
         return 1;
     }
 
-    if (1 == components) {
+    if (1 == components && FILETYPE_PPM == inputFiletype2) {
         grayscale(image1, &image1Gray, width1, height1);
         free(image1);
         image1 = image1Gray;
