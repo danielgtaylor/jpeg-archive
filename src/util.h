@@ -8,7 +8,7 @@
 #include <sys/types.h>
 #include <jpeglib.h>
 
-const char *VERSION;
+extern const char *VERSION;
 
 // Subsampling method, which defines how much of the data from
 // each color channel is included in the image per 2x2 block.
@@ -34,7 +34,7 @@ enum filetype {
 /*
     Read a file into a buffer and return the length.
 */
-long readFile(char *name, void **buffer);
+long readFile(const char *name, void **buffer);
 
 /*
     Decode a buffer into a JPEG image with the given pixel format.
@@ -58,9 +58,11 @@ unsigned long encodeJpeg(unsigned char **jpeg, unsigned char *buf, int width, in
 
 /* Automatically detect the file type of a given file. */
 enum filetype detectFiletype(const char *filename);
+enum filetype detectFiletypeFromBuffer(unsigned char *buf, long bufSize);
 
 /* Decode an image file with a given format. */
 unsigned long decodeFile(const char *filename, unsigned char **image, enum filetype type, int *width, int *height, int pixelFormat);
+unsigned long decodeFileFromBuffer(unsigned char *buf, long bufSize, unsigned char **image, enum filetype type, int *width, int *height, int pixelFormat);
 
 /*
     Get JPEG metadata (EXIF, IPTC, XMP, etc) and return a buffer

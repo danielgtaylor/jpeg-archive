@@ -13,7 +13,7 @@
 
 const char *VERSION = "2.1.1";
 
-long readFile(char *name, void **buffer) {
+long readFile(const char *name, void **buffer) {
     FILE *file;
     size_t fileLen = 0;
     size_t bytesRead = 0;
@@ -263,38 +263,40 @@ unsigned long decodePpm(unsigned char *buf, unsigned long bufSize, unsigned char
 enum filetype detectFiletype(const char *filename) {
     unsigned char *buf = NULL;
     long bufSize = 0;
-    enum filetype ret = FILETYPE_UNKNOWN;
-
-    bufSize = readFile((char *)filename, (void **)&buf);
-
-    if (checkJpegMagic(buf, bufSize))
-        ret = FILETYPE_JPEG;
-    else if (checkPpmMagic(buf, bufSize))
-        ret = FILETYPE_PPM;
-
+    bufSize = readFile(filename, (void **)&buf);
+    enum filetype ret = detectFiletypeFromBuffer(buf, bufSize);
     free(buf);
     return ret;
+}
+
+enum filetype detectFiletypeFromBuffer(unsigned char *buf, long bufSize) {
+    if (checkJpegMagic(buf, bufSize))
+        return FILETYPE_JPEG;
+
+    if (checkPpmMagic(buf, bufSize))
+        return FILETYPE_PPM;
+
+    return FILETYPE_UNKNOWN;
 }
 
 unsigned long decodeFile(const char *filename, unsigned char **image, enum filetype type, int *width, int *height, int pixelFormat) {
     unsigned char *buf = NULL;
     long bufSize = 0;
-    long ret = 0;
-
-    bufSize = readFile((char *)filename, (void **)&buf);
-
-    if (!bufSize)
-        return 0;
-
-    if (type == FILETYPE_PPM)
-        ret = decodePpm(buf, bufSize, image, width, height);
-    else if (type == FILETYPE_JPEG)
-        ret = decodeJpeg(buf, bufSize, image, width, height, pixelFormat);
-    else
-        ret = 0;
-
+    bufSize = readFile(filename, (void **)&buf);
+    unsigned long ret = decodeFileFromBuffer(buf, bufSize, image, type, width, height, pixelFormat);
     free(buf);
     return ret;
+}
+
+unsigned long decodeFileFromBuffer(unsigned char *buf, long bufSize, unsigned char **image, enum filetype type, int *width, int *height, int pixelFormat) {
+    switch(type) {
+        case FILETYPE_PPM:
+            return decodePpm(buf, bufSize, image, width, height);
+        case FILETYPE_JPEG:
+            return decodeJpeg(buf, bufSize, image, width, height, pixelFormat);
+        default:
+            return 0;
+    }
 }
 
 int getMetadata(const unsigned char *buf, unsigned int bufSize, unsigned char **meta, unsigned int *metaSize, const char *comment) {
