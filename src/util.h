@@ -58,9 +58,11 @@ unsigned long encodeJpeg(unsigned char **jpeg, unsigned char *buf, int width, in
 
 /* Automatically detect the file type of a given file. */
 enum filetype detectFiletype(const char *filename);
+enum filetype detectFiletypeFromBuffer(unsigned char *buf, long bufSize);
 
 /* Decode an image file with a given format. */
 unsigned long decodeFile(const char *filename, unsigned char **image, enum filetype type, int *width, int *height, int pixelFormat);
+unsigned long decodeFileFromBuffer(unsigned char *buf, long bufSize, unsigned char **image, enum filetype type, int *width, int *height, int pixelFormat);
 
 /*
     Get JPEG metadata (EXIF, IPTC, XMP, etc) and return a buffer
