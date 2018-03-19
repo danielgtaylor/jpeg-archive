@@ -319,6 +319,9 @@ bool recompress(const char *input, const char *output,
                     // Higher than required, decrease quality
                     max = quality - 1;
                     break;
+                case METHOD_UNKNOWN:
+                    // min and max values remain unchanged.
+                    break;
             }
         } else {
             switch (options->method) {
@@ -331,6 +334,9 @@ bool recompress(const char *input, const char *output,
                 case METHOD_MPE:
                     // Too distorted, increase quality
                     min = quality + 1;
+                    break;
+                case METHOD_UNKNOWN:
+                    // min and max values remain unchanged.
                     break;
             }
         }
