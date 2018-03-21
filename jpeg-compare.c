@@ -79,16 +79,16 @@ static enum filetype parseInputFiletype(const char *s) {
     return FILETYPE_UNKNOWN;
 }
 
-int compareFast(const char *filename1, const char *filename2) {
+int compareFastFromBuffer(unsigned char *imageBuf1, long bufSize1, unsigned char *imageBuf2, long bufSize2) {
     unsigned char *hash1, *hash2;
 
     // Generate hashes
-    if (jpegHash(filename1, &hash1, size)) {
+    if (jpegHashFromBuffer(imageBuf1, bufSize1, &hash1, size)) {
         printf("Error hashing image 1!\n");
         return 1;
     }
 
-    if (jpegHash(filename2, &hash2, size)) {
+    if (jpegHashFromBuffer(imageBuf2, bufSize2, &hash2, size)) {
         printf("Error hashing image 2!\n");
         return 1;
     }
@@ -103,7 +103,7 @@ int compareFast(const char *filename1, const char *filename2) {
     return 0;
 }
 
-int compare(const char *filename1, const char *filename2) {
+int compareFromBuffer(unsigned char *imageBuf1, long bufSize1, unsigned char *imageBuf2, long bufSize2) {
     unsigned char *image1, *image2, *image1Gray = NULL, *image2Gray = NULL;
     int width1, width2, height1, height2;
     int format, components;
@@ -122,8 +122,8 @@ int compare(const char *filename1, const char *filename2) {
     }
 
     // Decode files
-    if (!decodeFile(filename1, &image1, inputFiletype1, &width1, &height1, format)) {
-        fprintf(stderr, "invalid input file: %s\n", filename1);
+    if (!decodeFileFromBuffer(imageBuf1, bufSize1, &image1, inputFiletype1, &width1, &height1, format)) {
+        fprintf(stderr, "invalid input reference file\n");
         return 1;
     }
 
@@ -133,8 +133,8 @@ int compare(const char *filename1, const char *filename2) {
         image1 = image1Gray;
     }
 
-    if (!decodeFile(filename2, &image2, inputFiletype2, &width2, &height2, format)) {
-        fprintf(stderr, "invalid input file: %s\n", filename2);
+    if (!decodeFileFromBuffer(imageBuf2, bufSize2, &image2, inputFiletype2, &width2, &height2, format)) {
+        fprintf(stderr, "invalid input query file\n");
         return 1;
     }
 
@@ -251,11 +251,30 @@ int main (int argc, char **argv) {
         return 255;
     }
 
+    // Read the images
+    unsigned char *imageBuf1, *imageBuf2;
+    long bufSize1, bufSize2;
+
+    char *fileName1 = argv[optind];
+    char *fileName2 = argv[optind + 1];
+
+    bufSize1 = readFile(fileName1, &imageBuf1);
+    if (!bufSize1) {
+        fprintf(stderr, "failed to read file: %s\n", fileName1);
+        return 1;
+    }
+
+    bufSize2 = readFile(fileName2, &imageBuf2);
+    if (!bufSize2) {
+        fprintf(stderr, "failed to read file: %s\n", fileName2);
+        return 1;
+    }
+
     /* Detect input file types. */
     if (inputFiletype1 == FILETYPE_AUTO)
-        inputFiletype1 = detectFiletype(argv[optind]);
+        inputFiletype1 = detectFiletypeFromBuffer(imageBuf1, bufSize1);
     if (inputFiletype2 == FILETYPE_AUTO)
-        inputFiletype2 = detectFiletype(argv[optind + 1]);
+        inputFiletype2 = detectFiletypeFromBuffer(imageBuf2, bufSize2);
 
     // Calculate and print output
     switch (method) {
@@ -264,14 +283,18 @@ int main (int argc, char **argv) {
                 printf("fast comparison only works with JPEG files!\n");
                 return 255;
             }
-            return compareFast(argv[optind], argv[optind + 1]);
+            return compareFastFromBuffer(imageBuf1, bufSize1, imageBuf2, bufSize2);
         case PSNR:
         case SSIM:
         case MS_SSIM:
         case SMALLFRY:
-            return compare(argv[optind], argv[optind + 1]);
+            return compareFromBuffer(imageBuf1, bufSize1, imageBuf2, bufSize2);
         default:
             printf("Unknown comparison method!\n");
             return 255;
     }
+
+    // Cleanup resources
+    free(imageBuf1);
+    free(imageBuf2);
 }

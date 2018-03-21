@@ -48,6 +48,25 @@ int jpegHash(const char *filename, unsigned char **hash, int size) {
     return 0;
 }
 
+int jpegHashFromBuffer(unsigned char *imageBuf, long bufSize, unsigned char **hash, int size) {
+    unsigned char *image;
+    unsigned long imageSize = 0;
+    unsigned char *scaled;
+    int width, height;
+
+    imageSize = decodeFileFromBuffer(imageBuf, bufSize, &image, FILETYPE_JPEG, &width, &height, JCS_GRAYSCALE);
+
+    if (!imageSize)
+        return 1;
+
+    scale(image, width, height, &scaled, size, size);
+    free(image);
+    genHash(scaled, size, size, hash);
+    free(scaled);
+
+    return 0;
+}
+
 unsigned int hammingDist(const unsigned char *hash1, const unsigned char *hash2, int hashLength) {
     unsigned int dist = 0;
 
