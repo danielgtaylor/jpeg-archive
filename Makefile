@@ -10,7 +10,12 @@ ifeq ($(UNAME_S),Linux)
 	# Linux (e.g. Ubuntu)
 	MOZJPEG_PREFIX ?= /opt/mozjpeg
 	CFLAGS += -I$(MOZJPEG_PREFIX)/include
-	LIBJPEG = $(MOZJPEG_PREFIX)/lib/libjpeg.a
+
+	ifneq ("$(wildcard $(MOZJPEG_PREFIX)/lib64/libjpeg.a)","")
+		LIBJPEG = $(MOZJPEG_PREFIX)/lib64/libjpeg.a
+	else
+		LIBJPEG = $(MOZJPEG_PREFIX)/lib/libjpeg.a
+	endif
 else ifeq ($(UNAME_S),Darwin)
 	# Mac OS X
 	MOZJPEG_PREFIX ?= /usr/local/opt/mozjpeg
