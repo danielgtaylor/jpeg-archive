@@ -387,6 +387,11 @@ int main (int argc, char **argv) {
 
     if (!originalSize || !originalGraySize) { return 1; }
 
+    if (jpegMin > jpegMax) {
+        fprintf(stderr, "Maximum JPEG quality must not be smaller than minimum JPEG quality!\n");
+        return 1;
+    }
+
     // Do a binary search to find the optimal encoding quality for the
     // given target SSIM value.
     int min = jpegMin, max = jpegMax;
