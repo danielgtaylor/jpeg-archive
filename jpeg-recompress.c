@@ -471,22 +471,22 @@ int main (int argc, char **argv) {
             switch (method) {
                 case SSIM: case MS_SSIM: case SMALLFRY:
                     // Too distorted, increase quality
-                    min = quality + 1;
+                    min = MIN(quality + 1, max);
                     break;
                 case MPE:
                     // Higher than required, decrease quality
-                    max = quality - 1;
+                    max = MAX(quality - 1, min);
                     break;
             }
         } else {
             switch (method) {
                 case SSIM: case MS_SSIM: case SMALLFRY:
                     // Higher than required, decrease quality
-                    max = quality - 1;
+                    max = MAX(quality - 1, min);
                     break;
                 case MPE:
                     // Too distorted, increase quality
-                    min = quality + 1;
+                    min = MIN(quality + 1, max);
                     break;
             }
         }

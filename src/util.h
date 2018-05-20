@@ -8,6 +8,9 @@
 #include <sys/types.h>
 #include <jpeglib.h>
 
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+
 const char *VERSION;
 
 // Subsampling method, which defines how much of the data from
