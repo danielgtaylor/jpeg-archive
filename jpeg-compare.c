@@ -258,13 +258,13 @@ int main (int argc, char **argv) {
     char *fileName1 = argv[optind];
     char *fileName2 = argv[optind + 1];
 
-    bufSize1 = readFile(fileName1, &imageBuf1);
+    bufSize1 = readFile(fileName1, (void **)&imageBuf1);
     if (!bufSize1) {
         fprintf(stderr, "failed to read file: %s\n", fileName1);
         return 1;
     }
 
-    bufSize2 = readFile(fileName2, &imageBuf2);
+    bufSize2 = readFile(fileName2, (void **)&imageBuf2);
     if (!bufSize2) {
         fprintf(stderr, "failed to read file: %s\n", fileName2);
         return 1;
