@@ -4,23 +4,25 @@
     between JPEG quality 40 and 95 to find the best match. Also makes sure
     that huffman tables are optimized if they weren't already.
 */
+
+#include <getopt.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "src/commander.h"
 #include "src/edit.h"
 #include "src/iqa/include/iqa.h"
 #include "src/smallfry.h"
 #include "src/util.h"
 
 #ifdef _WIN32
-    #include <io.h>
-    #include <fcntl.h>
+#include <io.h>
+#include <fcntl.h>
 #endif
 
+static const char *progname = "jpeg-recompress";
 const char *COMMENT = "Compressed by jpeg-recompress";
 
 // Comparison method
@@ -77,87 +79,40 @@ int subsample = SUBSAMPLE_DEFAULT;
 // Quiet mode (less output)
 int quiet = 0;
 
-static void setAttempts(command_t *self) {
-    attempts = atoi(self->arg);
+static enum QUALITY_PRESET parseQuality(const char *s) {
+    if (!strcmp("low", s))
+        return LOW;
+    else if (!strcmp("medium", s))
+        return MEDIUM;
+    else if (!strcmp("high", s))
+        return preset = HIGH;
+    else if (!strcmp("veryhigh", s))
+        return preset = VERYHIGH;
+
+    fprintf(stderr, "Unknown quality preset '%s'!\n", s);
+    return MEDIUM;
 }
 
-static void setTarget(command_t *self) {
-    target = atof(self->arg);
+static enum METHOD parseMethod(const char *s) {
+    if (!strcmp("ssim", s))
+        return SSIM;
+    else if (!strcmp("ms-ssim", s))
+        return MS_SSIM;
+    else if (!strcmp("smallfry", s))
+        return SMALLFRY;
+    else if (!strcmp("mpe", s))
+        return MPE;
+    return UNKNOWN;
 }
 
-static void setQuality(command_t *self) {
-    if (!strcmp("low", self->arg)) {
-        preset = LOW;
-    } else if (!strcmp("medium", self->arg)) {
-        preset = MEDIUM;
-    } else if (!strcmp("high", self->arg)) {
-        preset = HIGH;
-    } else if (!strcmp("veryhigh", self->arg)) {
-        preset = VERYHIGH;
-    } else {
-        fprintf(stderr, "Unknown quality preset '%s'!\n", self->arg);
-    }
-}
-
-static void setMethod(command_t *self) {
-    if (!strcmp("ssim", self->arg)) {
-        method = SSIM;
-    } else if (!strcmp("ms-ssim", self->arg)) {
-        method = MS_SSIM;
-    } else if (!strcmp("smallfry", self->arg)) {
-        method = SMALLFRY;
-    } else if (!strcmp("mpe", self->arg)) {
-        method = MPE;
-    } else {
-        method = UNKNOWN;
-    }
-}
-
-static void setNoProgressive(command_t *self) {
-    noProgressive = 1;
-}
-
-static void setMinimum(command_t *self) {
-    jpegMin = atoi(self->arg);
-}
-
-static void setMaximum(command_t *self) {
-    jpegMax = atoi(self->arg);
-}
-
-static void setStrip(command_t *self) {
-    strip = 1;
-}
-
-static void setDefish(command_t *self) {
-    defishStrength = atof(self->arg);
-}
-
-static void setZoom(command_t *self) {
-    defishZoom = atof(self->arg);
-}
-
-static void setInputFiletype(command_t *self) {
-    if (!strcmp("auto", self->arg))
-        inputFiletype = FILETYPE_AUTO;
-    else if (!strcmp("jpeg", self->arg))
-        inputFiletype = FILETYPE_JPEG;
-    else if (!strcmp("ppm", self->arg))
-        inputFiletype = FILETYPE_PPM;
-    else
-        inputFiletype = FILETYPE_UNKNOWN;
-}
-
-static void setPpm(command_t *self) {
-    inputFiletype = FILETYPE_PPM;
-}
-
-static void setCopyFiles(command_t *self) {
-    copyFiles = 0;
-}
-
-static void setAccurate(command_t *self) {
-    accurate = 1;
+static enum filetype parseInputFiletype(const char *s) {
+    if (!strcmp("auto", s))
+        return FILETYPE_AUTO;
+    if (!strcmp("jpeg", s))
+        return FILETYPE_JPEG;
+    if (!strcmp("ppm", s))
+        return FILETYPE_PPM;
+    return FILETYPE_UNKNOWN;
 }
 
 static void setTargetFromPreset() {
@@ -229,18 +184,14 @@ static void setTargetFromPreset() {
     }
 }
 
-static void setSubsampling(command_t *self) {
-    if (!strcmp("default", self->arg)) {
-        subsample = SUBSAMPLE_DEFAULT;
-    } else if (!strcmp("disable", self->arg)) {
-        subsample = SUBSAMPLE_444;
-    } else {
-        fprintf(stderr, "Unknown sampling method '%s', using default!\n", self->arg);
-    }
-}
+static int parseSubsampling(const char *s) {
+    if (!strcmp("default", s))
+        return SUBSAMPLE_DEFAULT;
+    else if (!strcmp("disable", s))
+        return SUBSAMPLE_444;
 
-static void setQuiet(command_t *self) {
-    quiet = 1;
+    fprintf(stderr, "Unknown sampling method '%s', using default!\n", s);
+    return SUBSAMPLE_DEFAULT;
 }
 
 // Open a file for writing
@@ -267,7 +218,134 @@ void info(const char *format, ...) {
     }
 }
 
+void version(void) {
+    printf("%s\n", VERSION);
+}
+
+
+void usage(void) {
+    printf("usage: %s [options] input.jpg output.jpg\n\n", progname);
+    printf("options:\n\n");
+    printf("  -V, --version                output program version\n");
+    printf("  -h, --help                   output program help\n");
+    printf("  -t, --target [arg]           set target quality [0.9999]\n");
+    printf("  -q, --quality [arg]          set a quality preset: low, medium, high, veryhigh [medium]\n");
+    printf("  -n, --min [arg]              minimum JPEG quality [40]\n");
+    printf("  -x, --max [arg]              maximum JPEG quality [95]\n");
+    printf("  -l, --loops [arg]            set the number of runs to attempt [6]\n");
+    printf("  -a, --accurate               favor accuracy over speed\n");
+    printf("  -m, --method [arg]           set comparison method to one of 'mpe', 'ssim', 'ms-ssim', 'smallfry' [ssim]\n");
+    printf("  -s, --strip                  strip metadata\n");
+    printf("  -d, --defish [arg]           set defish strength [0.0]\n");
+    printf("  -z, --zoom [arg]             set defish zoom [1.0]\n");
+    printf("  -r, --ppm                    parse input as PPM\n");
+    printf("  -c, --no-copy                disable copying files that will not be compressed\n");
+    printf("  -p, --no-progressive         disable progressive encoding\n");
+    printf("  -S, --subsample [arg]        set subsampling method to one of 'default', 'disable' [default]\n");
+    printf("  -T, --input-filetype [arg]   set input file type to one of 'auto', 'jpeg', 'ppm' [auto]\n");
+    printf("  -Q, --quiet                  only print out errors\n");
+}
+
 int main (int argc, char **argv) {
+    const char *optstring = "Vht:q:n:x:l:am:sd:z:rcpS:T:Q";
+    static const struct option opts[] = {
+        { "version", no_argument, 0, 'V' },
+        { "help", no_argument, 0, 'h' },
+        { "target", required_argument, 0, 't' },
+        { "quality", required_argument, 0, 'q' },
+        { "min", required_argument, 0, 'n' },
+        { "max", required_argument, 0, 'x' },
+        { "loops", required_argument, 0, 'l' },
+        { "accurate", no_argument, 0, 'a' },
+        { "method", required_argument, 0, 'm' },
+        { "strip", no_argument, 0, 's' },
+        { "defish", required_argument, 0, 'd' },
+        { "zoom", required_argument, 0, 'z' },
+        { "ppm", no_argument, 0, 'r' },
+        { "no-copy", no_argument, 0, 'c' },
+        { "no-progressive", no_argument, 0, 'p' },
+        { "subsample", required_argument, 0, 'S' },
+        { "input-filetype", required_argument, 0, 'T' },
+        { "quiet", no_argument, 0, 'Q' },
+        { 0, 0, 0, 0 }
+    };
+    int opt, longind = 0;
+
+    while ((opt = getopt_long(argc, argv, optstring, opts, &longind)) != -1) {
+        switch (opt) {
+        case 'V':
+            version();
+            return 0;
+        case 'h':
+            usage();
+            return 0;
+        case 't':
+            target = atof(optarg);
+            break;
+        case 'q':
+            preset = parseQuality(optarg);
+            break;
+        case 'n':
+            jpegMin = atoi(optarg);
+            break;
+        case 'x':
+            jpegMax = atoi(optarg);
+            break;
+        case 'l':
+            attempts = atoi(optarg);
+            break;
+        case 'a':
+            accurate = 1;
+            break;
+        case 'm':
+            method = parseMethod(optarg);
+            break;
+        case 's':
+            strip = 1;
+            break;
+        case 'd':
+            defishStrength = atof(optarg);
+            break;
+        case 'z':
+            defishZoom = atof(optarg);
+            break;
+        case 'r':
+            inputFiletype = FILETYPE_PPM;
+            break;
+        case 'c':
+            copyFiles = 0;
+            break;
+        case 'p':
+            noProgressive = 1;
+            break;
+        case 'S':
+            subsample = parseSubsampling(optarg);
+            break;
+        case 'T':
+            inputFiletype = parseInputFiletype(optarg);
+            break;
+        case 'Q':
+            quiet = 1;
+            break;
+        };
+    }
+
+    if (argc - optind != 2) {
+        usage();
+        return 255;
+    }
+
+    if (method == UNKNOWN) {
+        fprintf(stderr, "Invalid method!");
+        usage();
+        return 255;
+    }
+
+    // No target passed, use preset!
+    if (!target) {
+        setTargetFromPreset();
+    }
+
     unsigned char *buf;
     long bufSize = 0;
     unsigned char *original;
@@ -283,47 +361,8 @@ int main (int argc, char **argv) {
     unsigned char *metaBuf;
     unsigned int metaSize = 0;
     FILE *file;
-
-    // Parse commandline options
-    command_t cmd;
-    command_init(&cmd, argv[0], VERSION);
-    cmd.usage = "[options] input.jpg compressed-output.jpg";
-    command_option(&cmd, "-t", "--target [arg]", "Set target quality [0.9999]", setTarget);
-    command_option(&cmd, "-q", "--quality [arg]", "Set a quality preset: low, medium, high, veryhigh [medium]", setQuality);
-    command_option(&cmd, "-n", "--min [arg]", "Minimum JPEG quality [40]", setMinimum);
-    command_option(&cmd, "-x", "--max [arg]", "Maximum JPEG quality [95]", setMaximum);
-    command_option(&cmd, "-l", "--loops [arg]", "Set the number of runs to attempt [6]", setAttempts);
-    command_option(&cmd, "-a", "--accurate", "Favor accuracy over speed", setAccurate);
-    command_option(&cmd, "-m", "--method [arg]", "Set comparison method to one of 'mpe', 'ssim', 'ms-ssim', 'smallfry' [ssim]", setMethod);
-    command_option(&cmd, "-s", "--strip", "Strip metadata", setStrip);
-    command_option(&cmd, "-d", "--defish [arg]", "Set defish strength [0.0]", setDefish);
-    command_option(&cmd, "-z", "--zoom [arg]", "Set defish zoom [1.0]", setZoom);
-    command_option(&cmd, "-r", "--ppm", "Parse input as PPM", setPpm);
-    command_option(&cmd, "-c", "--no-copy", "Disable copying files that will not be compressed", setCopyFiles);
-    command_option(&cmd, "-p", "--no-progressive", "Disable progressive encoding", setNoProgressive);
-    command_option(&cmd, "-S", "--subsample [arg]", "Set subsampling method. Valid values: 'default', 'disable'. [default]", setSubsampling);
-    command_option(&cmd, "-T", "--input-filetype [arg]", "Set input file type to one of 'auto', 'jpeg', 'ppm' [auto]", setInputFiletype);
-    command_option(&cmd, "-Q", "--quiet", "Only print out errors.", setQuiet);
-    command_parse(&cmd, argc, argv);
-
-    if (cmd.argc < 2) {
-        command_help(&cmd);
-        return 255;
-    }
-
-    if (method == UNKNOWN) {
-        fprintf(stderr, "Invalid method!");
-        command_help(&cmd);
-        return 255;
-    }
-
-    // No target passed, use preset!
-    if (!target) {
-        setTargetFromPreset();
-    }
-
-    char *inputPath = (char *) cmd.argv[0];
-    char *outputPath = cmd.argv[1];
+    char *inputPath = argv[optind];
+    char *outputPath = argv[optind + 1];
 
     /* Read the input into a buffer. */
     bufSize = readFile(inputPath, (void **) &buf);
@@ -338,7 +377,7 @@ int main (int argc, char **argv) {
      */
     originalSize = decodeFileFromBuffer(buf, bufSize, &original, inputFiletype, &width, &height, JCS_RGB);
     if (!originalSize) {
-        fprintf(stderr, "invalid input file: %s\n", cmd.argv[0]);
+        fprintf(stderr, "invalid input file: %s\n", inputPath);
         return 1;
     }
 
@@ -449,7 +488,7 @@ int main (int argc, char **argv) {
 
                 if (copyFiles) {
                     info("Output file would be larger than input!\n");
-                    file = openOutput(cmd.argv[1]);
+                    file = openOutput(outputPath);
                     if (file == NULL) {
                         fprintf(stderr, "Could not open output file.");
                         return 1;
@@ -511,7 +550,7 @@ int main (int argc, char **argv) {
     }
 
     // Open output file for writing
-    file = openOutput(cmd.argv[1]);
+    file = openOutput(outputPath);
     if (file == NULL) {
         fprintf(stderr, "Could not open output file.");
         return 1;
@@ -551,9 +590,6 @@ int main (int argc, char **argv) {
     /* Write image data. */
     fwrite(compressed + 4 + app0_len, compressedSize - 4 - app0_len, 1, file);
     fclose(file);
-
-    /* Cleanup. */
-    command_free(&cmd);
 
     if (inputFiletype == FILETYPE_JPEG && !strip) {
         free(metaBuf);
