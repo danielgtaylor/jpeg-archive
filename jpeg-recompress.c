@@ -217,11 +217,6 @@ void info(const char *format, ...) {
     }
 }
 
-void version(void) {
-    printf("%s\n", VERSION);
-}
-
-
 void usage(void) {
     printf("usage: %s [options] input.jpg output.jpg\n\n", progname);
     printf("options:\n\n");

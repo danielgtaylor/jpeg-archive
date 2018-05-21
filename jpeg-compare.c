@@ -183,10 +183,6 @@ int compareFromBuffer(unsigned char *imageBuf1, long bufSize1, unsigned char *im
     return 0;
 }
 
-void version(void) {
-    printf("%s\n", VERSION);
-}
-
 void usage(void) {
     printf("usage: %s [options] image1.jpg image2.jpg\n\n", progname);
     printf("options:\n\n");

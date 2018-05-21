@@ -35,6 +35,9 @@ enum filetype {
     FILETYPE_PPM
 };
 
+/* Print program version to stdout. */
+void version(void);
+
 /* Print an error message. */
 void error(const char *format, ...);
 

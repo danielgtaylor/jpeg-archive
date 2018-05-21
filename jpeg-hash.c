@@ -13,10 +13,6 @@
 
 int size = 16;
 
-void version(void) {
-    printf("%s\n", VERSION);
-}
-
 void usage(void) {
     printf("usage: %s [options] image.jpg\n\n", progname);
     printf("options:\n\n");

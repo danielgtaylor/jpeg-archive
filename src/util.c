@@ -14,6 +14,11 @@
 
 const char *VERSION = "2.1.1";
 
+/* Print program version to stdout. */
+void version(void) {
+    printf("%s\n", VERSION);
+}
+
 /* Print an error message. */
 void error(const char *format, ...) {
     va_list arglist;
