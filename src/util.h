@@ -12,6 +12,7 @@
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 
 const char *VERSION;
+const char *progname;
 
 // Subsampling method, which defines how much of the data from
 // each color channel is included in the image per 2x2 block.

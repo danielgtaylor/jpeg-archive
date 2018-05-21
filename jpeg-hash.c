@@ -11,8 +11,6 @@
 #include "src/hash.h"
 #include "src/util.h"
 
-static const char *progname = "jpeg-hash";
-
 int size = 16;
 
 void version(void) {
@@ -38,6 +36,8 @@ int main (int argc, char **argv) {
         { 0, 0, 0, 0 }
     };
     int opt, longind = 0;
+
+    progname = "jpeg-hash";
 
     while ((opt = getopt_long(argc, argv, optstring, opts, &longind)) != -1) {
         switch (opt) {

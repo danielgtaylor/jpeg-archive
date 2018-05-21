@@ -27,8 +27,6 @@
 #include "src/smallfry.h"
 #include "src/util.h"
 
-static const char *progname = "jpeg-compare";
-
 // Comparison method
 enum METHOD {
     UNKNOWN,
@@ -216,6 +214,8 @@ int main (int argc, char **argv) {
         { 0, 0, 0, 0 }
     };
     int opt, longind = 0;
+
+    progname = "jpeg-compare";
 
     while ((opt = getopt_long(argc, argv, optstring, opts, &longind)) != -1) {
         switch (opt) {
