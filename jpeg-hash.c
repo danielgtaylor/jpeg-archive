@@ -60,7 +60,7 @@ int main (int argc, char **argv) {
 
     // Generate the image hash
     if (jpegHash(argv[optind], &hash, size)) {
-        printf("Error hashing image!\n");
+        error("error hashing image!");
         return 1;
     }
 

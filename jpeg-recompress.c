@@ -88,7 +88,7 @@ static enum QUALITY_PRESET parseQuality(const char *s) {
     else if (!strcmp("veryhigh", s))
         return preset = VERYHIGH;
 
-    fprintf(stderr, "Unknown quality preset '%s'!\n", s);
+    error("unknown quality preset: %s", s);
     return MEDIUM;
 }
 
@@ -189,7 +189,7 @@ static int parseSubsampling(const char *s) {
     else if (!strcmp("disable", s))
         return SUBSAMPLE_444;
 
-    fprintf(stderr, "Unknown sampling method '%s', using default!\n", s);
+    error("unknown sampling method: %s", s);
     return SUBSAMPLE_DEFAULT;
 }
 
@@ -337,7 +337,7 @@ int main (int argc, char **argv) {
     }
 
     if (method == UNKNOWN) {
-        fprintf(stderr, "Invalid method!");
+        error("invalid method!");
         usage();
         return 255;
     }
@@ -378,7 +378,7 @@ int main (int argc, char **argv) {
      */
     originalSize = decodeFileFromBuffer(buf, bufSize, &original, inputFiletype, &width, &height, JCS_RGB);
     if (!originalSize) {
-        fprintf(stderr, "invalid input file: %s\n", inputPath);
+        error("invalid input file: %s", inputPath);
         return 1;
     }
 
@@ -400,7 +400,7 @@ int main (int argc, char **argv) {
                 info("File already processed by jpeg-recompress!\n");
                 file = openOutput(outputPath);
                 if (file == NULL) {
-                    fprintf(stderr, "Could not open output file.");
+                    error("could not open output file: %s", outputPath);
                     return 1;
                 }
 
@@ -411,7 +411,7 @@ int main (int argc, char **argv) {
 
                 return 0;
             } else {
-                fprintf(stderr, "File already processed by jpeg-recompress!\n");
+                error("file already processed by jpeg-recompress!");
                 free(buf);
                 return 2;
             }
@@ -428,7 +428,7 @@ int main (int argc, char **argv) {
     if (!originalSize || !originalGraySize) { return 1; }
 
     if (jpegMin > jpegMax) {
-        fprintf(stderr, "Maximum JPEG quality must not be smaller than minimum JPEG quality!\n");
+        error("maximum JPEG quality must not be smaller than minimum JPEG quality!");
         return 1;
     }
 
@@ -448,7 +448,7 @@ int main (int argc, char **argv) {
         compressedGraySize = decodeJpeg(compressed, compressedSize, &compressedGray, &width, &height, JCS_GRAYSCALE);
 
         if (!compressedGraySize) {
-          fprintf(stderr, "Unable to decode file that was just encoded!\n");
+          error("unable to decode file that was just encoded!");
           return 1;
         }
 
@@ -491,7 +491,7 @@ int main (int argc, char **argv) {
                     info("Output file would be larger than input!\n");
                     file = openOutput(outputPath);
                     if (file == NULL) {
-                        fprintf(stderr, "Could not open output file.");
+                        error("could not open output file: %s", outputPath);
                         return 1;
                     }
 
@@ -502,7 +502,7 @@ int main (int argc, char **argv) {
 
                     return 0;
                 } else {
-                    fprintf(stderr, "Output file would be larger than input!\n");
+                    error("output file would be larger than input!");
                     free(buf);
                     return 1;
                 }
@@ -546,26 +546,26 @@ int main (int argc, char **argv) {
     info("New size is %i%% of original (saved %lu kb)\n", percent, saved / 1024);
 
     if (compressedSize >= bufSize) {
-        fprintf(stderr, "Output file is larger than input, aborting!\n");
+        error("output file is larger than input, aborting!");
         return 1;
     }
 
     // Open output file for writing
     file = openOutput(outputPath);
     if (file == NULL) {
-        fprintf(stderr, "Could not open output file.");
+        error("could not open output file");
         return 1;
     }
 
     /* Check that the metadata starts with a SOI marker. */
     if (!checkJpegMagic(compressed, compressedSize)) {
-        fprintf(stderr, "Missing SOI marker, aborting!\n");
+        error("missing SOI marker, aborting!");
         return 1;
     }
 
     /* Make sure APP0 is recorded immediately after the SOI marker. */
     if (compressed[2] != 0xff || compressed[3] != 0xe0) {
-        fprintf(stderr, "Missing APP0 marker, aborting!\n");
+        error("missing APP0 marker, aborting!");
         return 1;
     }
 

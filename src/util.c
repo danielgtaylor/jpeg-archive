@@ -1,5 +1,6 @@
 #include "util.h"
 
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,6 +13,17 @@
 #define INPUT_BUFFER_SIZE 102400
 
 const char *VERSION = "2.1.1";
+
+/* Print an error message. */
+void error(const char *format, ...) {
+    va_list arglist;
+
+    va_start(arglist, format);
+    fprintf(stderr, "%s: ", progname);
+    vfprintf(stderr, format, arglist);
+    fputc('\n', stderr);
+    va_end(arglist);
+}
 
 long readFile(char *name, void **buffer) {
     FILE *file;
@@ -35,7 +47,7 @@ long readFile(char *name, void **buffer) {
 
         if (!file)
         {
-            fprintf(stderr, "Unable to open file %s\n", name);
+            error("unable to open file: %s", name);
             return 0;
         }
     }
@@ -48,7 +60,7 @@ long readFile(char *name, void **buffer) {
             memmove((unsigned char *)(*buffer) + fileLen, chunk, bytesRead);
             fileLen += bytesRead;
         } else {
-            fprintf(stderr, "Only able to read %zu bytes!\n", fileLen);
+            error("only able to read %zu bytes!", fileLen);
             free(*buffer);
             fclose(file);
             return 0;
@@ -202,7 +214,7 @@ unsigned long decodePpm(unsigned char *buf, unsigned long bufSize, unsigned char
     int depth;
 
     if (!checkPpmMagic(buf, bufSize)) {
-        fprintf(stderr, "Not a valid PPM format image!\n");
+        error("not a valid PPM format image!");
         return 0;
     }
 
@@ -218,7 +230,7 @@ unsigned long decodePpm(unsigned char *buf, unsigned long bufSize, unsigned char
     }
 
     if (pos >= bufSize) {
-        fprintf(stderr, "Not a valid PPM format image!\n");
+        error("not a valid PPM format image!");
         return 0;
     }
 
@@ -229,7 +241,7 @@ unsigned long decodePpm(unsigned char *buf, unsigned long bufSize, unsigned char
     while (buf[pos++] != '\n' && pos < bufSize);
 
     if (pos >= bufSize) {
-        fprintf(stderr, "Not a valid PPM format image!\n");
+        error("not a valid PPM format image!");
         return 0;
     }
 
@@ -237,7 +249,7 @@ unsigned long decodePpm(unsigned char *buf, unsigned long bufSize, unsigned char
     sscanf((const char*) buf + pos, "%d", &depth);
 
     if (depth != 255) {
-        fprintf(stderr, "Unsupported bit depth %d!\n", depth);
+        error("unsupported bit depth: %d", depth);
         return 0;
     }
 
@@ -247,7 +259,7 @@ unsigned long decodePpm(unsigned char *buf, unsigned long bufSize, unsigned char
     // Width * height * red/green/blue
     imageDataSize = (*width) * (*height) * 3;
     if (pos + imageDataSize != bufSize) {
-        fprintf(stderr, "Incorrect image size! %lu vs. %lu\n", bufSize, pos + imageDataSize);
+        error("incorrect image size: %lu vs. %lu", bufSize, pos + imageDataSize);
         return 0;
     }
 

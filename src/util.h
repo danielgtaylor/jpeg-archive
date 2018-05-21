@@ -35,6 +35,9 @@ enum filetype {
     FILETYPE_PPM
 };
 
+/* Print an error message. */
+void error(const char *format, ...);
+
 /*
     Read a file into a buffer and return the length.
 */

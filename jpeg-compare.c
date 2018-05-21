@@ -82,12 +82,12 @@ int compareFastFromBuffer(unsigned char *imageBuf1, long bufSize1, unsigned char
 
     // Generate hashes
     if (jpegHashFromBuffer(imageBuf1, bufSize1, &hash1, size)) {
-        printf("Error hashing image 1!\n");
+        error("error hashing image 1!");
         return 1;
     }
 
     if (jpegHashFromBuffer(imageBuf2, bufSize2, &hash2, size)) {
-        printf("Error hashing image 2!\n");
+        error("error hashing image 2!");
         return 1;
     }
 
@@ -121,7 +121,7 @@ int compareFromBuffer(unsigned char *imageBuf1, long bufSize1, unsigned char *im
 
     // Decode files
     if (!decodeFileFromBuffer(imageBuf1, bufSize1, &image1, inputFiletype1, &width1, &height1, format)) {
-        fprintf(stderr, "invalid input reference file\n");
+        error("invalid input reference file");
         return 1;
     }
 
@@ -132,7 +132,7 @@ int compareFromBuffer(unsigned char *imageBuf1, long bufSize1, unsigned char *im
     }
 
     if (!decodeFileFromBuffer(imageBuf2, bufSize2, &image2, inputFiletype2, &width2, &height2, format)) {
-        fprintf(stderr, "invalid input query file\n");
+        error("invalid input query file");
         return 1;
     }
 
@@ -144,7 +144,7 @@ int compareFromBuffer(unsigned char *imageBuf1, long bufSize1, unsigned char *im
 
     // Ensure width/height are equal
     if (width1 != width2 || height1 != height2) {
-        printf("Images must be identical sizes for selected method!\n");
+        error("images must be identical sizes for selected method!");
         return 1;
     }
 
@@ -260,13 +260,13 @@ int main (int argc, char **argv) {
 
     bufSize1 = readFile(fileName1, (void **)&imageBuf1);
     if (!bufSize1) {
-        fprintf(stderr, "failed to read file: %s\n", fileName1);
+        error("failed to read file: %s", fileName1);
         return 1;
     }
 
     bufSize2 = readFile(fileName2, (void **)&imageBuf2);
     if (!bufSize2) {
-        fprintf(stderr, "failed to read file: %s\n", fileName2);
+        error("failed to read file: %s", fileName2);
         return 1;
     }
 
@@ -280,7 +280,7 @@ int main (int argc, char **argv) {
     switch (method) {
         case FAST:
             if (inputFiletype1 != FILETYPE_JPEG || inputFiletype2 != FILETYPE_JPEG) {
-                printf("fast comparison only works with JPEG files!\n");
+                error("fast comparison only works with JPEG files!");
                 return 255;
             }
             return compareFastFromBuffer(imageBuf1, bufSize1, imageBuf2, bufSize2);
@@ -290,7 +290,7 @@ int main (int argc, char **argv) {
         case SMALLFRY:
             return compareFromBuffer(imageBuf1, bufSize1, imageBuf2, bufSize2);
         default:
-            printf("Unknown comparison method!\n");
+            error("unknown comparison method!");
             return 255;
     }
 
