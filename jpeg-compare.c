@@ -125,7 +125,7 @@ int compareFromBuffer(unsigned char *imageBuf1, long bufSize1, unsigned char *im
         return 1;
     }
 
-    if (1 == components && FILETYPE_PPM == inputFiletype2) {
+    if (1 == components && FILETYPE_PPM == inputFiletype1) {
         grayscale(image1, &image1Gray, width1, height1);
         free(image1);
         image1 = image1Gray;
