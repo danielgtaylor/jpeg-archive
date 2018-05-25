@@ -318,6 +318,10 @@ int main (int argc, char **argv) {
             subsample = parseSubsampling(optarg);
             break;
         case 'T':
+            if (inputFiletype != FILETYPE_AUTO) {
+                error("multiple file types specified for the input file");
+                return 1;
+            }
             inputFiletype = parseInputFiletype(optarg);
             break;
         case 'Q':

@@ -228,12 +228,24 @@ int main (int argc, char **argv) {
             method = parseMethod(optarg);
             break;
         case 'r':
+            if (inputFiletype1 != FILETYPE_AUTO) {
+                error("multiple file types specified for input file 1");
+                return 1;
+            }
             inputFiletype1 = FILETYPE_PPM;
             break;
         case 'T':
+            if (inputFiletype1 != FILETYPE_AUTO) {
+                error("multiple file types specified for input file 1");
+                return 1;
+            }
             inputFiletype1 = parseInputFiletype(optarg);
             break;
         case 'U':
+            if (inputFiletype2 != FILETYPE_AUTO) {
+                error("multiple file types specified for input file 2");
+                return 1;
+            }
             inputFiletype2 = parseInputFiletype(optarg);
             break;
         case OPT_SHORT:
