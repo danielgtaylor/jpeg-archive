@@ -12,7 +12,7 @@
 
 #define INPUT_BUFFER_SIZE 102400
 
-const char *VERSION = "2.1.1";
+const char *VERSION = "2.2.0";
 
 /* Print program version to stdout. */
 void version(void) {
