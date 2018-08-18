@@ -437,6 +437,11 @@ int main (int argc, char **argv) {
     for (int attempt = attempts - 1; attempt >= 0; --attempt) {
         float metric;
         int quality = min + (max - min) / 2;
+
+        /* Terminate early once bisection interval is a singleton. */
+        if (min == max)
+            attempt = 0;
+
         int progressive = attempt ? 0 : !noProgressive;
         int optimize = accurate ? 1 : (attempt ? 0 : 1);
 
