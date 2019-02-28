@@ -11,7 +11,7 @@ SRC= \
 OBJ = $(SRC:.c=.o)
 
 INCLUDES = -I./include
-CC = gcc
+CC ?= gcc
 
 ifeq ($(RELEASE),1)
 OUTDIR=./build/release
