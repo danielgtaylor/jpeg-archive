@@ -84,9 +84,9 @@ static enum QUALITY_PRESET parseQuality(const char *s) {
     else if (!strcmp("medium", s))
         return MEDIUM;
     else if (!strcmp("high", s))
-        return preset = HIGH;
+        return HIGH;
     else if (!strcmp("veryhigh", s))
-        return preset = VERYHIGH;
+        return VERYHIGH;
 
     error("unknown quality preset: %s", s);
     return MEDIUM;
