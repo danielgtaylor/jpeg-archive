@@ -272,7 +272,7 @@ unsigned long decodePpm(unsigned char *buf, unsigned long bufSize, unsigned char
     *image = malloc(imageDataSize);
 
     // Copy pixel data
-    memcpy((void *) *image, (void *) buf + pos, imageDataSize);
+    memcpy((char *) *image, (char *) buf + pos, imageDataSize);
 
     return (*width) * (*height);
 }
