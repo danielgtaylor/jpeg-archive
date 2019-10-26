@@ -78,7 +78,8 @@ static enum filetype parseInputFiletype(const char *s) {
 }
 
 int compareFastFromBuffer(unsigned char *imageBuf1, long bufSize1, unsigned char *imageBuf2, long bufSize2) {
-    unsigned char *hash1, *hash2;
+    unsigned char *hash1 = NULL;
+    unsigned char *hash2 = NULL;
 
     // Generate hashes
     if (jpegHashFromBuffer(imageBuf1, bufSize1, &hash1, size)) {
@@ -96,13 +97,15 @@ int compareFastFromBuffer(unsigned char *imageBuf1, long bufSize1, unsigned char
 
     // Cleanup
     free(hash1);
+    hash1 = NULL;
     free(hash2);
+    hash2 = NULL;
 
     return 0;
 }
 
 int compareFromBuffer(unsigned char *imageBuf1, long bufSize1, unsigned char *imageBuf2, long bufSize2) {
-    unsigned char *image1, *image2, *image1Gray = NULL, *image2Gray = NULL;
+    unsigned char *image1 = NULL, *image2 = NULL, *image1Gray = NULL, *image2Gray = NULL;
     int width1, width2, height1, height2;
     int format, components;
     float diff;
@@ -128,6 +131,7 @@ int compareFromBuffer(unsigned char *imageBuf1, long bufSize1, unsigned char *im
     if (1 == components && FILETYPE_PPM == inputFiletype1) {
         grayscale(image1, &image1Gray, width1, height1);
         free(image1);
+        image1 = NULL;
         image1 = image1Gray;
     }
 
@@ -139,6 +143,7 @@ int compareFromBuffer(unsigned char *imageBuf1, long bufSize1, unsigned char *im
     if (1 == components && FILETYPE_PPM == inputFiletype2) {
         grayscale(image2, &image2Gray, width2, height2);
         free(image2);
+        image2 = NULL;
         image2 = image2Gray;
     }
 

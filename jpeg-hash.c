@@ -22,7 +22,7 @@ void usage(void) {
 }
 
 int main (int argc, char **argv) {
-    unsigned char *hash;
+    unsigned char *hash= NULL;
 
     const char *optstring = "Vhs:";
     static const struct option opts[] = {
