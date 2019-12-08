@@ -93,7 +93,7 @@ static double aae_factor(uint8_t *orig, uint8_t *cmp, int orig_stride,
     old = orig + 7 * orig_stride;
     new = cmp  + 7 * cmp_stride;
 
-    for (i = 7; i < height - 1; i += 8) {
+    for (i = 7; i < height - 2; i += 8) {
         for (j = 0; j < width; j++) {
             double calc;
 
