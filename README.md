@@ -176,21 +176,21 @@ The `Makefile` should work with MinGW/Cygwin/etc and standard GCC. Patches welco
 
 To get everything you need to build, install these:
 
-* [CMake](http://www.cmake.org/files/v3.0/cmake-3.0.0-win32-x86.exe)
-* [NASM](http://www.nasm.us/pub/nasm/releasebuilds/2.11.05/win32/)
-* [MinGW](http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/installer/mingw-w64-install.exe/download) (installed to e.g. `C:\mingw`)
+* [CMake](https://cmake.org/download/)
+* [NASM](https://www.nasm.us/)
+* [MinGW](https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/installer/mingw-w64-install.exe/download) (installed to e.g. `C:\mingw`)
 * [Github for Windows](https://windows.github.com/)
 
 Run Github for windows. In the settings, set **Git Bash** as the shell. Open Git Shell from the start menu.
 
 ```bash
 # Update PATH to include MinGW/NASM bin folder, location on your system may vary
-export PATH=$PATH:/c/mingw/mingw32/bin:/c/Program\ Files \(x68\)/nasm
+export PATH=/c/mingw/mingw32/bin:/c/Program\ Files \(x68\)/nasm:$PATH
 
 # Build mozjpeg or download https://www.dropbox.com/s/98jppfgds2xjblu/libjpeg.a
 git clone https://github.com/mozilla/mozjpeg.git
 cd mozjpeg
-cmake -G "MSYS Makefiles" -D CMAKE_C_COMPILER=/c/mingw/bin/gcc.exe -D CMAKE_MAKE_PROGRAM=/c/mingw/bin/mingw32-make.exe  -DWITH_JPEG8=1 .
+cmake -G "MSYS Makefiles" -D CMAKE_C_COMPILER=gcc.exe -D CMAKE_MAKE_PROGRAM=mingw32-make.exe  -D WITH_JPEG8=1
 mingw32-make
 cd ..
 
