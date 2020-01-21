@@ -21,13 +21,13 @@ $(LIBIQA):
 
 LIB_DEPS += $(LIBIQA)
 
-jpeg-recompress: jpeg-recompress.c src/util.o src/edit.o src/smallfry.o src/commander.o $(LIB_DEPS)
+jpeg-recompress: jpeg-recompress.c src/util.o src/edit.o src/smallfry.o $(LIB_DEPS)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-jpeg-compare: jpeg-compare.c src/util.o src/hash.o src/edit.o src/commander.o src/smallfry.o $(LIB_DEPS)
+jpeg-compare: jpeg-compare.c src/util.o src/hash.o src/edit.o src/smallfry.o $(LIB_DEPS)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-jpeg-hash: jpeg-hash.c src/util.o src/hash.o src/commander.o $(LIB_DEPS)
+jpeg-hash: jpeg-hash.c src/util.o src/hash.o $(LIB_DEPS)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 %.o: %.c %.h | $(DIR_DEPS)

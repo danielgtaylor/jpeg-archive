@@ -8,7 +8,11 @@
 #include <sys/types.h>
 #include <jpeglib.h>
 
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+
 const char *VERSION;
+const char *progname;
 
 // Subsampling method, which defines how much of the data from
 // each color channel is included in the image per 2x2 block.
@@ -30,6 +34,12 @@ enum filetype {
     FILETYPE_JPEG,
     FILETYPE_PPM
 };
+
+/* Print program version to stdout. */
+void version(void);
+
+/* Print an error message. */
+void error(const char *format, ...);
 
 /*
     Read a file into a buffer and return the length.
@@ -58,9 +68,11 @@ unsigned long encodeJpeg(unsigned char **jpeg, unsigned char *buf, int width, in
 
 /* Automatically detect the file type of a given file. */
 enum filetype detectFiletype(const char *filename);
+enum filetype detectFiletypeFromBuffer(unsigned char *buf, long bufSize);
 
 /* Decode an image file with a given format. */
 unsigned long decodeFile(const char *filename, unsigned char **image, enum filetype type, int *width, int *height, int pixelFormat);
+unsigned long decodeFileFromBuffer(unsigned char *buf, long bufSize, unsigned char **image, enum filetype type, int *width, int *height, int pixelFormat);
 
 /*
     Get JPEG metadata (EXIF, IPTC, XMP, etc) and return a buffer

@@ -1,4 +1,4 @@
-JPEG Archive [![Build Status](http://img.shields.io/travis/danielgtaylor/jpeg-archive.svg?style=flat)](https://travis-ci.org/danielgtaylor/jpeg-archive) [![Build status](https://ci.appveyor.com/api/projects/status/1p7hrrq380xuqlyh?svg=true)](https://ci.appveyor.com/project/danielgtaylor/jpeg-archive) [![Version](http://img.shields.io/badge/version-2.1.1-blue.svg?style=flat)](https://github.com/danielgtaylor/jpeg-archive/releases) [![License](http://img.shields.io/badge/license-MIT-red.svg?style=flat)](http://dgt.mit-license.org/)
+JPEG Archive [![Build Status](http://img.shields.io/travis/danielgtaylor/jpeg-archive.svg?style=flat)](https://travis-ci.org/danielgtaylor/jpeg-archive) [![Build status](https://ci.appveyor.com/api/projects/status/1p7hrrq380xuqlyh?svg=true)](https://ci.appveyor.com/project/danielgtaylor/jpeg-archive) [![Version](http://img.shields.io/badge/version-2.2.0-blue.svg?style=flat)](https://github.com/danielgtaylor/jpeg-archive/releases) [![License](http://img.shields.io/badge/license-MIT-red.svg?style=flat)](http://dgt.mit-license.org/)
 ============
 Utilities for archiving photos for saving to long term storage or serving over the web. The goals are:
 
@@ -73,7 +73,7 @@ Name     | Option        | Description
 -------- | ------------- | -----------
 MPE      | `-m mpe`      | Mean pixel error (as used by [imgmin](https://github.com/rflynn/imgmin))
 SSIM     | `-m ssim`     | [Structural similarity](http://en.wikipedia.org/wiki/Structural_similarity) **DEFAULT**
-MS-SSIM* | `-m ms-ssim`  | Multi-scale structural similarity (slow!) ([2008 paper](http://foulard.ece.cornell.edu/publications/dmr_hvei2008_paper.pdf))
+MS-SSIM* | `-m ms-ssim`  | Multi-scale structural similarity (slow!) ([2008 paper](https://doi.org/10.1117/12.768060))
 SmallFry | `-m smallfry` | Linear-weighted BBCQ-like ([original project](https://github.com/dwbuiten/smallfry), [2011 BBCQ paper](http://spie.org/Publications/Proceedings/Paper/10.1117/12.872231))
 
 **Note**: The SmallFry algorithm may be [patented](http://www.jpegmini.com/main/technology) so use with caution.
@@ -179,7 +179,16 @@ pkg install autoconf automake libtool pkg-config nasm
 
 #### Windows
 
-Recommend using [Chocolatey](https://chocolatey.org/).
+The `Makefile` should work with MinGW/Cygwin/etc and standard GCC. Patches welcome.
+
+To get everything you need to build, install these:
+
+* [CMake](https://cmake.org/download/)
+* [NASM](https://www.nasm.us/)
+* [MinGW](https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/installer/mingw-w64-install.exe/download) (installed to e.g. `C:\mingw`)
+* [Github for Windows](https://windows.github.com/)
+
+Recommend using [Chocolatey](https://chocolatey.org/) to install and manage.
 
 ```bash
 choco install /y cmake mingw nasm git
@@ -189,7 +198,14 @@ Run the `Git Bash` cmd app.
 
 ```bash
 # Update PATH to include MinGW/NASM bin folder, location on your system may vary
-export PATH=$PATH:/c/tools/mingw64//bin:/c/Program\ Files/NASM
+export PATH=/c/mingw/mingw32/bin:/c/Program\ Files \(x68\)/nasm:$PATH
+
+# Get jpeg-archive
+git clone https://github.com/danielgtaylor/jpeg-archive
+
+# Build jpeg-archive. mozjpeg is downloaded and compiled automatically.
+cd jpeg-archive
+CC=gcc mingw32-make
 ```
 
 Or export these to your Windows path and restart `Git Bash`.

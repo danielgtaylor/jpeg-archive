@@ -1,5 +1,6 @@
 #include "util.h"
 
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,7 +12,23 @@
 
 #define INPUT_BUFFER_SIZE 102400
 
-const char *VERSION = "2.1.1";
+const char *VERSION = "2.2.0";
+
+/* Print program version to stdout. */
+void version(void) {
+    printf("%s\n", VERSION);
+}
+
+/* Print an error message. */
+void error(const char *format, ...) {
+    va_list arglist;
+
+    va_start(arglist, format);
+    fprintf(stderr, "%s: ", progname);
+    vfprintf(stderr, format, arglist);
+    fputc('\n', stderr);
+    va_end(arglist);
+}
 
 long readFile(char *name, void **buffer) {
     FILE *file;
@@ -35,7 +52,7 @@ long readFile(char *name, void **buffer) {
 
         if (!file)
         {
-            fprintf(stderr, "Unable to open file %s\n", name);
+            error("unable to open file: %s", name);
             return 0;
         }
     }
@@ -48,7 +65,7 @@ long readFile(char *name, void **buffer) {
             memmove((unsigned char *)(*buffer) + fileLen, chunk, bytesRead);
             fileLen += bytesRead;
         } else {
-            fprintf(stderr, "Only able to read %zu bytes!\n", fileLen);
+            error("only able to read %zu bytes!", fileLen);
             free(*buffer);
             fclose(file);
             return 0;
@@ -202,42 +219,52 @@ unsigned long decodePpm(unsigned char *buf, unsigned long bufSize, unsigned char
     int depth;
 
     if (!checkPpmMagic(buf, bufSize)) {
-        fprintf(stderr, "Not a valid PPM format image!\n");
+        error("not a valid PPM format image!");
         return 0;
     }
 
     // Read to first newline
-    while (buf[pos++] != '\n') {}
+    while (buf[pos++] != '\n' && pos < bufSize);
 
     // Discard for any comment and empty lines
-    while (buf[pos] == '#' || buf[pos] == '\n') {
+    while ((buf[pos] == '#' || buf[pos] == '\n') && pos < bufSize) {
         while (buf[pos] != '\n') {
             pos++;
         }
         pos++;
     }
 
+    if (pos >= bufSize) {
+        error("not a valid PPM format image!");
+        return 0;
+    }
+
     // Read width/height
     sscanf((const char *) buf + pos, "%d %d", width, height);
 
     // Go to next line
-    while (buf[pos++] != '\n') {}
+    while (buf[pos++] != '\n' && pos < bufSize);
+
+    if (pos >= bufSize) {
+        error("not a valid PPM format image!");
+        return 0;
+    }
 
     // Read bit depth
     sscanf((const char*) buf + pos, "%d", &depth);
 
     if (depth != 255) {
-        fprintf(stderr, "Unsupported bit depth %d!\n", depth);
+        error("unsupported bit depth: %d", depth);
         return 0;
     }
 
     // Go to next line
-    while (buf[pos++] != '\n') {}
+    while (buf[pos++] != '\n' && pos < bufSize);
 
     // Width * height * red/green/blue
     imageDataSize = (*width) * (*height) * 3;
     if (pos + imageDataSize != bufSize) {
-        fprintf(stderr, "Incorrect image size! %lu vs. %lu\n", bufSize, pos + imageDataSize);
+        error("incorrect image size: %lu vs. %lu", bufSize, pos + imageDataSize);
         return 0;
     }
 
@@ -253,38 +280,40 @@ unsigned long decodePpm(unsigned char *buf, unsigned long bufSize, unsigned char
 enum filetype detectFiletype(const char *filename) {
     unsigned char *buf = NULL;
     long bufSize = 0;
-    enum filetype ret = FILETYPE_UNKNOWN;
-
     bufSize = readFile((char *)filename, (void **)&buf);
-
-    if (checkJpegMagic(buf, bufSize))
-        ret = FILETYPE_JPEG;
-    else if (checkPpmMagic(buf, bufSize))
-        ret = FILETYPE_PPM;
-
+    enum filetype ret = detectFiletypeFromBuffer(buf, bufSize);
     free(buf);
     return ret;
+}
+
+enum filetype detectFiletypeFromBuffer(unsigned char *buf, long bufSize) {
+    if (checkJpegMagic(buf, bufSize))
+        return FILETYPE_JPEG;
+
+    if (checkPpmMagic(buf, bufSize))
+        return FILETYPE_PPM;
+
+    return FILETYPE_UNKNOWN;
 }
 
 unsigned long decodeFile(const char *filename, unsigned char **image, enum filetype type, int *width, int *height, int pixelFormat) {
     unsigned char *buf = NULL;
     long bufSize = 0;
-    long ret = 0;
-
     bufSize = readFile((char *)filename, (void **)&buf);
-
-    if (!bufSize)
-        return 0;
-
-    if (type == FILETYPE_PPM)
-        ret = decodePpm(buf, bufSize, image, width, height);
-    else if (type == FILETYPE_JPEG)
-        ret = decodeJpeg(buf, bufSize, image, width, height, pixelFormat);
-    else
-        ret = 0;
-
+    unsigned long ret = decodeFileFromBuffer(buf, bufSize, image, type, width, height, pixelFormat);
     free(buf);
     return ret;
+}
+
+unsigned long decodeFileFromBuffer(unsigned char *buf, long bufSize, unsigned char **image, enum filetype type, int *width, int *height, int pixelFormat) {
+    switch (type) {
+        case FILETYPE_PPM:
+            return decodePpm(buf, bufSize, image, width, height);
+        case FILETYPE_JPEG:
+            return decodeJpeg(buf, bufSize, image, width, height, pixelFormat);
+        default:
+            return 0;
+    }
 }
 
 int getMetadata(const unsigned char *buf, unsigned int bufSize, unsigned char **meta, unsigned int *metaSize, const char *comment) {

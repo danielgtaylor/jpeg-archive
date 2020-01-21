@@ -10,6 +10,7 @@
     scales the image, and generates the hash.
 */
 int jpegHash(const char *filename, unsigned char **hash, int size);
+int jpegHashFromBuffer(unsigned char *imageBuf, long bufSize, unsigned char **hash, int size);
 
 /*
     Downscale an image with nearest-neighbor interpolation.
