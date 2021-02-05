@@ -1,9 +1,11 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "iqa", "iqa.vcproj", "{3C7BB421-C147-4828-8EAE-53A5F1A0394A}"
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.329
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "iqa", "iqa.vcxproj", "{3C7BB421-C147-4828-8EAE-53A5F1A0394A}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "test\test.vcproj", "{CB10555C-6A76-4AD9-A5BA-2D2733115859}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "test\test.vcxproj", "{CB10555C-6A76-4AD9-A5BA-2D2733115859}"
 	ProjectSection(ProjectDependencies) = postProject
 		{3C7BB421-C147-4828-8EAE-53A5F1A0394A} = {3C7BB421-C147-4828-8EAE-53A5F1A0394A}
 	EndProjectSection
@@ -35,5 +37,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {472C1FE6-6447-476E-8ECF-4F1E03B503A6}
 	EndGlobalSection
 EndGlobal
