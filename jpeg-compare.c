@@ -189,7 +189,7 @@ void usage(void) {
     printf("  -V, --version                output program version\n");
     printf("  -h, --help                   output program help\n");
     printf("  -s, --size [arg]             set fast comparison image hash size\n");
-    printf("  -m, --method [arg]           set comparison method to one of 'fast', 'psnr', 'ssim', or 'ms-ssim' [fast]\n");
+    printf("  -m, --method [arg]           set comparison method to one of 'fast', 'psnr', 'ssim', 'ms-ssim' or 'smallfry' [fast]\n");
     printf("  -r, --ppm                    parse first input as PPM instead of JPEG\n");
     printf("  -T, --input-filetype [arg]   set first input file type to one of 'auto', 'jpeg', 'ppm' [auto]\n");
     printf("  -U, --second-filetype [arg]  set second input file type to one of 'auto', 'jpeg', 'ppm' [auto]\n");
