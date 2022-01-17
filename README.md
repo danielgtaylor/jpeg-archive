@@ -148,8 +148,8 @@ Ubuntu users can install via `apt-get`:
 sudo apt-get install build-essential autoconf pkg-config nasm libtool
 git clone https://github.com/mozilla/mozjpeg.git
 cd mozjpeg
-autoreconf -fiv
-./configure --with-jpeg8
+mkdir build && cd build
+cmake -G"Unix Makefiles" --with-jpeg8 ..
 make
 sudo make install
 ```
