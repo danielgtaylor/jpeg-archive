@@ -1,5 +1,5 @@
 CC ?= gcc
-CFLAGS += -std=c99 -Wall -O3 
+CFLAGS += -std=c99 -Wall -O3
 # workaround for GCC 10
 CFLAGS += -fcommon
 LDFLAGS += -lm
