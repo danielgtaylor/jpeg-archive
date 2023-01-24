@@ -1,9 +1,10 @@
 # Win32 Makefile created by Zoltan Frombach <tssajo@gmail.com>
+# sylikc modified to use mozjpeg from the deps directory instead of external to the project
 
 CC = cl
-CFLAGS = -I. -I./src -I../mozjpeg -I../mozjpeg/build -DHAVE_CONFIG_H -D_CONSOLE /W2 /O2 /DNDEBUG /nologo
+CFLAGS = -I. -I./src -I./deps/mozjpeg -I./deps/mozjpeg/build -DHAVE_CONFIG_H -D_CONSOLE /W2 /O2 /DNDEBUG /nologo
 LDLIBS = /DEBUG:NONE /NODEFAULTLIB:MSVCRT
-LIBJPEG = ../mozjpeg/WIN32/jpeg.lib
+LIBJPEG = ./deps/mozjpeg/build/jpeg.lib
 LIBIQA = src/iqa/build/release/iqa.lib
 
 all: jpeg-recompress jpeg-compare jpeg-hash

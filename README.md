@@ -185,7 +185,7 @@ Run Github for windows. In the settings, set **Git Bash** as the shell. Open Git
 
 ```bash
 # Update PATH to include MinGW/NASM bin folder, location on your system may vary
-export PATH=/c/mingw/mingw32/bin:/c/Program\ Files \(x68\)/nasm:$PATH
+export PATH=/c/mingw/mingw32/bin:/c/Program\ Files \(x86\)/nasm:$PATH
 
 # Build mozjpeg or download https://www.dropbox.com/s/98jppfgds2xjblu/libjpeg.a
 git clone https://github.com/mozilla/mozjpeg.git
@@ -230,3 +230,22 @@ License
 All are released under an MIT license.
 
 http://dgt.mit-license.org/
+
+
+#### Windows with VS2017
+
+Initialize submodules to include mozjpeg from deps folder
+
+Open command prompt
+
+```cmd
+REM initialize your C++ Environment, if necessary
+"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvars64.bat"
+
+REM Update PATH to include NASM bin folder, location on your system may vary
+SET PATH=C:\Program Files (x86)\nasm;%PATH%
+
+REM run the compile script for x64 VS2017 build
+compile-on-windows.cmd
+
+```
