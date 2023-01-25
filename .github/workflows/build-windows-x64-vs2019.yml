@@ -1,9 +1,9 @@
-name: Build x64 (Release)
+name: Build x64 Static (Release)
 
 on: [push, pull_request]
 
 jobs:
-  build:
+  build-x64-static:
     # if windows-latest, might not find VS 2019
     runs-on: windows-2019
 
@@ -13,7 +13,7 @@ jobs:
       sdk-url: https://go.microsoft.com/fwlink/p/?LinkId=323507
       # place it's saved to, used for cache as well
       sdk-dlexe: sdksetup8.1.exe
-      mozjpeg-lib: deps/mozjpeg/build/jpeg.lib
+      mozjpeg-lib: deps/mozjpeg/build/*.lib
       mozjpeg-h: deps/mozjpeg/build/*.h
       mozjpeg-dll: deps/mozjpeg/build/*.dll
       cache-name: cache-deps
@@ -99,14 +99,15 @@ jobs:
         where cl.exe
 
         echo Run compile batchfile ...
-        compile-on-windows.cmd
+        compile-on-windows.cmd static
 
 
     - name: Upload Binaries
       uses: actions/upload-artifact@v3
       with:
-        name: release-x64
+        name: release-x64-static
+        # Static build doesn't need jpeg*.dll
+        #jpeg*.dll
         path: |
           jpeg*.exe
           jpeg*.lib
-          jpeg*.dll

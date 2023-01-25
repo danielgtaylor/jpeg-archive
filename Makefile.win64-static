@@ -1,0 +1,29 @@
+# Win32 Makefile created by Zoltan Frombach <tssajo@gmail.com>
+# sylikc modified to use mozjpeg from the deps directory instead of external to the project
+
+CC = cl
+CFLAGS = -I. -I./src -I./deps/mozjpeg -I./deps/mozjpeg/build -DHAVE_CONFIG_H -D_CONSOLE /W2 /O2 /DNDEBUG /nologo
+LDLIBS = /DEBUG:NONE /NODEFAULTLIB:MSVCRT
+LIBJPEG = ./deps/mozjpeg/build/jpeg-static.lib
+LIBIQA = src/iqa/build/release/iqa.lib
+
+all: jpeg-recompress jpeg-compare jpeg-hash
+
+jpeg-recompress: jpeg-recompress.obj src/util.obj src/edit.obj src/smallfry.obj $(LIBIQA)
+	$(CC) $(CFLAGS) /Fejpeg-recompress.exe jpeg-recompress.obj util.obj edit.obj smallfry.obj $(LIBIQA) $(LIBJPEG) $(LDFLAGS) /link /LTCG $(LDLIBS)
+
+jpeg-compare: jpeg-compare.obj src/util.obj src/hash.obj src/edit.obj src/smallfry.obj $(LIBIQA)
+	$(CC) $(CFLAGS) /Fejpeg-compare.exe jpeg-compare.obj util.obj hash.obj edit.obj smallfry.obj $(LIBIQA) $(LIBJPEG) $(LDFLAGS) /link /LTCG $(LDLIBS)
+
+jpeg-hash: jpeg-hash.obj src/util.obj src/hash.obj
+	$(CC) $(CFLAGS) /Fejpeg-hash.exe jpeg-hash.obj util.obj hash.obj $(LIBJPEG) $(LDFLAGS) /link $(LDLIBS)
+
+%.obj: %.c %.h
+	$(CC) $(CFLAGS) /c $<
+
+test: test/test.obj src/util.obj src/edit.obj src/hash.obj
+	$(CC) $(CFLAGS) /Fetest/test.exe test.obj util.obj edit.obj hash.obj $(LIBJPEG) $(LDFLAGS) /link $(LDLIBS)
+	./test.exe
+
+clean:
+	del *.obj src/*.obj *.exe

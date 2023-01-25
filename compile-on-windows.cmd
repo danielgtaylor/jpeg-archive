@@ -1,8 +1,21 @@
 @ECHO OFF
 
+setlocal
+
 REM make clean by deleting
 REM deps\mozjpeg\build
 REM src\iqa\build
+
+REM if static or not
+REM should really use CMake, but doing it the quick and dirty way to get it working
+SET JPA_MAKEFILE=
+IF /I "%~1" EQU "static" (
+	echo Static build requested
+	SET JPA_MAKEFILE=Makefile.win64-static
+) ELSE (
+	echo Dynamically linked build requested
+	SET JPA_MAKEFILE=Makefile.win64-dynamic
+)
 
 REM this is currently for x64 build, but should be easily adaptable to 32-bit build
 
@@ -67,7 +80,7 @@ popd
 
 
 echo == Build jpeg-archive ==
-nmake.exe /NOLOGO -f Makefile.w32
+nmake.exe /NOLOGO /F %JPA_MAKEFILE%
 IF ERRORLEVEL 1 (
 	echo jpeg-archive nmake failed
 	exit /b 1
