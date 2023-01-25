@@ -1,0 +1,113 @@
+name: Build x64 Static (Release)
+
+on: [push, pull_request]
+
+jobs:
+  build-x64-static:
+    # if windows-latest, might not find VS 2019
+    runs-on: windows-2019
+
+
+    env:
+      # Windows SDK 8.1 URL
+      sdk-url: https://go.microsoft.com/fwlink/p/?LinkId=323507
+      # place it's saved to, used for cache as well
+      sdk-dlexe: sdksetup8.1.exe
+      mozjpeg-lib: deps/mozjpeg/build/*.lib
+      mozjpeg-h: deps/mozjpeg/build/*.h
+      mozjpeg-dll: deps/mozjpeg/build/*.dll
+      cache-name: cache-deps
+
+
+    steps:
+    - name: Checkout code with submodules
+      uses: actions/checkout@v3
+      with:
+        submodules: recursive
+
+    - name: Setup msbuild
+      # https://github.com/marketplace/actions/setup-msbuild
+      uses: microsoft/setup-msbuild@v1.1
+      with:
+        # Fixed on Visual Studio 2019 -- https://docs.microsoft.com/en-us/visualstudio/releases/2019/history
+        vs-version: '[16.0,17.0)'
+        msbuild-architecture: x64
+
+    - name: Setup NASM
+      # https://github.com/marketplace/actions/set-up-nasm
+      uses: ilammy/setup-nasm@v1
+
+
+    - name: Cache SDK and deps
+      # https://docs.github.com/en/actions/using-workflows/caching-dependencies-to-speed-up-workflows
+      uses: actions/cache@v3
+      env:
+        cache-name: ${{ env.cache-name }}
+      with:
+        # change the cache whenever gitmodules gets updated (all deps invalidated)
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('.gitmodules') }}
+        path: |
+          # path where we would save the SDK
+          ${{ env.sdk-dlexe }}
+          # path where the mozjpeg lib is, this shouldn't change between runs, but clear the cache in GH if the submodule gets updated
+          ${{ env.mozjpeg-lib }}
+          # need header files also
+          ${{ env.mozjpeg-h }}
+          # need dll files to run jpeg-*.exe
+          ${{ env.mozjpeg-dll }}
+
+
+    # https://github.com/actions/runner-images/issues/842#issuecomment-643382166
+    # required to build iqa
+    - name: Install Windows 8.1 SDK
+      shell: powershell
+      run: |
+        if ( Test-Path -Path "${{ env.sdk-dlexe }}" ) {
+          echo "Cache found, not re-downloading sdk"
+        } else {
+          echo "Downloading Windows 8.1 SDK"
+          Invoke-WebRequest -Method Get -Uri "${{ env.sdk-url }}" -OutFile "${{ env.sdk-dlexe }}" -UseBasicParsing
+        }
+
+        echo "Installing Windows 8.1 SDK"
+        Start-Process -Wait "${{ env.sdk-dlexe }}" -ArgumentList "/q", "/norestart", "/features", "OptionId.WindowsDesktopSoftwareDevelopmentKit", "OptionId.NetFxSoftwareDevelopmentKit"
+
+
+    - name: Print environment
+      run: |
+        Get-Command nasm.exe | Format-List
+        Get-Command msbuild.exe | Format-List
+        #Get-ChildItem "C:\Program Files (x86)"
+        #Get-ChildItem "C:\Program Files"
+
+        # powershell is so slow on the runner, it works but slow
+        #Get-ChildItem -Path "C:\Program Files (x86)\Microsoft Visual Studio\2019" -Filter "vcvars64.bat" -Recurse -ErrorAction SilentlyContinue -Force  #| Foreach {&$_.FullName}
+        Get-ChildItem -Path "C:\Program Files (x86)\Microsoft Visual Studio\2019" -Filter "vcvars64.bat" -Recurse -ErrorAction SilentlyContinue -Force | Foreach {echo "vcvars_bat=$($_.FullName)" >> $env:GITHUB_ENV}
+
+        #Get-Command cl.exe | Format-List
+
+
+    - name: Build jpeg-archive
+      shell: cmd
+      run: |
+        REM run the vcvars.bat first
+        call "%vcvars_bat%"
+
+        REM this also works but possible errors running (batch limitation):
+        REM FOR /F "usebackq tokens=*" %%I IN (`dir /b /s "C:\Program Files (x86)\Microsoft Visual Studio\2019\vcvars64.bat"`) DO (echo %%I && call "%%I")
+
+        where cl.exe
+
+        echo Run compile batchfile ...
+        compile-on-windows.cmd static
+
+
+    - name: Upload Binaries
+      uses: actions/upload-artifact@v3
+      with:
+        name: release-x64-static
+        # Static build doesn't need jpeg*.dll
+        #jpeg*.dll
+        path: |
+          jpeg*.exe
+          jpeg*.lib
