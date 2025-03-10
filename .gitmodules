@@ -1,0 +1,3 @@
+[submodule "deps/mozjpeg"]
+	path = deps/mozjpeg
+	url = git@github.com:mozilla/mozjpeg.git
