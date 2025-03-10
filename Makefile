@@ -4,54 +4,37 @@ LDFLAGS += -lm
 MAKE ?= make
 PREFIX ?= /usr/local
 
-UNAME_S := $(shell uname -s)
-
-ifeq ($(UNAME_S),Linux)
-	# Linux (e.g. Ubuntu)
-	MOZJPEG_PREFIX ?= /opt/mozjpeg
-	CFLAGS += -I$(MOZJPEG_PREFIX)/include
-
-	ifneq ("$(wildcard $(MOZJPEG_PREFIX)/lib64/libjpeg.a)","")
-		LIBJPEG = $(MOZJPEG_PREFIX)/lib64/libjpeg.a
-	else
-		LIBJPEG = $(MOZJPEG_PREFIX)/lib/libjpeg.a
-	endif
-else ifeq ($(UNAME_S),Darwin)
-	# Mac OS X
-	MOZJPEG_PREFIX ?= /usr/local/opt/mozjpeg
-	LIBJPEG = $(MOZJPEG_PREFIX)/lib/libjpeg.a
-	CFLAGS += -I$(MOZJPEG_PREFIX)/include
-else ifeq ($(UNAME_S),FreeBSD)
-	# FreeBSD
-	LIBJPEG = $(PREFIX)/lib/mozjpeg/libjpeg.so
-	CFLAGS += -I$(PREFIX)/include/mozjpeg
-else
-	# Windows
-	LIBJPEG = ../mozjpeg/libjpeg.a
-	CFLAGS += -I../mozjpeg
-endif
-
-LIBIQA=src/iqa/build/release/libiqa.a
+DIR_DEPS =
+LIB_DEPS =
 
 all: jpeg-recompress jpeg-compare jpeg-hash
+
+include find_mozjpeg.mk
+ifeq ($(MOZJPEG_FOUND),0)
+include mozjpeg.mk
+endif
+
+LIBIQA = src/iqa/build/release/libiqa.a
 
 $(LIBIQA):
 	cd src/iqa; RELEASE=1 $(MAKE)
 
-jpeg-recompress: jpeg-recompress.c src/util.o src/edit.o src/smallfry.o $(LIBIQA)
-	$(CC) $(CFLAGS) -o $@ $^ $(LIBJPEG) $(LDFLAGS)
+LIB_DEPS += $(LIBIQA)
 
-jpeg-compare: jpeg-compare.c src/util.o src/hash.o src/edit.o src/smallfry.o $(LIBIQA)
-	$(CC) $(CFLAGS) -o $@ $^ $(LIBJPEG) $(LDFLAGS)
+jpeg-recompress: jpeg-recompress.c src/util.o src/edit.o src/smallfry.o $(LIB_DEPS)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-jpeg-hash: jpeg-hash.c src/util.o src/hash.o
-	$(CC) $(CFLAGS) -o $@ $^ $(LIBJPEG) $(LDFLAGS)
+jpeg-compare: jpeg-compare.c src/util.o src/hash.o src/edit.o src/smallfry.o $(LIB_DEPS)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
-%.o: %.c %.h
+jpeg-hash: jpeg-hash.c src/util.o src/hash.o $(LIB_DEPS)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+
+%.o: %.c %.h | $(DIR_DEPS)
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-test: test/test.c src/util.o src/edit.o src/hash.o
-	$(CC) $(CFLAGS) -o test/$@ $^ $(LIBJPEG) $(LDFLAGS)
+test: test/test.c src/util.o src/edit.o src/hash.o $(LIB_DEPS)
+	$(CC) $(CFLAGS) -o test/$@ $^ $(LDFLAGS)
 	./test/$@
 
 install: all
@@ -62,6 +45,12 @@ install: all
 	cp jpeg-hash $(PREFIX)/bin/
 
 clean:
-	rm -rf jpeg-recompress jpeg-compare jpeg-hash test/test src/*.o src/iqa/build
+	rm -rf \
+		jpeg-recompress \
+		jpeg-compare \
+		jpeg-hash \
+		test/test \
+		src/*.o \
+		src/iqa/build
 
 .PHONY: test install clean

@@ -2,16 +2,10 @@ version: '{build}'
 environment:
   CC: gcc
 install:
-- cinst mingw
-- cd %APPVEYOR_BUILD_FOLDER%\..
-- mkdir mozjpeg
-- cd mozjpeg
-- appveyor DownloadFile https://www.dropbox.com/s/b551b2a1qle5urf/mozjpeg.zip?dl=1
-- 7z e mozjpeg.zip -y > extract.log
+- cinst mingw cmake nasm
 build_script:
+- set PATH=%PATH%;C:\tools\mingw64\bin;C:\Program Files\NASM;C:\Program Files\CMake\bin
 - cd %APPVEYOR_BUILD_FOLDER%
-- cd
-- set PATH=%PATH%;C:\tools\mingw64\bin
 - mingw32-make
 after_build:
 - 7z a jpeg-archive.zip %APPVEYOR_BUILD_FOLDER%\*.exe

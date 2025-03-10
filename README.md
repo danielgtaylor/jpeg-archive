@@ -138,40 +138,47 @@ jpeg-hash image.jpg
 
 Building
 --------
+
 ### Dependencies
- * [mozjpeg](https://github.com/mozilla/mozjpeg)
+ * GCC or Clang
+ * Make
+ * [MozJPEG](https://github.com/mozilla/mozjpeg) dependencies
+   - nasm
+   - Unix-based only
+     - autoconf
+     - automake
+     - libtool
+   - Windows only
+     - cmake
 
 #### Ubuntu
 Ubuntu users can install via `apt-get`:
 
 ```bash
 sudo apt-get install build-essential autoconf pkg-config nasm libtool
-git clone https://github.com/mozilla/mozjpeg.git
-cd mozjpeg
-autoreconf -fiv
-./configure --with-jpeg8
-make
-sudo make install
 ```
 
 #### Mac OS X
 Mac users can install it via [Homebrew](http://brew.sh/):
 
 ```bash
-brew install mozjpeg
+brew install autoconf automake libtool pkg-config nasm
+```
+
+or via [MacPorts](https://www.macports.org/):
+
+```bash
+sudo port install autoconf automake libtool pkg-config nasm
 ```
 
 #### FreeBSD
 
 ```bash
-pkg install mozjpeg
-git clone https://github.com/danielgtaylor/jpeg-archive.git
-cd jpeg-archive/
-gmake
-sudo gmake install
+pkg install autoconf automake libtool pkg-config nasm
 ```
 
 #### Windows
+
 The `Makefile` should work with MinGW/Cygwin/etc and standard GCC. Patches welcome.
 
 To get everything you need to build, install these:
@@ -181,29 +188,32 @@ To get everything you need to build, install these:
 * [MinGW](https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/installer/mingw-w64-install.exe/download) (installed to e.g. `C:\mingw`)
 * [Github for Windows](https://windows.github.com/)
 
-Run Github for windows. In the settings, set **Git Bash** as the shell. Open Git Shell from the start menu.
+Recommend using [Chocolatey](https://chocolatey.org/) to install and manage.
+
+```bash
+choco install /y cmake mingw nasm git
+```
+
+Run the `Git Bash` cmd app.
 
 ```bash
 # Update PATH to include MinGW/NASM bin folder, location on your system may vary
 export PATH=/c/mingw/mingw32/bin:/c/Program\ Files \(x68\)/nasm:$PATH
 
-# Build mozjpeg or download https://www.dropbox.com/s/98jppfgds2xjblu/libjpeg.a
-git clone https://github.com/mozilla/mozjpeg.git
-cd mozjpeg
-cmake -G "MSYS Makefiles" -D CMAKE_C_COMPILER=gcc.exe -D CMAKE_MAKE_PROGRAM=mingw32-make.exe  -D WITH_JPEG8=1
-mingw32-make
-cd ..
-
-# Build jpeg-archive
+# Get jpeg-archive
 git clone https://github.com/danielgtaylor/jpeg-archive
+
+# Build jpeg-archive. mozjpeg is downloaded and compiled automatically.
 cd jpeg-archive
 CC=gcc mingw32-make
 ```
 
-JPEG-Archive should now be built.
+Or export these to your Windows path and restart `Git Bash`.
 
-### Compiling (Linux and Mac OS X)
-The `Makefile` should work as-is on Ubuntu and Mac OS X. Other platforms may need to set the location of `libjpeg.a` or make other tweaks.
+### Compiling
+
+Simply run make. The Makefile will download the MozJPEG dependency for you,
+build it, and then use that to link against.
 
 ```bash
 make
