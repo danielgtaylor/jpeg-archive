@@ -50,7 +50,7 @@ elif [ -n "$PARALLEL" ]; then
 		"$PARALLEL" --no-notice "exiftool -overwrite_original -TagsFromFile {} -all:all /tmp/comp/{.}.jpg"
 
 	echo 'Recompressing JPEG files'
-	find . -name '*.jpg' | \
+	find . -iname '*.jpg' | \
 		"$PARALLEL" --no-notice "mkdir -p /tmp/comp/{//}; jpeg-recompress ${@:--q high} {} /tmp/comp/{}"
 fi
 
