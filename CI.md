@@ -7,8 +7,8 @@
 以下のプラットフォームでのプロセスをそれぞれ JOB として実装します。
 
 - ubuntu-latest
-- macos-14
-- linux aarch64 on macos-14 + qemu
+- macos-26
+- linux aarch64 on macos-26 + qemu
 - windows-latest + MSYS2
 - freebsd13 on ubuntu-latest + qemu
 
